@@ -16,7 +16,7 @@ try {
   if (legacyData && !localStorage.getItem(getSaveKey(1))) {
     localStorage.setItem(getSaveKey(1), legacyData);
   }
-} catch (e) {}
+} catch (e) { }
 
 const meta = {
   shards: 0,
@@ -185,7 +185,7 @@ function loadMetaProgression() {
       meta.achievements = { ...(parsed.achievements || {}) };
       meta.stats = { ...meta.stats, ...(parsed.stats || {}) };
     }
-  } catch (e) {}
+  } catch (e) { }
 }
 
 function saveMetaProgression() {
@@ -200,7 +200,7 @@ function saveMetaProgression() {
     document.getElementById("hud-ach-count").textContent =
       `${unlockedCount}/${ACHIEVEMENTS_LIST.length}`;
     if (meta.shards >= 50) unlockAchievement("rich_cyber");
-  } catch (e) {}
+  } catch (e) { }
 }
 
 let achPopupTimer = null;
@@ -303,7 +303,7 @@ function saveGameProgress(showNotification = false, slot = currentSaveSlot) {
     if (showNotification) showSaveToast(`⚡ POZICE ULOŽENA DO SLOTU #${slot}`);
     refreshMenuSaveUI();
     updateHUD();
-  } catch (e) {}
+  } catch (e) { }
 }
 
 function clearSavedGame(slot = currentSaveSlot) {
@@ -2038,7 +2038,7 @@ function triggerGameOver() {
   }, 650);
 }
 
-// PODPORA PRO GAMEPAD (XBOX / PLAYSTATION OVLADAČ)
+// PŘESNÉ MAPOVÁNÍ PRO DUALSHOCK 4 (PLAYSTATION OVLADAČ)
 let gamepadDashLock = false;
 let gamepadBombLock = false;
 let gamepadOverdriveLock = false;
@@ -2055,18 +2055,19 @@ function pollGamepadInput() {
   let rx = Math.abs(gp.axes[2]) > deadzone ? gp.axes[2] : 0;
   let ry = Math.abs(gp.axes[3]) > deadzone ? gp.axes[3] : 0;
 
+  // Pravá páčka míří a střílí
   if (rx !== 0 || ry !== 0) {
     const aimAngle = Math.atan2(ry, rx);
     player.angle = aimAngle;
     mouse.x = player.x + Math.cos(aimAngle) * 180;
     mouse.y = player.y + Math.sin(aimAngle) * 180;
+    mouse.down = true; // Pravá páčka rovnou drží palbu
+  } else {
+    mouse.down = false;
   }
 
-  // L1/LB nebo A (0) nebo RT (7) -> Hyper-Skok
-  const dashPressed =
-    (gp.buttons[0] && gp.buttons[0].pressed) ||
-    (gp.buttons[4] && gp.buttons[4].pressed) ||
-    (gp.buttons[7] && gp.buttons[7].pressed);
+  // Křížek (button 0 na PS4) nebo R1 (button 5) -> Hyper-Skok
+  const dashPressed = (gp.buttons[0] && gp.buttons[0].pressed) || (gp.buttons[5] && gp.buttons[5].pressed);
   if (dashPressed && !gamepadDashLock) {
     triggerHyperDash();
     gamepadDashLock = true;
@@ -2074,11 +2075,8 @@ function pollGamepadInput() {
     gamepadDashLock = false;
   }
 
-  // R1/RB nebo B (1) nebo LT (6) -> Černá díra
-  const bombPressed =
-    (gp.buttons[1] && gp.buttons[1].pressed) ||
-    (gp.buttons[5] && gp.buttons[5].pressed) ||
-    (gp.buttons[6] && gp.buttons[6].pressed);
+  // Čtverec (button 2 na PS4) nebo L1 (button 4) -> Černá díra
+  const bombPressed = (gp.buttons[2] && gp.buttons[2].pressed) || (gp.buttons[4] && gp.buttons[4].pressed);
   if (bombPressed && !gamepadBombLock) {
     deploySingularityBomb();
     gamepadBombLock = true;
@@ -2086,10 +2084,8 @@ function pollGamepadInput() {
     gamepadBombLock = false;
   }
 
-  // Y (3) nebo X (2) -> Kvantový Přetlak [F]
-  const odPressed =
-    (gp.buttons[2] && gp.buttons[2].pressed) ||
-    (gp.buttons[3] && gp.buttons[3].pressed);
+  // Trojúhelník (button 3 na PS4) -> Kvantový Přetlak [F]
+  const odPressed = gp.buttons[3] && gp.buttons[3].pressed;
   if (odPressed && !gamepadOverdriveLock) {
     triggerQuantumOverdrive();
     gamepadOverdriveLock = true;
@@ -3405,39 +3401,39 @@ document.getElementById("btn-track").addEventListener("click", () => {
 
 // Přepínání záložek v Hangáru (1. Výběr lodi <-> 2. Paměťové sloty & Ovládání)
 function setupHangarTabs() {
-    const tabShips = document.getElementById('tab-ships') || document.getElementById('btn-tab-ships');
-    const tabSlots = document.getElementById('tab-slots') || document.getElementById('btn-tab-slots');
-    const panelShips = document.getElementById('panel-ships') || document.getElementById('tab-content-ships') || document.getElementById('ship-selector-grid')?.parentElement;
-    const panelSlots = document.getElementById('panel-slots') || document.getElementById('tab-content-slots') || document.getElementById('save-slots-grid')?.parentElement;
+  const tabShips = document.getElementById('tab-ships') || document.getElementById('btn-tab-ships');
+  const tabSlots = document.getElementById('tab-slots') || document.getElementById('btn-tab-slots');
+  const panelShips = document.getElementById('panel-ships') || document.getElementById('tab-content-ships') || document.getElementById('ship-selector-grid')?.parentElement;
+  const panelSlots = document.getElementById('panel-slots') || document.getElementById('tab-content-slots') || document.getElementById('save-slots-grid')?.parentElement;
 
-    // Pojistka: najde tlačítka i podle textu, pokud mají v HTML jiné ID
-    const allBtns = Array.from(document.querySelectorAll('#start-modal button, #start-modal [role="tab"], #start-modal div.cursor-pointer'));
-    const btn1 = tabShips || allBtns.find(el => el.textContent.includes('1. VÝBĚR TŘÍDY'));
-    const btn2 = tabSlots || allBtns.find(el => el.textContent.includes('2. PAMĚŤOVÉ SLOTY'));
+  // Pojistka: najde tlačítka i podle textu, pokud mají v HTML jiné ID
+  const allBtns = Array.from(document.querySelectorAll('#start-modal button, #start-modal [role="tab"], #start-modal div.cursor-pointer'));
+  const btn1 = tabShips || allBtns.find(el => el.textContent.includes('1. VÝBĚR TŘÍDY'));
+  const btn2 = tabSlots || allBtns.find(el => el.textContent.includes('2. PAMĚŤOVÉ SLOTY'));
 
-    if (btn1 && btn2 && panelShips && panelSlots) {
-        btn1.style.cursor = 'pointer';
-        btn2.style.cursor = 'pointer';
+  if (btn1 && btn2 && panelShips && panelSlots) {
+    btn1.style.cursor = 'pointer';
+    btn2.style.cursor = 'pointer';
 
-        btn1.addEventListener('click', () => {
-            panelShips.classList.remove('hidden');
-            panelSlots.classList.add('hidden');
-            btn1.classList.add('border-cyan-400', 'text-cyan-300', 'bg-cyan-500/15');
-            btn1.classList.remove('text-slate-400', 'border-slate-800');
-            btn2.classList.remove('border-cyan-400', 'text-cyan-300', 'bg-cyan-500/15');
-            btn2.classList.add('text-slate-400', 'border-slate-800');
-        });
+    btn1.addEventListener('click', () => {
+      panelShips.classList.remove('hidden');
+      panelSlots.classList.add('hidden');
+      btn1.classList.add('border-cyan-400', 'text-cyan-300', 'bg-cyan-500/15');
+      btn1.classList.remove('text-slate-400', 'border-slate-800');
+      btn2.classList.remove('border-cyan-400', 'text-cyan-300', 'bg-cyan-500/15');
+      btn2.classList.add('text-slate-400', 'border-slate-800');
+    });
 
-        btn2.addEventListener('click', () => {
-            panelSlots.classList.remove('hidden');
-            panelShips.classList.add('hidden');
-            btn2.classList.add('border-cyan-400', 'text-cyan-300', 'bg-cyan-500/15');
-            btn2.classList.remove('text-slate-400', 'border-slate-800');
-            btn1.classList.remove('border-cyan-400', 'text-cyan-300', 'bg-cyan-500/15');
-            btn1.classList.add('text-slate-400', 'border-slate-800');
-            renderSaveSlotsUI();
-        });
-    }
+    btn2.addEventListener('click', () => {
+      panelSlots.classList.remove('hidden');
+      panelShips.classList.add('hidden');
+      btn2.classList.add('border-cyan-400', 'text-cyan-300', 'bg-cyan-500/15');
+      btn2.classList.remove('text-slate-400', 'border-slate-800');
+      btn1.classList.remove('border-cyan-400', 'text-cyan-300', 'bg-cyan-500/15');
+      btn1.classList.add('text-slate-400', 'border-slate-800');
+      renderSaveSlotsUI();
+    });
+  }
 }
 
 window.onload = () => {
