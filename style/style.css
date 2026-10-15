@@ -1,0 +1,245 @@
+:root {
+  --cyan: #00f3ff;
+  --magenta: #ff007f;
+  --violet: #9d00ff;
+  --gold: #fcee09;
+}
+* {
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+}
+body,
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #010006;
+  font-family: "Rajdhani", sans-serif;
+  color: #ffffff;
+  cursor: none;
+}
+#game-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  display: block;
+}
+.font-orbitron {
+  font-family: "Orbitron", sans-serif;
+}
+.crt-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 15;
+  background:
+    linear-gradient(rgba(16, 12, 24, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+    radial-gradient(circle at center, transparent 60%, rgba(1, 0, 8, 0.88) 100%);
+  background-size:
+    100% 4px,
+    100% 100%;
+  transition: opacity 0.3s ease;
+}
+.cyber-box {
+  background: rgba(8, 5, 22, 0.85);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(0, 243, 255, 0.38);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 14px) 0,
+    100% 14px,
+    100% 100%,
+    14px 100%,
+    0 calc(100% - 14px)
+  );
+  box-shadow:
+    0 0 25px rgba(0, 243, 255, 0.14),
+    inset 0 0 15px rgba(0, 243, 255, 0.06);
+}
+.cyber-box-magenta {
+  background: rgba(20, 4, 24, 0.88);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 0, 127, 0.55);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 14px) 0,
+    100% 14px,
+    100% 100%,
+    14px 100%,
+    0 calc(100% - 14px)
+  );
+  box-shadow:
+    0 0 28px rgba(255, 0, 127, 0.25),
+    inset 0 0 15px rgba(255, 0, 127, 0.1);
+}
+.cyber-box-gold {
+  background: rgba(26, 20, 4, 0.94);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(252, 238, 9, 0.75);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 14px) 0,
+    100% 14px,
+    100% 100%,
+    14px 100%,
+    0 calc(100% - 14px)
+  );
+  box-shadow:
+    0 0 32px rgba(252, 238, 9, 0.35),
+    inset 0 0 15px rgba(252, 238, 9, 0.12);
+}
+.cyber-card {
+  background: linear-gradient(
+    160deg,
+    rgba(14, 10, 36, 0.94) 0%,
+    rgba(6, 3, 18, 0.98) 100%
+  );
+  border: 1px solid rgba(0, 243, 255, 0.45);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 16px) 0,
+    100% 16px,
+    100% 100%,
+    16px 100%,
+    0 calc(100% - 16px)
+  );
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+.cyber-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  border-color: #fcee09;
+  box-shadow:
+    0 0 32px rgba(0, 243, 255, 0.4),
+    0 0 55px rgba(255, 0, 127, 0.22);
+}
+.ship-card {
+  background: linear-gradient(
+    160deg,
+    rgba(12, 9, 30, 0.9) 0%,
+    rgba(5, 2, 14, 0.95) 100%
+  );
+  border: 1px solid rgba(100, 116, 139, 0.4);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% 100%,
+    12px 100%,
+    0 calc(100% - 12px)
+  );
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.ship-card:hover {
+  border-color: rgba(0, 243, 255, 0.6);
+  transform: translateY(-2px);
+}
+.ship-card.selected {
+  border-color: #00f3ff;
+  background: linear-gradient(
+    160deg,
+    rgba(0, 243, 255, 0.18) 0%,
+    rgba(15, 8, 35, 0.95) 100%
+  );
+  box-shadow:
+    0 0 28px rgba(0, 243, 255, 0.38),
+    inset 0 0 15px rgba(0, 243, 255, 0.14);
+}
+.cyber-btn {
+  background: linear-gradient(135deg, #00f3ff 0%, #0077ff 100%);
+  color: #04010c;
+  font-family: "Orbitron", sans-serif;
+  font-weight: 900;
+  letter-spacing: 2px;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 14px) 0,
+    100% 14px,
+    100% 100%,
+    14px 100%,
+    0 calc(100% - 14px)
+  );
+  transition: all 0.18s ease;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+.cyber-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 0 30px rgba(0, 243, 255, 0.9),
+    0 0 55px rgba(255, 0, 127, 0.5);
+  background: linear-gradient(135deg, #70fbff 0%, #00f3ff 100%);
+}
+.cyber-btn-gold {
+  background: linear-gradient(135deg, #fcee09 0%, #ff9900 100%);
+  color: #04010c;
+  font-family: "Orbitron", sans-serif;
+  font-weight: 900;
+  letter-spacing: 2px;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 14px) 0,
+    100% 14px,
+    100% 100%,
+    14px 100%,
+    0 calc(100% - 14px)
+  );
+  transition: all 0.18s ease;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+.cyber-btn-gold:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 0 30px rgba(252, 238, 9, 0.9),
+    0 0 55px rgba(255, 153, 0, 0.5);
+}
+.cyber-btn-outline {
+  background: rgba(15, 23, 42, 0.85);
+  color: #00f3ff;
+  border: 1px solid rgba(0, 243, 255, 0.5);
+  font-family: "Orbitron", sans-serif;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% 100%,
+    12px 100%,
+    0 calc(100% - 12px)
+  );
+  transition: all 0.18s ease;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+.cyber-btn-outline:hover {
+  background: rgba(0, 243, 255, 0.15);
+  border-color: #fcee09;
+  color: #ffffff;
+}
+.neon-cyan {
+  text-shadow:
+    0 0 10px rgba(0, 243, 255, 0.85),
+    0 0 24px rgba(0, 243, 255, 0.45);
+}
+.neon-magenta {
+  text-shadow:
+    0 0 10px rgba(255, 0, 127, 0.9),
+    0 0 28px rgba(255, 0, 127, 0.5);
+}
+.neon-gold {
+  text-shadow:
+    0 0 10px rgba(252, 238, 9, 0.9),
+    0 0 22px rgba(252, 238, 9, 0.45);
+}
+.ui-interactive {
+  cursor: auto;
+}
