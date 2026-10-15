@@ -1,6 +1,5 @@
 /*************************************************************************
- * AUDIO.JS - HIGH-IMPACT AUDIO-REACTIVE MP3 ENGINE (FFT + BEAT COUNTER)
- *            + 32-BAND RADIAL SPECTRUM + CUSTOM MP3 LOADER [KEY 'O']
+ * AUDIO.JS - ADAPTIVE SUNO MP3 ANALYSER (16-BAND SPECTRUM + BAR DROPS)
  *************************************************************************/
 class DarksynthSoundtrackEngine {
     constructor() {
@@ -12,22 +11,19 @@ class DarksynthSoundtrackEngine {
         this.muted = false;
         this.styleIndex = 0;
 
-        // Audio-reaktivní telemetrie pro grafiku a gameplay
-        this.beatPulse = 0;      // 0.0 až 1.0 (hlavní úder beatu)
-        this.bassEnergy = 0;     // 0.0 až 1.0 (hluboké basy / kick)
-        this.midEnergy = 0;      // 0.0 až 1.0 (syntezátory / melodie)
-        this.highEnergy = 0;     // 0.0 až 1.0 (hi-hat / výšky)
-        this.justBeat = false;   // true přesně v okamžiku úderu
-        this.isFourthBeat = false; // true každý 4. úder (pro Sonic Shockwave)
+        // Audio-reaktivní telemetrie pro grafiku, 360° halo a hratelnost
+        this.beatPulse = 0;       // 0.0 až 1.0 (okamžitý úder beatu)
+        this.bassEnergy = 0;      // 0.0 až 1.0 (hluboké basy)
+        this.midEnergy = 0;       // 0.0 až 1.0 (středy / syntezátory)
+        this.highEnergy = 0;      // 0.0 až 1.0 (výšky / činely)
+        this.bassAvg = 0.5;       // Plovoucí průměr pro detekci dropů u zkomprimovaných MP3
+        this.justBeat = false;    // true v momentě úderu bubnu
+        this.justBarDrop = false; // true každý 4. úder (velký sonický pulz lodi)
         this.beatCount = 0;
         this.beatPhase = 0;
         this.lastBeatCooldown = 0;
-        this.bassHistory = 0.35;
+        this.bands = new Array(16).fill(0); // 16 pásem pro kruhový ekvalizér kolem lodi
 
-        // 32 pásem pro kruhový vizualizér kolem lodi
-        this.bands = new Float32Array(32);
-
-        // 1. PLAYLIST SKLADEB
         this.tracks = [
             {
                 label: 'NEON JUMP',
@@ -53,7 +49,7 @@ class DarksynthSoundtrackEngine {
 
         this.bgm = new Audio();
         this.bgm.loop = true;
-        this.bgm.volume = 0.58;
+        this.bgm.volume = 0.55;
         this.bgm.src = this.tracks[0].url;
 
         this.useRealtimeFFT = false;
@@ -124,7 +120,7 @@ class DarksynthSoundtrackEngine {
             try {
                 this.analyser = this.ctx.createAnalyser();
                 this.analyser.fftSize = 128;
-                this.analyser.smoothingTimeConstant = 0.55; // Rychlá odezva na údery bubnů
+                this.analyser.smoothingTimeConstant = 0.65;
                 this.freqData = new Uint8Array(this.analyser.frequencyBinCount);
 
                 this.mediaSource = this.ctx.createMediaElementSource(this.bgm);
@@ -139,7 +135,7 @@ class DarksynthSoundtrackEngine {
 
     updateAudioAnalysis(dt) {
         this.justBeat = false;
-        this.isFourthBeat = false;
+        this.justBarDrop = false;
         if (this.lastBeatCooldown > 0) this.lastBeatCooldown -= dt;
 
         if (this.muted || state.mode !== 'PLAYING') {
@@ -148,7 +144,7 @@ class DarksynthSoundtrackEngine {
             this.bassEnergy *= 0.9;
             this.midEnergy *= 0.9;
             this.highEnergy *= 0.9;
-            for (let i = 0; i < 32; i++) this.bands[i] *= 0.85;
+            for (let i = 0; i < 16; i++) this.bands[i] *= 0.85;
             return;
         }
 
@@ -156,67 +152,67 @@ class DarksynthSoundtrackEngine {
             this.bgm.play().catch(() => {});
         }
 
+        // BPM synchronizátor běží vždy na pozadí jako garant rytmu
         const bpm = this.tracks[this.styleIndex].bpm || 145;
         const beatsPerSec = bpm / 60;
         const prevPhase = this.beatPhase;
         this.beatPhase = (this.beatPhase + dt * beatsPerSec) % 1.0;
-        const bpmWrapped = this.beatPhase < prevPhase;
+        const bpmTriggered = this.beatPhase < prevPhase;
 
-        // A) SKUTEČNÁ FREKVENČNÍ ANALÝZA (FFT) + BPM POJISTKA
+        let fftTriggered = false;
+
+        // A) SKUTEČNÁ FREKVENČNÍ ANALÝZA (FFT) S ADAPTIVNÍM PRAHEM PRO SUNO MP3
         if (this.useRealtimeFFT && this.analyser && this.freqData) {
             this.analyser.getByteFrequencyData(this.freqData);
+
             let bassSum = 0, midSum = 0, highSum = 0;
-            for (let i = 0; i < 6; i++) bassSum += this.freqData[i];
-            for (let i = 6; i < 22; i++) midSum += this.freqData[i];
+            for (let i = 0; i < 5; i++) bassSum += this.freqData[i];
+            for (let i = 5; i < 22; i++) midSum += this.freqData[i];
             for (let i = 22; i < 48; i++) highSum += this.freqData[i];
 
-            const rawBass = Math.min(1.0, (bassSum / (6 * 255)) * 1.45);
-            this.midEnergy = Math.min(1.0, (midSum / (16 * 255)) * 1.4);
-            this.highEnergy = Math.min(1.0, (highSum / (26 * 255)) * 1.6);
+            const rawBass = bassSum / (5 * 255);
+            this.midEnergy = Math.min(1.0, (midSum / (17 * 255)) * 1.25);
+            this.highEnergy = Math.min(1.0, (highSum / (26 * 255)) * 1.45);
 
-            for (let i = 0; i < 32; i++) {
-                this.bands[i] = Math.min(1.0, (this.freqData[i + 1] / 255) * 1.35);
+            // Naplnění 16 pásem pro kruhový ekvalizér
+            for (let b = 0; b < 16; b++) {
+                const val = this.freqData[b * 2] / 255;
+                this.bands[b] = this.bands[b] * 0.4 + Math.pow(val, 1.4) * 0.6;
             }
 
-            // Detekce špičky oproti klouzavému průměru NEBO synchronní BPM úder
-            const isFftKick = rawBass > 0.48 && rawBass > this.bassHistory * 1.16 && this.lastBeatCooldown <= 0;
-            const isBpmFallbackKick = bpmWrapped && this.lastBeatCooldown <= -0.15;
-
-            if (isFftKick || isBpmFallbackKick) {
-                this.beatPulse = 1.0;
-                this.justBeat = true;
-                this.beatCount++;
-                this.isFourthBeat = (this.beatCount % 4 === 0);
-                this.lastBeatCooldown = 0.24;
+            // Adaptivní detekce špičky oproti plovoucímu průměru
+            this.bassAvg = this.bassAvg * 0.92 + rawBass * 0.08;
+            if (rawBass > this.bassAvg * 1.09 && rawBass > 0.45 && this.lastBeatCooldown <= 0) {
+                fftTriggered = true;
             }
-
-            this.bassHistory = this.bassHistory * 0.92 + rawBass * 0.08;
-            this.bassEnergy = Math.max(rawBass, this.beatPulse * 0.85);
-        }
-        // B) VYSOCE VÝRAZNÝ BPM SYNCHRONIZÁTOR (pro lokální file:// režim)
-        else {
-            if (bpmWrapped) {
-                this.beatPulse = 1.0;
-                this.justBeat = true;
-                this.beatCount++;
-                this.isFourthBeat = (this.beatCount % 4 === 0);
-            }
-
-            const env = Math.pow(1.0 - this.beatPhase, 1.85);
-            this.bassEnergy = Math.min(1.0, env * 1.05);
+            this.bassEnergy = Math.min(1.0, Math.max(rawBass, Math.pow(1.0 - this.beatPhase, 1.8) * 0.85));
+        } else {
+            // B) DYNAMICKÝ BPM SPEKTRÁLNÍ GENERÁTOR (když běží z file://)
+            const env = Math.pow(1.0 - this.beatPhase, 1.7);
+            this.bassEnergy = env * 0.95;
             this.midEnergy = 0.35 + 0.55 * Math.abs(Math.sin(this.beatPhase * Math.PI * 2));
             this.highEnergy = 0.25 + 0.65 * Math.abs(Math.cos(this.beatPhase * Math.PI * 4));
 
-            const now = performance.now() * 0.008;
-            for (let i = 0; i < 32; i++) {
-                const wave = Math.abs(Math.sin(now * 2.2 + i * 0.45)) * this.midEnergy;
-                const kickBoost = (i % 4 === 0) ? this.beatPulse * 0.95 : this.beatPulse * 0.45;
-                this.bands[i] = Math.min(1.0, wave * 0.65 + kickBoost);
+            const t = performance.now() * 0.012;
+            for (let b = 0; b < 16; b++) {
+                const wave = Math.abs(Math.sin(t + b * 0.55)) * 0.55;
+                this.bands[b] = Math.min(1.0, env * (b < 5 ? 0.85 : 0.4) + wave);
+            }
+        }
+
+        // Spuštění úderu (buď z FFT špičky, nebo přesného BPM)
+        if ((fftTriggered || bpmTriggered) && this.lastBeatCooldown <= 0) {
+            this.beatPulse = 1.0;
+            this.justBeat = true;
+            this.beatCount++;
+            this.lastBeatCooldown = 0.24;
+            if (this.beatCount % 4 === 0) {
+                this.justBarDrop = true;
             }
         }
 
         if (this.beatPulse > 0) {
-            this.beatPulse = Math.max(0, this.beatPulse - dt * 3.4);
+            this.beatPulse = Math.max(0, this.beatPulse - dt * 3.6);
         }
     }
 
@@ -226,7 +222,7 @@ class DarksynthSoundtrackEngine {
         if (!this.bgm.src.endsWith(track.url)) {
             this.bgm.src = track.url;
         }
-        this.bgm.volume = 0.58;
+        this.bgm.volume = 0.55;
         this.bgm.play().catch(() => {});
     }
 

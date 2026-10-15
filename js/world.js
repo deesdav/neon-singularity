@@ -1,6 +1,5 @@
 /*************************************************************************
- * WORLD.JS - PARALLAX SPACE, ELECTRIFIED SPRING-GRID & GAME CATALOGS
- *            (HIGH-VISIBILITY AUDIO-REACTIVE EDITION)
+ * WORLD.JS - PARALLAX SPACE, AUDIO-REACTIVE SPRING-GRID & GAME CATALOGS
  *************************************************************************/
 class DeepSpaceBackdrop {
     constructor(w, h) {
@@ -17,24 +16,24 @@ class DeepSpaceBackdrop {
                 x: Math.random() * w,
                 y: Math.random() * h,
                 depth,
-                size: depth * 2.3,
+                size: depth * 2.2,
                 color: Math.random() > 0.7 ? '#00f3ff' : (Math.random() > 0.5 ? '#ff007f' : '#ffffff'),
                 twinkle: Math.random() * Math.PI * 2
             });
         }
 
         this.nebulas = [
-            { x: w * 0.22, y: h * 0.3, r: 420, baseR: 157, baseG: 0,   baseB: 255, depth: 0.12 },
-            { x: w * 0.78, y: h * 0.7, r: 480, baseR: 0,   baseG: 243, baseB: 255, depth: 0.18 },
-            { x: w * 0.52, y: h * 0.25, r: 380, baseR: 255, baseG: 0,  baseB: 127, depth: 0.15 }
+            { x: w * 0.22, y: h * 0.3, r: 400, color: 'rgba(157, 0, 255, 0.09)', depth: 0.12 },
+            { x: w * 0.78, y: h * 0.7, r: 460, color: 'rgba(0, 243, 255, 0.08)', depth: 0.18 },
+            { x: w * 0.52, y: h * 0.25, r: 360, color: 'rgba(255, 0, 127, 0.08)', depth: 0.15 }
         ];
     }
 
     update(dt, pvx, pvy, w, h) {
-        const beatSpeedBoost = 1 + (sfx.bassEnergy || 0) * 1.4;
+        const speedBoost = 1 + (sfx.bassEnergy || 0) * 1.4;
         for (const s of this.stars) {
-            s.x -= pvx * s.depth * 0.18 * beatSpeedBoost * dt;
-            s.y -= pvy * s.depth * 0.18 * beatSpeedBoost * dt;
+            s.x -= pvx * s.depth * 0.18 * speedBoost * dt;
+            s.y -= pvy * s.depth * 0.18 * speedBoost * dt;
             s.twinkle += dt * (3 + (sfx.highEnergy || 0) * 8);
             if (s.x < 0) s.x += w;
             if (s.x > w) s.x -= w;
@@ -52,15 +51,11 @@ class DeepSpaceBackdrop {
     }
 
     draw(ctx) {
-        const bass = sfx.bassEnergy || 0;
-        const pulse = sfx.beatPulse || 0;
-        const bassScale = 1 + bass * 0.42 + pulse * 0.18;
-
+        const bassScale = 1 + (sfx.beatPulse || 0) * 0.35 + (sfx.bassEnergy || 0) * 0.25;
         for (const n of this.nebulas) {
             const rad = n.r * bassScale;
-            const alpha = Math.min(0.26, 0.065 + bass * 0.10 + pulse * 0.07);
             const grad = ctx.createRadialGradient(n.x, n.y, 10, n.x, n.y, rad);
-            grad.addColorStop(0, `rgba(${n.baseR}, ${n.baseG}, ${n.baseB}, ${alpha})`);
+            grad.addColorStop(0, n.color);
             grad.addColorStop(1, 'rgba(0,0,0,0)');
             ctx.fillStyle = grad;
             ctx.beginPath();
@@ -68,10 +63,9 @@ class DeepSpaceBackdrop {
             ctx.fill();
         }
 
-        const highBoost = (sfx.highEnergy || 0) * 0.5;
-        const sizePulse = 1 + pulse * 0.65;
+        const sizePulse = 1 + (sfx.beatPulse || 0) * 0.65;
         for (const s of this.stars) {
-            const alpha = 0.35 + Math.sin(s.twinkle) * 0.25 + highBoost;
+            const alpha = 0.4 + Math.sin(s.twinkle) * 0.3 + (sfx.beatPulse || 0) * 0.3;
             ctx.fillStyle = s.color;
             ctx.globalAlpha = Math.min(1, alpha * s.depth);
             ctx.beginPath();
@@ -126,23 +120,27 @@ class SpringGrid {
                 const strength = force * falloff * falloff * (isPull ? -1 : 1);
                 p.vx += (dx / dist) * strength;
                 p.vy += (dy / dist) * strength;
-                p.energy = Math.min(1.0, p.energy + falloff * 0.95);
-                if (addCharge && Math.random() < 0.55) {
-                    p.charge = Math.min(1.0, p.charge + falloff * 1.15);
+                p.energy = Math.min(1.0, p.energy + falloff * 0.88);
+                if (addCharge && Math.random() < 0.45) {
+                    p.charge = Math.min(1.0, p.charge + falloff * 1.1);
                 }
             }
         }
     }
 
-    // Náhodné jiskření uzlů mřížky při vysokých frekvencích a beatech
-    pulseWithMusic(beatPulse, highEnergy) {
-        if (this.points.length === 0) return;
-        const count = Math.floor(beatPulse * 14 + highEnergy * 6);
-        for (let i = 0; i < count; i++) {
-            const idx = Math.floor(Math.random() * this.points.length);
-            const p = this.points[idx];
-            p.energy = Math.min(1.0, p.energy + 0.55);
-            if (Math.random() < 0.4) p.charge = Math.min(1.0, p.charge + 0.7);
+    // Celomapový rytmický pulz mřížky při úderu bubnu
+    triggerBeatWave(cx, cy, intensity = 1.0) {
+        for (let i = 0; i < this.points.length; i += 2) {
+            const p = this.points[i];
+            const dx = p.x - cx;
+            const dy = p.y - cy;
+            const dist = Math.hypot(dx, dy) || 1;
+            if (dist < 420) {
+                const wave = Math.sin(dist * 0.04) * 5.5 * intensity;
+                p.vx += (dx / dist) * wave;
+                p.vy += (dy / dist) * wave;
+                p.energy = Math.min(1.0, p.energy + 0.35 * intensity);
+            }
         }
     }
 
@@ -180,7 +178,7 @@ class SpringGrid {
             p.x += p.vx;
             p.y += p.vy;
             p.energy *= 0.93;
-            p.charge *= 0.87;
+            p.charge *= 0.88;
         }
     }
 
@@ -189,16 +187,14 @@ class SpringGrid {
         const rows = this.rows;
         const pts = this.points;
 
-        const pulse = sfx.beatPulse || 0;
-        const bass = sfx.bassEnergy || 0;
+        const beatGlow = (sfx.beatPulse || 0) * 0.16;
+        const baseAlpha = 0.09 + beatGlow;
+        const gridHue = Math.floor(185 + (sfx.midEnergy || 0) * 140);
 
-        // Celá mřížka při úderu beatu zřetelně zesvětlá a změní odstín
-        const baseAlpha = 0.11 + pulse * 0.22 + bass * 0.08;
-        const baseHue = Math.round(190 + pulse * 115);
-        ctx.lineWidth = 1 + pulse * 0.7;
+        ctx.lineWidth = 1 + (sfx.beatPulse || 0) * 0.8;
         ctx.strokeStyle = state.overdriveTimer > 0
-            ? `rgba(252, 238, 9, ${baseAlpha + 0.08})`
-            : `hsla(${baseHue}, 100%, 60%, ${baseAlpha})`;
+            ? `rgba(252, 238, 9, ${baseAlpha + 0.06})`
+            : `hsla(${gridHue}, 100\%, 55\%,${baseAlpha})`;
 
         ctx.beginPath();
         for (let r = 0; r < rows - 1; r++) {
@@ -215,7 +211,7 @@ class SpringGrid {
         }
         ctx.stroke();
 
-        ctx.lineWidth = 2.2;
+        ctx.lineWidth = 2.1;
         for (let r = 1; r < rows - 1; r++) {
             for (let c = 1; c < cols - 1; c++) {
                 const idx = r * cols + c;
@@ -223,9 +219,9 @@ class SpringGrid {
                 if (p.energy > 0.06 || p.charge > 0.1) {
                     const pr = pts[idx + 1];
                     const pd = pts[idx + cols];
-                    const alpha = Math.min(0.98, Math.max(p.energy, p.charge) * 0.96);
-                    const hue = p.charge > 0.25 ? 52 : ((185 + p.energy * 165) % 360);
-                    ctx.strokeStyle = `hsla(${hue}, 100%, 65%, ${alpha})`;
+                    const alpha = Math.min(0.96, Math.max(p.energy, p.charge) * 0.95);
+                    const hue = p.charge > 0.25 ? 55 : ((185 + p.energy * 165) % 360);
+                    ctx.strokeStyle = `hsla(${hue}, 100\%, 64\%,${alpha})`;
                     ctx.beginPath();
                     ctx.moveTo(p.x, p.y);
                     ctx.lineTo(pr.x, pr.y);
@@ -233,9 +229,9 @@ class SpringGrid {
                     ctx.lineTo(pd.x, pd.y);
                     ctx.stroke();
 
-                    if (p.energy > 0.30 || p.charge > 0.22) {
+                    if (p.energy > 0.30 || p.charge > 0.25) {
                         ctx.fillStyle = '#ffffff';
-                        ctx.fillRect(p.x - 1.6, p.y - 1.6, 3.2, 3.2);
+                        ctx.fillRect(p.x - 1.5, p.y - 1.5, 3.0, 3.0);
                     }
                 }
             }
@@ -243,7 +239,6 @@ class SpringGrid {
     }
 }
 
-// 6 DISTINCT SHIP CLASSES
 const SHIP_CLASSES = [
     {
         id: 'INTERCEPTOR',
@@ -301,7 +296,6 @@ const SHIP_CLASSES = [
     }
 ];
 
-// 18 ACHIEVEMENTS / TROPHIES
 const ACHIEVEMENTS_LIST = [
     { id: 'first_blood',   name: 'PRVNÍ KREV',             desc: 'Znič svého prvního geometrického nepřítele v aréně.', reward: 3 },
     { id: 'combo_10',      name: 'MISTR SYNCHRONIZACE',    desc: 'Dosáhni násobiče komba alespoň x10.0.',               reward: 6 },
@@ -323,7 +317,6 @@ const ACHIEVEMENTS_LIST = [
     { id: 'rich_cyber',    name: 'BANKÉŘ SINGULARITY',     desc: 'Měj na účtu alespoň 50 Kvantových Čipů (◈) najednou.', reward: 15 }
 ];
 
-// 6 PERMANENT CYBER-SHOP UPGRADES
 const SHOP_ITEMS = [
     {
         key: 'hullLvl',
@@ -357,7 +350,7 @@ const SHOP_ITEMS = [
     },
     {
         key: 'critShopLvl',
-        name: 'OPTICKÝ KALIBRATOR KRITU',
+        name: 'OPTICKÝ KALIBRÁTOR KRITU',
         desc: 'Trvale zvyšuje základní šanci na 2.4x Kritický zásah o +6 % za každou úroveň.',
         maxLvl: 5, baseCost: 12, color: '#f43f5e'
     }
