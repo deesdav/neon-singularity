@@ -3,12 +3,11 @@
   --magenta: #ff007f;
   --violet: #9d00ff;
   --gold: #fcee09;
-}
-* {
   box-sizing: border-box;
   user-select: none;
   -webkit-user-select: none;
 }
+
 body,
 html {
   margin: 0;
@@ -21,6 +20,42 @@ html {
   color: #ffffff;
   cursor: none;
 }
+
+/* Povolení výběru textu a kurzoru v poli pro přejmenování slotu */
+input[type="text"] {
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+  transition: all 0.2s ease;
+}
+
+input[type="text"]:focus {
+  box-shadow:
+    0 0 14px rgba(252, 238, 9, 0.55),
+    inset 0 0 8px rgba(252, 238, 9, 0.2);
+  background-color: rgba(15, 23, 42, 0.98);
+}
+
+/* Stylové kyberpunkové posuvníky pro Shop a Trofeje */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(6, 3, 18, 0.9);
+  border: 1px solid rgba(0, 243, 255, 0.15);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #00f3ff 0%, #ff007f 100%);
+  box-shadow: 0 0 10px rgba(0, 243, 255, 0.7);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #fcee09;
+}
+
 #game-canvas {
   position: absolute;
   top: 0;
@@ -30,26 +65,36 @@ html {
   z-index: 1;
   display: block;
 }
+
 .font-orbitron {
   font-family: "Orbitron", sans-serif;
 }
+
+/* Vylepšená CRT obrazovka s jemnou vinětací */
 .crt-overlay {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 15;
   background:
-    linear-gradient(rgba(16, 12, 24, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
-    radial-gradient(circle at center, transparent 60%, rgba(1, 0, 8, 0.88) 100%);
+    linear-gradient(rgba(16, 12, 24, 0) 50%, rgba(0, 0, 0, 0.28) 50%),
+    radial-gradient(circle at center, transparent 58%, rgba(1, 0, 8, 0.9) 100%);
   background-size:
     100% 4px,
     100% 100%;
   transition: opacity 0.3s ease;
 }
+
+/* Hlavní kontejnery s neonovým vnitřním i vnějším svitem */
 .cyber-box {
-  background: rgba(8, 5, 22, 0.85);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(0, 243, 255, 0.38);
+  position: relative;
+  background: linear-gradient(
+    165deg,
+    rgba(10, 7, 28, 0.88) 0%,
+    rgba(5, 2, 16, 0.92) 100%
+  );
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 243, 255, 0.42);
   clip-path: polygon(
     0 0,
     calc(100% - 14px) 0,
@@ -59,13 +104,19 @@ html {
     0 calc(100% - 14px)
   );
   box-shadow:
-    0 0 25px rgba(0, 243, 255, 0.14),
-    inset 0 0 15px rgba(0, 243, 255, 0.06);
+    0 0 28px rgba(0, 243, 255, 0.16),
+    inset 0 0 18px rgba(0, 243, 255, 0.08);
 }
+
 .cyber-box-magenta {
-  background: rgba(20, 4, 24, 0.88);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 0, 127, 0.55);
+  position: relative;
+  background: linear-gradient(
+    165deg,
+    rgba(24, 5, 28, 0.9) 0%,
+    rgba(10, 2, 16, 0.94) 100%
+  );
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 0, 127, 0.6);
   clip-path: polygon(
     0 0,
     calc(100% - 14px) 0,
@@ -75,13 +126,19 @@ html {
     0 calc(100% - 14px)
   );
   box-shadow:
-    0 0 28px rgba(255, 0, 127, 0.25),
-    inset 0 0 15px rgba(255, 0, 127, 0.1);
+    0 0 32px rgba(255, 0, 127, 0.28),
+    inset 0 0 18px rgba(255, 0, 127, 0.12);
 }
+
 .cyber-box-gold {
-  background: rgba(26, 20, 4, 0.94);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(252, 238, 9, 0.75);
+  position: relative;
+  background: linear-gradient(
+    165deg,
+    rgba(30, 22, 4, 0.95) 0%,
+    rgba(14, 10, 2, 0.98) 100%
+  );
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(252, 238, 9, 0.8);
   clip-path: polygon(
     0 0,
     calc(100% - 14px) 0,
@@ -91,13 +148,17 @@ html {
     0 calc(100% - 14px)
   );
   box-shadow:
-    0 0 32px rgba(252, 238, 9, 0.35),
-    inset 0 0 15px rgba(252, 238, 9, 0.12);
+    0 0 35px rgba(252, 238, 9, 0.38),
+    inset 0 0 16px rgba(252, 238, 9, 0.15);
 }
+
+/* Karty vylepšení (Upgrade) s přebíhajícím holografickým odleskem */
 .cyber-card {
+  position: relative;
+  overflow: hidden;
   background: linear-gradient(
     160deg,
-    rgba(14, 10, 36, 0.94) 0%,
+    rgba(16, 12, 42, 0.95) 0%,
     rgba(6, 3, 18, 0.98) 100%
   );
   border: 1px solid rgba(0, 243, 255, 0.45);
@@ -109,17 +170,45 @@ html {
     16px 100%,
     0 calc(100% - 16px)
   );
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
 }
+
+.cyber-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.14),
+    transparent
+  );
+  transform: skewX(-25deg);
+  transition: left 0.55s ease;
+  pointer-events: none;
+}
+
+.cyber-card:hover::before {
+  left: 140%;
+}
+
 .cyber-card:hover {
-  transform: translateY(-6px) scale(1.02);
+  transform: translateY(-6px) scale(1.025);
   border-color: #fcee09;
   box-shadow:
-    0 0 32px rgba(0, 243, 255, 0.4),
-    0 0 55px rgba(255, 0, 127, 0.22);
+    0 0 35px rgba(0, 243, 255, 0.45),
+    0 0 60px rgba(255, 0, 127, 0.25),
+    inset 0 0 20px rgba(252, 238, 9, 0.12);
 }
+
+/* Karty lodí a paměťových slotů v Hangáru */
 .ship-card {
+  position: relative;
+  overflow: hidden;
   background: linear-gradient(
     160deg,
     rgba(12, 9, 30, 0.9) 0%,
@@ -137,21 +226,61 @@ html {
   transition: all 0.2s ease;
   cursor: pointer;
 }
-.ship-card:hover {
-  border-color: rgba(0, 243, 255, 0.6);
-  transform: translateY(-2px);
+
+.ship-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 243, 255, 0.12),
+    transparent
+  );
+  transform: skewX(-25deg);
+  transition: left 0.45s ease;
+  pointer-events: none;
 }
+
+.ship-card:hover::after {
+  left: 140%;
+}
+
+.ship-card:hover {
+  border-color: rgba(0, 243, 255, 0.75);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 243, 255, 0.18);
+}
+
 .ship-card.selected {
   border-color: #00f3ff;
   background: linear-gradient(
     160deg,
-    rgba(0, 243, 255, 0.18) 0%,
-    rgba(15, 8, 35, 0.95) 100%
+    rgba(0, 243, 255, 0.2) 0%,
+    rgba(15, 8, 35, 0.96) 100%
   );
   box-shadow:
-    0 0 28px rgba(0, 243, 255, 0.38),
-    inset 0 0 15px rgba(0, 243, 255, 0.14);
+    0 0 28px rgba(0, 243, 255, 0.42),
+    inset 0 0 16px rgba(0, 243, 255, 0.16);
 }
+
+.ship-card svg {
+  filter: drop-shadow(0 0 6px rgba(0, 243, 255, 0.45));
+  transition:
+    transform 0.25s ease,
+    filter 0.25s ease;
+}
+
+.ship-card:hover svg,
+.ship-card.selected svg {
+  transform: scale(1.08);
+  filter: drop-shadow(0 0 10px rgba(252, 238, 9, 0.75));
+}
+
+/* Akční tlačítka */
 .cyber-btn {
   background: linear-gradient(135deg, #00f3ff 0%, #0077ff 100%);
   color: #04010c;
@@ -170,13 +299,19 @@ html {
   cursor: pointer;
   text-transform: uppercase;
 }
+
 .cyber-btn:hover {
   transform: translateY(-2px) scale(1.02);
   box-shadow:
     0 0 30px rgba(0, 243, 255, 0.9),
     0 0 55px rgba(255, 0, 127, 0.5);
-  background: linear-gradient(135deg, #70fbff 0%, #00f3ff 100%);
+  background: linear-gradient(135deg, #88fcff 0%, #00f3ff 100%);
 }
+
+.cyber-btn:active {
+  transform: translateY(0) scale(0.99);
+}
+
 .cyber-btn-gold {
   background: linear-gradient(135deg, #fcee09 0%, #ff9900 100%);
   color: #04010c;
@@ -195,12 +330,14 @@ html {
   cursor: pointer;
   text-transform: uppercase;
 }
+
 .cyber-btn-gold:hover {
   transform: translateY(-2px) scale(1.02);
   box-shadow:
     0 0 30px rgba(252, 238, 9, 0.9),
     0 0 55px rgba(255, 153, 0, 0.5);
 }
+
 .cyber-btn-outline {
   background: rgba(15, 23, 42, 0.85);
   color: #00f3ff;
@@ -220,26 +357,162 @@ html {
   cursor: pointer;
   text-transform: uppercase;
 }
+
 .cyber-btn-outline:hover {
-  background: rgba(0, 243, 255, 0.15);
+  background: rgba(0, 243, 255, 0.18);
   border-color: #fcee09;
   color: #ffffff;
+  box-shadow: 0 0 16px rgba(0, 243, 255, 0.3);
 }
+
+/* Zářící neonové texty */
 .neon-cyan {
   text-shadow:
     0 0 10px rgba(0, 243, 255, 0.85),
     0 0 24px rgba(0, 243, 255, 0.45);
 }
+
 .neon-magenta {
   text-shadow:
     0 0 10px rgba(255, 0, 127, 0.9),
     0 0 28px rgba(255, 0, 127, 0.5);
 }
+
 .neon-gold {
   text-shadow:
     0 0 10px rgba(252, 238, 9, 0.9),
     0 0 22px rgba(252, 238, 9, 0.45);
 }
+
+/* Jemná animace otevření modálních oken */
+#start-modal > div,
+#shop-modal > div,
+#achievements-modal > div,
+#pause-modal > div,
+#gameover-modal > div {
+  animation: cyberModalIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes cyberModalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
 .ui-interactive {
   cursor: auto;
+}
+/* ==========================================================================
+   RESPONZIVITA PRO MENŠÍ NOTEBOOKY, TABLETY A MOBILY
+   ========================================================================== */
+@media (max-height: 820px) {
+  #start-modal .cyber-box {
+    padding: 0.9rem 1.25rem;
+  }
+  #start-modal h1 {
+    font-size: 2.1rem;
+  }
+  .ship-card {
+    padding: 0.5rem 0.65rem;
+  }
+  .ship-card svg {
+    width: 3rem;
+    height: 2.1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  body,
+  html {
+    cursor: auto;
+  }
+  #hud {
+    padding: 0.5rem;
+  }
+  #start-modal,
+  #shop-modal,
+  #achievements-modal,
+  #pause-modal,
+  #upgrade-modal,
+  #gameover-modal {
+    align-items: flex-start;
+    padding: 0.5rem;
+  }
+  #start-modal > div,
+  #shop-modal > div,
+  #achievements-modal > div,
+  #pause-modal > div,
+  #upgrade-modal > div {
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+    max-height: 95vh;
+    overflow-y: auto;
+  }
+  #upgrade-cards-container {
+    max-height: 78vh;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  .cyber-card {
+    padding: 1rem !important;
+  }
+  .cyber-card h3 {
+    font-size: 1.15rem !important;
+  }
+}
+
+/* Virtuální dotykové ovládání pro mobily a tablety */
+#touch-controls {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 25;
+  display: none;
+}
+
+@media (pointer: coarse) {
+  #touch-controls.active {
+    display: block;
+  }
+}
+
+.touch-zone {
+  position: absolute;
+  bottom: 22px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgba(0, 243, 255, 0.08);
+  border: 1.5px solid rgba(0, 243, 255, 0.35);
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.touch-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  margin-left: -22px;
+  margin-top: -22px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #00f3ff 0%, rgba(0, 243, 255, 0.3) 100%);
+  box-shadow: 0 0 15px #00f3ff;
+  pointer-events: none;
+}
+
+.touch-action-btns {
+  position: absolute;
+  bottom: 155px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: auto;
 }

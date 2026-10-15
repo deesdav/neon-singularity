@@ -87,44 +87,69 @@ function renderSaveSlotsUI() {
   for (let slot = 1; slot <= 3; slot++) {
     const isSel = currentSaveSlot === slot;
     const raw = localStorage.getItem(getSaveKey(slot));
-    let slotHtml = "";
+    const savedCustomName = localStorage.getItem(`neon_singularity_slot_name_${slot}`);
+    let customName = savedCustomName || `Profil #${slot}`;
+    let slotInfoHtml = "";
 
     if (raw) {
       try {
         const data = JSON.parse(raw);
+        if (data.customName && !savedCustomName) customName = data.customName;
         const sc = Math.floor(data.state.score || 0).toLocaleString("cs-CZ");
         const shipName = data.player.shipClass || "INTERCEPTOR";
-        slotHtml = `
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="font-orbitron text-xs font-black ${isSel ? "text-yellow-300" : "text-cyan-300"}">💾 SLOT #${slot}</span>
-                        <div class="flex items-center gap-1.5">
-                            ${isSel ? '<span class="px-1.5 py-0.5 bg-yellow-400 text-black font-orbitron text-[8px] font-black">VYBRÁN</span>' : ""}
-                            <button data-del-slot="${slot}" class="px-1.5 py-0.5 bg-rose-950/80 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 font-orbitron text-[9px] transition" title="Smazat tento slot">✕</button>
-                        </div>
-                    </div>
-                    <div class="font-orbitron text-xs font-bold text-white">${shipName} // VLNA ${data.state.wave}</div>
-                    <div class="flex justify-between text-[10px] font-orbitron text-slate-300 mt-1 pt-1 border-t border-slate-800">
-                        <span>LV ${data.player.level} (${Math.ceil(data.player.hp)} HP)</span>
-                        <span class="text-cyan-300 font-bold">${sc} B.</span>
-                    </div>
-                `;
+        const diff = data.state.difficulty || "ARCADE";
+        slotInfoHtml = `
+          <div class="font-orbitron text-xs font-bold text-white mt-1">${shipName} // VLNA ${data.state.wave}</div>
+          <div class="flex justify-between text-[10px] font-orbitron text-slate-300 mt-1 pt-1 border-t border-slate-800">
+            <span>LV ${data.player.level} (${Math.ceil(data.player.hp)} HP) // ${diff}</span>
+            <span class="text-cyan-300 font-bold">${sc} B.</span>
+          </div>
+        `;
       } catch (e) {
-        slotHtml = `<div class="text-xs font-orbitron text-slate-500">SLOT #${slot} // POŠKOZENÁ DATA</div>`;
+        slotInfoHtml = `<div class="text-xs font-orbitron text-slate-500 mt-1">SLOT #${slot} // POŠKOZENÁ DATA</div>`;
       }
     } else {
-      slotHtml = `
-                <div class="flex justify-between items-center mb-1">
-                    <span class="font-orbitron text-xs font-black ${isSel ? "text-cyan-300" : "text-slate-400"}">💿 SLOT #${slot}</span>
-                    ${isSel ? '<span class="px-1.5 py-0.5 bg-cyan-400 text-black font-orbitron text-[8px] font-black">VYBRÁN</span>' : ""}
-                </div>
-                <div class="font-orbitron text-xs text-slate-400 py-1">PRÁZDNÝ SLOT</div>
-                <div class="text-[9px] font-orbitron text-slate-500 border-t border-slate-800/80 pt-1">Připraven pro novou misi</div>
-            `;
+      slotInfoHtml = `
+        <div class="font-orbitron text-xs text-slate-400 py-1">PRÁZDNÝ SLOT</div>
+        <div class="text-[9px] font-orbitron text-slate-500 border-t border-slate-800/80 pt-1">Připraven pro novou misi</div>
+      `;
     }
 
     const card = document.createElement("div");
     card.className = `ship-card p-3 text-left transition ${isSel ? "selected" : ""}`;
-    card.innerHTML = slotHtml;
+    card.innerHTML = `
+      <div class="flex justify-between items-center gap-1.5 mb-1">
+        <input
+          type="text"
+          data-slot-input="${slot}"
+          value="${customName}"
+          maxlength="24"
+          class="bg-slate-950/90 border border-cyan-500/40 focus:border-yellow-400 px-2 py-0.5 text-xs font-orbitron font-bold text-yellow-300 w-full rounded outline-none"
+          title="Klikni pro přejmenování slotu"
+        />
+        <div class="flex items-center gap-1 shrink-0">
+          ${isSel ? '<span class="px-1.5 py-0.5 bg-cyan-400 text-black font-orbitron text-[8px] font-black">AKTIVNÍ</span>' : ""}
+          ${raw ? `<button data-del-slot="${slot}" class="px-1.5 py-0.5 bg-rose-950/80 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 font-orbitron text-[9px] transition" title="Smazat tento slot">✕</button>` : ""}
+        </div>
+      </div>
+      ${slotInfoHtml}
+    `;
+
+    const inputEl = card.querySelector(`[data-slot-input="${slot}"]`);
+    inputEl.addEventListener("click", (e) => e.stopPropagation());
+    inputEl.addEventListener("keydown", (e) => e.stopPropagation());
+    inputEl.addEventListener("input", (e) => {
+      const newName = e.target.value;
+      localStorage.setItem(`neon_singularity_slot_name_${slot}`, newName);
+      const slotRaw = localStorage.getItem(getSaveKey(slot));
+      if (slotRaw) {
+        try {
+          const parsed = JSON.parse(slotRaw);
+          parsed.customName = newName;
+          localStorage.setItem(getSaveKey(slot), JSON.stringify(parsed));
+        } catch (err) { }
+      }
+    });
 
     card.addEventListener("click", (e) => {
       if (e.target && e.target.getAttribute("data-del-slot")) {
@@ -164,13 +189,12 @@ function renderCyberShop() {
                 </div>
                 <p class="text-xs text-slate-300 mb-3">${item.desc}</p>
             </div>
-            <button class="w-full py-2 font-orbitron text-xs font-black uppercase transition ${
-              isMax
-                ? "bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 cursor-default"
-                : canAfford
-                  ? "cyber-btn-gold"
-                  : "bg-slate-900 border border-slate-700 text-slate-500 cursor-not-allowed"
-            }">
+            <button class="w-full py-2 font-orbitron text-xs font-black uppercase transition ${isMax
+        ? "bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 cursor-default"
+        : canAfford
+          ? "cyber-btn-gold"
+          : "bg-slate-900 border border-slate-700 text-slate-500 cursor-not-allowed"
+      }">
                 ${isMax ? "✓ MAXIMÁLNÍ ÚROVEŇ" : `VYLEPŠIT (◈ ${cost} ČIPŮ)`}
             </button>
         `;
@@ -198,11 +222,10 @@ function renderAchievementsModal() {
   ACHIEVEMENTS_LIST.forEach((ach) => {
     const done = !!meta.achievements[ach.id];
     const card = document.createElement("div");
-    card.className = `p-3 border flex items-start gap-3 text-left ${
-      done
-        ? "bg-yellow-500/10 border-yellow-400/70"
-        : "bg-slate-950/85 border-slate-800 opacity-70"
-    }`;
+    card.className = `p-3 border flex items-start gap-3 text-left ${done
+      ? "bg-yellow-500/10 border-yellow-400/70"
+      : "bg-slate-950/85 border-slate-800 opacity-70"
+      }`;
     card.innerHTML = `
             <div class="text-xl mt-0.5">${done ? "🏆" : "🔒"}</div>
             <div class="flex-1">

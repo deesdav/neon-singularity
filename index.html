@@ -164,7 +164,7 @@
       <div class="cyber-box px-4 py-2.5 flex flex-wrap items-center gap-4 sm:gap-5">
         <div>
           <div class="text-[10px] tracking-widest text-cyan-300 uppercase font-orbitron">
-            HYPER-SKOK [MEZERNÍK / RT]
+            HYPER-SKOK [MEZERNÍK / KŘÍŽEK]
           </div>
           <div class="w-32 h-2.5 bg-slate-950 border border-cyan-500/40 mt-1 p-0.5">
             <div id="dash-bar" class="h-full bg-cyan-400 transition-all duration-75" style="width: 100%"></div>
@@ -172,13 +172,13 @@
         </div>
         <div class="border-l border-cyan-500/30 pl-4">
           <div class="text-[10px] tracking-widest text-pink-400 uppercase font-orbitron">
-            ČERNÁ DÍRA [Q / LT]
+            ČERNÁ DÍRA [Q / ČTVEREC]
           </div>
           <div id="bomb-slots" class="flex gap-1.5 mt-1"></div>
         </div>
         <div class="border-l border-cyan-500/30 pl-4">
           <div class="flex justify-between items-center text-[10px] tracking-widest uppercase font-orbitron">
-            <span id="overdrive-label" class="text-yellow-300">PŘETLAK [F / Y]</span>
+            <span id="overdrive-label" class="text-yellow-300">PŘETLAK [F / TROJÚHELNÍK]</span>
             <span id="overdrive-pct" class="text-white ml-2">0%</span>
           </div>
           <div class="w-32 h-2.5 bg-slate-950 border border-yellow-400/40 mt-1 p-0.5">
@@ -205,6 +205,8 @@
         <div class="text-[10px] text-slate-400">
           SLOT:
           <span id="hud-active-slot" class="text-yellow-300">#1</span> //
+          OBTÍŽNOST:
+          <span id="hud-difficulty" class="text-cyan-300">ARCADE</span> //
           TROFEJE:
           <span id="hud-ach-count" class="text-yellow-300">0/24</span>
         </div>
@@ -227,6 +229,11 @@
             class="px-2.5 py-1 bg-slate-900 border border-slate-700 text-slate-400 font-orbitron text-[10px]">
             🎮 GAMEPAD: NEPŘIPOJEN
           </span>
+          <button id="btn-lang-toggle" type="button"
+            class="px-2.5 py-1 bg-cyan-500/20 hover:bg-cyan-500/40 border border-cyan-400 text-cyan-200 font-orbitron text-[10px] font-black transition cursor-pointer"
+            title="Přepnout jazyk / Switch Language [L]">
+            🌐 JAZYK: CZ [L]
+          </button>
         </div>
         <div class="flex gap-2">
           <div
@@ -245,8 +252,7 @@
         NEON <span class="text-pink-500 neon-magenta">SINGULARITY</span>
       </h1>
       <p class="font-orbitron text-[10px] sm:text-xs tracking-[0.18em] text-yellow-300 uppercase mt-1 mb-4">
-        6 LODÍ // 24 ZBRANÍ + 3 SYNERGIE // VZÁCNÉ ČERVÍ DÍRY // PODPORA
-        GAMEPADU
+        6 LODÍ // 24 ZBRANÍ + 3 SYNERGIE // 3 OBTÍŽNOSTI // PODPORA GAMEPADU
       </p>
 
       <!-- Navigation Tabs for Clean Layout -->
@@ -262,21 +268,20 @@
       </div>
 
       <!-- TAB 1: SHIP SELECTOR -->
-      <div id="menu-tab-ships" class="text-left mb-4">
+      <div id="menu-tab-ships" class="text-left mb-3">
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5" id="ship-selector-grid"></div>
       </div>
 
       <!-- TAB 2: SAVE SLOTS & SYNERGY / GAMEPAD GUIDE -->
-      <div id="menu-tab-slots" class="hidden text-left mb-4">
+      <div id="menu-tab-slots" class="hidden text-left mb-3">
         <div class="text-xs font-orbitron text-yellow-300 uppercase tracking-widest mb-2 font-bold">
-          VYBER AKTIVNÍ SLOT PRO UKLÁDÁNÍ NEBO NAČTENÍ ROZEHRANÉ MISE:
+          VYBER AKTIVNÍ SLOT PRO UKLÁDÁNÍ NEBO PŘEJMENOVÁNÍ ROZEHRANÉ MISE:
         </div>
         <div id="save-slots-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-3"></div>
-
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-[11px] bg-slate-950/90 border border-slate-800 p-3">
           <div>
             <div class="font-orbitron text-cyan-300 font-bold mb-1">
-              ⚡ FÚZNÍ SYNERGIE ZBRANÍ (AUTOMATICKÉ):
+              ⚡ SYNERGIE ZBRANÍ (AUTOMATICKÉ FÚZE):
             </div>
             <ul class="text-slate-300 space-y-0.5">
               <li>
@@ -292,13 +297,13 @@
               <li>
                 •
                 <span class="text-pink-400 font-bold">Hvězdná Singularita:</span>
-                Černá Díra + Ion-Satelit
+                Drtič Gravitace + Ion-Satelit
               </li>
             </ul>
           </div>
           <div>
             <div class="font-orbitron text-yellow-300 font-bold mb-1">
-              🎮 OVLÁDÁNÍ (KLÁVESNICE / GAMEPAD):
+              🎮 OVLÁDÁNÍ (KLÁVESNICE / DUALSHOCK 4):
             </div>
             <ul class="text-slate-300 space-y-0.5">
               <li>
@@ -309,15 +314,41 @@
               <li>
                 •
                 <span class="text-white font-bold">Hyper-Skok & Černá díra:</span>
-                Mezerník (RT) / Q,E (LT)
+                Mezerník (Křížek/R1) / Q,E (Čtverec/L1)
               </li>
               <li>
                 •
-                <span class="text-white font-bold">Přetlak & Vlastní MP3:</span>
-                Klávesa F (Y) / Klávesa O
+                <span class="text-white font-bold">Přetlak & Výběr vylepšení:</span>
+                Klávesa F (Trojúhelník) / D-Pad (Šipky)
               </li>
             </ul>
           </div>
+        </div>
+      </div>
+
+      <!-- DIFFICULTY SELECTOR -->
+      <div class="text-left mb-3 bg-slate-950/80 border border-cyan-500/30 p-2.5">
+        <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-1.5 gap-1">
+          <span class="text-[11px] font-orbitron text-cyan-300 uppercase tracking-widest font-bold">
+            ⚔️ VYBER OBTÍŽNOST SIMULACE:
+          </span>
+          <span id="difficulty-desc-text" class="text-[11px] font-orbitron text-yellow-300">
+            ARCADE: Standardní aréna (100 % HP, běžný zisk Čipů, vítězství ve 12. vlně)
+          </span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2" id="difficulty-selector-grid">
+          <button type="button" data-diff="ARCADE"
+            class="cyber-btn-outline py-2 text-[11px] font-bold border-cyan-400 bg-cyan-500/20 text-white">
+            🛡️ ARCADE (STANDARD // 12 VLN)
+          </button>
+          <button type="button" data-diff="HARDCORE"
+            class="cyber-btn-outline py-2 text-[11px] font-bold text-slate-400 border-slate-700">
+            💀 HARDCORE (70 % HP // 2x ČIPY ◈)
+          </button>
+          <button type="button" data-diff="ENDLESS"
+            class="cyber-btn-outline py-2 text-[11px] font-bold text-slate-400 border-slate-700">
+            ♾️ ENDLESS (NEKONEČNÁ VÝZVA)
+          </button>
         </div>
       </div>
 
@@ -462,7 +493,7 @@
 
       <div class="flex flex-col gap-2.5">
         <button id="btn-resume-play" class="cyber-btn w-full py-3.5 text-base sm:text-lg">
-          POKRAČOVAT V BOJI [ESC / START]
+          POKRAČOVAT V BOJI [ESC / OPTIONS]
         </button>
         <div class="grid grid-cols-2 gap-3">
           <button id="btn-manual-save" class="cyber-btn-outline py-2.5 text-xs">
@@ -486,7 +517,7 @@
     <div class="max-w-4xl w-full text-center">
       <div
         class="inline-block px-4 py-1 bg-yellow-400/20 border border-yellow-400 text-yellow-300 font-orbitron text-xs tracking-widest uppercase mb-2 animate-pulse">
-        KVANTOVÁ EVOLUCE SYSTÉMU // VYBER 1 MODUL (KLIK NEBO KLÁVESY 1, 2, 3)
+        KVANTOVÁ EVOLUCE SYSTÉMU // KLIKNI, STISKNI [1, 2, 3] NEBO ŠIPKY NA OVLADAČI [⬅️ ⬆️ ➡️]
       </div>
       <h2 class="font-orbitron text-3xl sm:text-5xl font-black text-white neon-cyan tracking-wide mb-6">
         VYLEPŠENÍ ARZENÁLU
@@ -495,15 +526,15 @@
     </div>
   </div>
 
-  <!-- GAME OVER MODAL -->
+  <!-- GAME OVER / VICTORY MODAL -->
   <div id="gameover-modal"
     class="fixed inset-0 z-30 hidden items-center justify-center p-4 bg-black/85 backdrop-blur-lg ui-interactive">
     <div class="cyber-box-magenta max-w-lg w-full p-7 sm:p-9 text-center border-t-2 border-pink-500">
-      <div
+      <div id="go-badge"
         class="inline-block px-3 py-1 bg-red-500/20 border border-red-500 text-red-300 font-orbitron text-xs tracking-widest uppercase mb-2 animate-pulse">
         KOLAPS JÁDRA // SYSTÉM ZNIČEN
       </div>
-      <h2 class="font-orbitron text-4xl sm:text-5xl font-black text-white neon-magenta mb-6">
+      <h2 id="go-title" class="font-orbitron text-4xl sm:text-5xl font-black text-white neon-magenta mb-6">
         KONEC PŘENOSU
       </h2>
       <div class="grid grid-cols-2 gap-3 mb-6">
@@ -549,7 +580,9 @@
   <script src="./js/audio.js"></script>
   <script src="./js/world.js"></script>
   <script src="./js/renderer.js"></script>
+  <script src="./js/combat.js"></script>
   <script src="./js/game.js"></script>
+  <script src="./js/i18n.js"></script>
 </body>
 
 </html>
