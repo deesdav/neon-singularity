@@ -1,5 +1,7 @@
 # NEON SINGULARITY // SYNERGY EDITION
 
+> **[▶ PLAY NEON SINGULARITY](https://deesdav.github.io/neon-singularity/)** · [Source code](https://github.com/deesdav/neon-singularity)
+
 **Neon Singularity** je neonově laděná sci-fi arkádová vesmírná střílečka běžící přímo v prohlížeči. Pilotuj svou loď, přežij stále náročnější vlny nepřátel, sbírej skóre a kvantové čipy, odemykej vylepšení a postav se bossům na cestě k singularitě.
 
 Hra kombinuje rychlý souboj, postup postavy, synergická vylepšení a cyberpunkovou atmosféru s neonovým HUDem.
@@ -16,7 +18,15 @@ Hra kombinuje rychlý souboj, postup postavy, synergická vylepšení a cyberpun
 - **Hudba a zvuk** – přepínej rádio i zvukové efekty.
 - **Retro-futuristický vzhled** – neonové barvy, CRT efekt a futuristické rozhraní.
 
-## 🚀 Jak hru spustit
+## 🚀 Zahraj si online
+
+Hra je dostupná jako webová stránka přes GitHub Pages:
+
+**[▶ Spustit Neon Singularity](https://deesdav.github.io/neon-singularity/)**
+
+Po každém pushi do větve `main` se web automaticky nasadí pomocí GitHub Actions. První nasazení může několik minut trvat.
+
+## 💻 Lokální spuštění
 
 Hra je vytvořená pomocí HTML, CSS a JavaScriptu a nevyžaduje instalaci balíčků.
 
@@ -54,6 +64,9 @@ Některé akce se mohou lišit podle obrazovky nebo právě aktivního menu. Dos
 
 ```text
 neon-singularity/
+├── .github/
+│   └── workflows/
+│       └── deploy-pages.yml # Automatické nasazení na GitHub Pages
 ├── index.html       # Herní stránka a uživatelské rozhraní
 ├── js/
 │   ├── game.js      # Hlavní herní logika
@@ -75,6 +88,7 @@ neon-singularity/
 - JavaScript
 - Tailwind CSS (CDN)
 - Google Fonts: Orbitron a Rajdhani
+- GitHub Actions + GitHub Pages pro publikování
 
 ## 📌 Stav projektu
 
