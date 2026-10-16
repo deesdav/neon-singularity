@@ -21,7 +21,6 @@ html {
   cursor: none;
 }
 
-/* Povolení výběru textu a kurzoru v poli pro přejmenování slotu */
 input[type="text"] {
   user-select: text;
   -webkit-user-select: text;
@@ -36,7 +35,6 @@ input[type="text"]:focus {
   background-color: rgba(15, 23, 42, 0.98);
 }
 
-/* Stylové kyberpunkové posuvníky pro Shop a Trofeje */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -70,7 +68,6 @@ input[type="text"]:focus {
   font-family: "Orbitron", sans-serif;
 }
 
-/* Vylepšená CRT obrazovka s jemnou vinětací */
 .crt-overlay {
   position: fixed;
   inset: 0;
@@ -85,13 +82,12 @@ input[type="text"]:focus {
   transition: opacity 0.3s ease;
 }
 
-/* Hlavní kontejnery s neonovým vnitřním i vnějším svitem */
 .cyber-box {
   position: relative;
   background: linear-gradient(
     165deg,
-    rgba(10, 7, 28, 0.88) 0%,
-    rgba(5, 2, 16, 0.92) 100%
+    rgba(10, 7, 28, 0.9) 0%,
+    rgba(5, 2, 16, 0.94) 100%
   );
   backdrop-filter: blur(16px);
   border: 1px solid rgba(0, 243, 255, 0.42);
@@ -112,8 +108,8 @@ input[type="text"]:focus {
   position: relative;
   background: linear-gradient(
     165deg,
-    rgba(24, 5, 28, 0.9) 0%,
-    rgba(10, 2, 16, 0.94) 100%
+    rgba(24, 5, 28, 0.92) 0%,
+    rgba(10, 2, 16, 0.96) 100%
   );
   backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 0, 127, 0.6);
@@ -152,7 +148,6 @@ input[type="text"]:focus {
     inset 0 0 16px rgba(252, 238, 9, 0.15);
 }
 
-/* Karty vylepšení (Upgrade) s přebíhajícím holografickým odleskem */
 .cyber-card {
   position: relative;
   overflow: hidden;
@@ -170,8 +165,33 @@ input[type="text"]:focus {
     16px 100%,
     0 calc(100% - 16px)
   );
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    transform 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.2s ease,
+    box-shadow 0.24s ease;
   cursor: pointer;
+  animation: cardSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.cyber-card:nth-child(1) {
+  animation-delay: 0.03s;
+}
+.cyber-card:nth-child(2) {
+  animation-delay: 0.09s;
+}
+.cyber-card:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+@keyframes cardSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .cyber-card::before {
@@ -196,7 +216,8 @@ input[type="text"]:focus {
   left: 140%;
 }
 
-.cyber-card:hover {
+.cyber-card:hover,
+.cyber-card.gamepad-focus {
   transform: translateY(-6px) scale(1.025);
   border-color: #fcee09;
   box-shadow:
@@ -205,7 +226,6 @@ input[type="text"]:focus {
     inset 0 0 20px rgba(252, 238, 9, 0.12);
 }
 
-/* Karty lodí a paměťových slotů v Hangáru */
 .ship-card {
   position: relative;
   overflow: hidden;
@@ -223,7 +243,7 @@ input[type="text"]:focus {
     12px 100%,
     0 calc(100% - 12px)
   );
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
 }
 
@@ -280,7 +300,24 @@ input[type="text"]:focus {
   filter: drop-shadow(0 0 10px rgba(252, 238, 9, 0.75));
 }
 
-/* Akční tlačítka */
+.color-swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.color-swatch:hover,
+.color-swatch.active {
+  transform: scale(1.22);
+  border-color: #ffffff;
+  box-shadow: 0 0 10px currentColor;
+}
+
 .cyber-btn {
   background: linear-gradient(135deg, #00f3ff 0%, #0077ff 100%);
   color: #04010c;
@@ -295,21 +332,17 @@ input[type="text"]:focus {
     14px 100%,
     0 calc(100% - 14px)
   );
-  transition: all 0.18s ease;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   text-transform: uppercase;
 }
 
 .cyber-btn:hover {
-  transform: translateY(-2px) scale(1.02);
+  transform: translateY(-2px) scale(1.015);
   box-shadow:
     0 0 30px rgba(0, 243, 255, 0.9),
     0 0 55px rgba(255, 0, 127, 0.5);
   background: linear-gradient(135deg, #88fcff 0%, #00f3ff 100%);
-}
-
-.cyber-btn:active {
-  transform: translateY(0) scale(0.99);
 }
 
 .cyber-btn-gold {
@@ -326,13 +359,13 @@ input[type="text"]:focus {
     14px 100%,
     0 calc(100% - 14px)
   );
-  transition: all 0.18s ease;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   text-transform: uppercase;
 }
 
 .cyber-btn-gold:hover {
-  transform: translateY(-2px) scale(1.02);
+  transform: translateY(-2px) scale(1.015);
   box-shadow:
     0 0 30px rgba(252, 238, 9, 0.9),
     0 0 55px rgba(255, 153, 0, 0.5);
@@ -365,7 +398,6 @@ input[type="text"]:focus {
   box-shadow: 0 0 16px rgba(0, 243, 255, 0.3);
 }
 
-/* Zářící neonové texty */
 .neon-cyan {
   text-shadow:
     0 0 10px rgba(0, 243, 255, 0.85),
@@ -384,45 +416,55 @@ input[type="text"]:focus {
     0 0 22px rgba(252, 238, 9, 0.45);
 }
 
-/* Jemná animace otevření modálních oken */
 #start-modal > div,
 #shop-modal > div,
 #achievements-modal > div,
 #pause-modal > div,
+#upgrade-modal > div,
 #gameover-modal > div {
-  animation: cyberModalIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: cyberModalIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes cyberModalIn {
   from {
     opacity: 0;
-    transform: scale(0.96) translateY(8px);
+    transform: scale(0.93) translateY(14px);
+    filter: brightness(1.35);
   }
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
+    filter: brightness(1);
   }
+}
+
+#achievement-popup {
+  transition:
+    opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .ui-interactive {
   cursor: auto;
 }
-/* ==========================================================================
-   RESPONZIVITA PRO MENŠÍ NOTEBOOKY, TABLETY A MOBILY
-   ========================================================================== */
-@media (max-height: 820px) {
-  #start-modal .cyber-box {
-    padding: 0.9rem 1.25rem;
+
+/* Laptop & Compact Height Responsiveness */
+@media (max-height: 860px) {
+  #start-modal .cyber-box,
+  #shop-modal .cyber-box,
+  #pause-modal .cyber-box,
+  #gameover-modal .cyber-box-magenta {
+    padding: 0.85rem 1.25rem;
   }
   #start-modal h1 {
-    font-size: 2.1rem;
+    font-size: 2rem;
   }
   .ship-card {
-    padding: 0.5rem 0.65rem;
+    padding: 0.45rem 0.6rem;
   }
   .ship-card svg {
-    width: 3rem;
-    height: 2.1rem;
+    width: 2.7rem;
+    height: 1.85rem;
   }
 }
 
@@ -447,7 +489,8 @@ input[type="text"]:focus {
   #shop-modal > div,
   #achievements-modal > div,
   #pause-modal > div,
-  #upgrade-modal > div {
+  #upgrade-modal > div,
+  #gameover-modal > div {
     margin-top: 0.25rem;
     margin-bottom: 0.5rem;
     max-height: 95vh;
@@ -458,15 +501,8 @@ input[type="text"]:focus {
     overflow-y: auto;
     padding-right: 4px;
   }
-  .cyber-card {
-    padding: 1rem !important;
-  }
-  .cyber-card h3 {
-    font-size: 1.15rem !important;
-  }
 }
 
-/* Virtuální dotykové ovládání pro mobily a tablety */
 #touch-controls {
   position: fixed;
   inset: 0;

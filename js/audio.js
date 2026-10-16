@@ -43,6 +43,24 @@ class DarksynthSoundtrackEngine {
         bpm: 138,
         url: "audio/hyper_glitch.mp3",
       },
+      {
+        label: "CYBER OVERLOAD",
+        name: "TRACK 04 // CYBER OVERLOAD (155 BPM)",
+        bpm: 155,
+        url: "audio/cyber_overload.mp3",
+      },
+      {
+        label: "VOID RUNNER",
+        name: "TRACK 05 // VOID RUNNER (142 BPM)",
+        bpm: 142,
+        url: "audio/void_runner.mp3",
+      },
+      {
+        label: "DARKSYNTH FURY",
+        name: "TRACK 06 // DARKSYNTH FURY (160 BPM)",
+        bpm: 160,
+        url: "audio/darksynth_fury.mp3",
+      },
     ];
 
     this.styles = this.tracks.map((t) => t.label);
@@ -159,7 +177,7 @@ class DarksynthSoundtrackEngine {
     }
 
     if (this.bgm.paused) {
-      this.bgm.play().catch(() => {});
+      this.bgm.play().catch(() => { });
     }
 
     // BPM synchronizátor běží vždy na pozadí jako garant rytmu
@@ -244,7 +262,7 @@ class DarksynthSoundtrackEngine {
       this.bgm.src = track.url;
     }
     this.bgm.volume = 0.55;
-    this.bgm.play().catch(() => {});
+    this.bgm.play().catch(() => { });
   }
 
   cycleStyle() {
@@ -252,7 +270,7 @@ class DarksynthSoundtrackEngine {
     const track = this.tracks[this.styleIndex];
     this.bgm.src = track.url;
     if (!this.muted && state.mode === "PLAYING") {
-      this.bgm.play().catch(() => {});
+      this.bgm.play().catch(() => { });
     }
     if (typeof showSaveToast === "function") {
       showSaveToast(`🎵 ${track.name} (STISKNI [O] PRO VLASTNÍ MP3)`);

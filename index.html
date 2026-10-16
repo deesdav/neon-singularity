@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>NEON SINGULARITY // SYNERGY EDITION</title>
+  <title>NEON SINGULARITY // OMEGA EDITION</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link
     href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Rajdhani:wght@500;600;700&display=swap"
@@ -18,7 +18,7 @@
 
   <!-- SAVE / INFO NOTIFICATION TOAST -->
   <div id="save-toast"
-    class="fixed top-5 left-1/2 -translate-x-1/2 z-40 pointer-events-none opacity-0 transition-opacity duration-300 cyber-box px-4 py-1.5 text-xs font-orbitron text-yellow-300 border-yellow-400/60">
+    class="fixed top-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-opacity duration-300 cyber-box px-4 py-1.5 text-xs font-orbitron text-yellow-300 border-yellow-400/60">
     ⚡ POZICE AUTOMATICKY ULOŽENA
   </div>
 
@@ -28,16 +28,12 @@
     <div
       class="flex flex-wrap items-center justify-center gap-5 px-5 py-1.5 rounded-full bg-black/45 backdrop-blur-md border border-cyan-500/25">
       <div class="font-orbitron text-xs tracking-widest text-rose-400 font-bold">
-        TRUP
-        <span id="ghost-hp" class="text-white font-black ml-1">100 / 100</span>
+        TRUP <span id="ghost-hp" class="text-white font-black ml-1">100 / 100</span>
       </div>
       <div class="font-orbitron text-xs tracking-widest text-cyan-300/80 border-l border-slate-700 pl-4">
-        SKÓRE
-        <span id="ghost-score" class="text-lg sm:text-xl font-black text-white neon-cyan ml-1">0000000</span>
+        SKÓRE <span id="ghost-score" class="text-lg sm:text-xl font-black text-white neon-cyan ml-1">0000000</span>
       </div>
-      <div id="ghost-combo" class="font-orbitron text-sm font-black text-pink-400 neon-magenta">
-        x1.0
-      </div>
+      <div id="ghost-combo" class="font-orbitron text-sm font-black text-pink-400 neon-magenta">x1.0</div>
       <div class="font-orbitron text-xs tracking-widest text-yellow-300/90 border-l border-slate-700 pl-4">
         VLNA <span id="ghost-wave" class="text-white font-bold">1</span>
       </div>
@@ -67,15 +63,9 @@
     class="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 -translate-y-4 transition-all duration-300 cyber-box-gold px-6 py-3 flex items-center gap-4 min-w-[320px]">
     <div class="text-3xl">🏆</div>
     <div class="text-left">
-      <div class="text-[10px] font-orbitron text-yellow-300 tracking-widest uppercase font-black">
-        ODEMČENO!
-      </div>
-      <div id="ach-popup-title" class="font-orbitron text-base font-black text-white">
-        PRVNÍ KREV
-      </div>
-      <div id="ach-popup-reward" class="text-xs font-orbitron text-emerald-300 font-bold">
-        +5 ◈ KVANTOVÝCH ČIPŮ
-      </div>
+      <div class="text-[10px] font-orbitron text-yellow-300 tracking-widest uppercase font-black">ODEMČENO!</div>
+      <div id="ach-popup-title" class="font-orbitron text-base font-black text-white">PRVNÍ KREV</div>
+      <div id="ach-popup-reward" class="text-xs font-orbitron text-emerald-300 font-bold">+5 ◈ KVANTOVÝCH ČIPŮ</div>
     </div>
   </div>
 
@@ -95,8 +85,7 @@
         </div>
         <div id="aegis-row"
           class="hidden justify-between items-center text-[10px] tracking-widest uppercase text-sky-300 mb-1">
-          <span class="font-orbitron">AEGIS ŠTÍT:
-            <span id="aegis-status" class="text-white">NABITO</span></span>
+          <span class="font-orbitron">AEGIS ŠTÍT: <span id="aegis-status" class="text-white">NABITO</span></span>
         </div>
         <div class="flex justify-between items-center text-[11px] tracking-widest uppercase text-yellow-300 mb-0.5">
           <span id="level-text" class="font-orbitron font-bold">ÚROVEŇ 01</span>
@@ -129,9 +118,7 @@
             <span class="font-orbitron text-yellow-300 font-bold">◈ <span id="hud-shards">0</span> ČIPŮ</span>
           </div>
           <div id="score-display"
-            class="font-orbitron text-2xl sm:text-4xl font-black text-white neon-cyan tracking-wider">
-            0000000
-          </div>
+            class="font-orbitron text-2xl sm:text-4xl font-black text-white neon-cyan tracking-wider">0000000</div>
           <div class="flex justify-between text-[11px] text-slate-400 mt-0.5 border-t border-cyan-500/20 pt-0.5">
             <span>REKORD:</span>
             <span id="best-score-display" class="font-orbitron text-yellow-300 font-bold">0000000</span>
@@ -140,21 +127,17 @@
 
         <div class="flex flex-col gap-1 pointer-events-auto ui-interactive">
           <button id="btn-pause-hud"
-            class="cyber-box px-3 py-1 text-[10px] font-orbitron text-yellow-300 hover:text-white border-yellow-400/50 transition font-bold">
-            ⏸ PAUZA [ESC]
-          </button>
+            class="cyber-box px-3 py-1 text-[10px] font-orbitron text-yellow-300 hover:text-white border-yellow-400/50 transition font-bold">⏸
+            PAUZA [ESC]</button>
           <button id="btn-hide-hud"
-            class="cyber-box px-3 py-1 text-[10px] font-orbitron text-emerald-300 hover:text-white transition font-bold">
-            👁 HUD: PLNÝ [H]
-          </button>
+            class="cyber-box px-3 py-1 text-[10px] font-orbitron text-emerald-300 hover:text-white transition font-bold">👁
+            HUD: PLNÝ [H]</button>
           <button id="btn-track"
-            class="cyber-box px-3 py-1 text-[10px] font-orbitron text-pink-300 hover:text-white transition">
-            🎵 RÁDIO: NEON JUMP
-          </button>
+            class="cyber-box px-3 py-1 text-[10px] font-orbitron text-pink-300 hover:text-white transition">🎵 RÁDIO:
+            NEON JUMP</button>
           <button id="btn-audio"
-            class="cyber-box px-3 py-1 text-[10px] font-orbitron text-cyan-300 hover:text-white transition">
-            🔊 ZVUK: ON
-          </button>
+            class="cyber-box px-3 py-1 text-[10px] font-orbitron text-cyan-300 hover:text-white transition">🔊 ZVUK:
+            ON</button>
         </div>
       </div>
     </div>
@@ -163,17 +146,14 @@
       class="flex flex-col sm:flex-row justify-between items-stretch sm:items-end gap-3 w-full max-w-[1650px] mx-auto">
       <div class="cyber-box px-4 py-2.5 flex flex-wrap items-center gap-4 sm:gap-5">
         <div>
-          <div class="text-[10px] tracking-widest text-cyan-300 uppercase font-orbitron">
-            HYPER-SKOK [MEZERNÍK / KŘÍŽEK]
+          <div class="text-[10px] tracking-widest text-cyan-300 uppercase font-orbitron">HYPER-SKOK [MEZERNÍK / KŘÍŽEK]
           </div>
           <div class="w-32 h-2.5 bg-slate-950 border border-cyan-500/40 mt-1 p-0.5">
             <div id="dash-bar" class="h-full bg-cyan-400 transition-all duration-75" style="width: 100%"></div>
           </div>
         </div>
         <div class="border-l border-cyan-500/30 pl-4">
-          <div class="text-[10px] tracking-widest text-pink-400 uppercase font-orbitron">
-            ČERNÁ DÍRA [Q / ČTVEREC]
-          </div>
+          <div class="text-[10px] tracking-widest text-pink-400 uppercase font-orbitron">ČERNÁ DÍRA [Q / ČTVEREC]</div>
           <div id="bomb-slots" class="flex gap-1.5 mt-1"></div>
         </div>
         <div class="border-l border-cyan-500/30 pl-4">
@@ -197,18 +177,12 @@
 
       <div class="cyber-box px-3.5 py-2 text-right font-orbitron text-[11px] text-cyan-300/90 hidden sm:block">
         <div>
-          FPS:
-          <span id="fps-counter" class="text-white font-bold">60</span> //
-          ČÁSTICE:
-          <span id="particle-counter" class="text-pink-400 font-bold">0</span>
+          FPS: <span id="fps-counter" class="text-white font-bold">60</span> // ČÁSTICE: <span id="particle-counter"
+            class="text-pink-400 font-bold">0</span>
         </div>
         <div class="text-[10px] text-slate-400">
-          SLOT:
-          <span id="hud-active-slot" class="text-yellow-300">#1</span> //
-          OBTÍŽNOST:
-          <span id="hud-difficulty" class="text-cyan-300">ARCADE</span> //
-          TROFEJE:
-          <span id="hud-ach-count" class="text-yellow-300">0/24</span>
+          SLOT: <span id="hud-active-slot" class="text-yellow-300">#1</span> // OBTÍŽNOST: <span id="hud-difficulty"
+            class="text-cyan-300">ARCADE</span> // TROFEJE: <span id="hud-ach-count" class="text-yellow-300">0/36</span>
         </div>
       </div>
     </div>
@@ -217,13 +191,12 @@
   <!-- CLEAN TABBED START SCREEN MODAL -->
   <div id="start-modal"
     class="fixed inset-0 z-30 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md ui-interactive overflow-y-auto">
-    <div class="cyber-box max-w-5xl w-full p-5 sm:p-7 text-center border-t-2 border-cyan-400 relative my-auto">
-      <!-- Top Status Bar -->
-      <div class="flex flex-wrap justify-between items-center gap-2 mb-2">
-        <div class="flex items-center gap-2">
+    <div class="cyber-box max-w-6xl w-full p-5 sm:p-6 text-center border-t-2 border-cyan-400 relative my-auto">
+      <div class="flex flex-wrap justify-between items-center gap-2 mb-1.5">
+        <div class="flex items-center gap-2 flex-wrap">
           <span
             class="px-3 py-1 bg-pink-500/20 border border-pink-500/60 text-pink-300 font-orbitron text-[10px] tracking-widest uppercase">
-            SYNERGY & WORMHOLE EDITION
+            OMEGA OVERCLOCK EDITION
           </span>
           <span id="gamepad-status-badge"
             class="px-2.5 py-1 bg-slate-900 border border-slate-700 text-slate-400 font-orbitron text-[10px]">
@@ -238,7 +211,7 @@
         <div class="flex gap-2">
           <div
             class="px-3 py-1 bg-purple-500/20 border border-purple-400 text-purple-200 font-orbitron text-xs font-bold">
-            🏆 TROFEJE: <span id="menu-ach-count">0/24</span>
+            🏆 TROFEJE: <span id="menu-ach-count">0/36</span>
           </div>
           <div
             class="px-3.5 py-1 bg-yellow-400/15 border border-yellow-400 text-yellow-300 font-orbitron text-xs font-black tracking-wider">
@@ -251,25 +224,31 @@
         class="font-orbitron text-3xl sm:text-5xl font-black italic tracking-tight text-white neon-cyan leading-none mt-1">
         NEON <span class="text-pink-500 neon-magenta">SINGULARITY</span>
       </h1>
-      <p class="font-orbitron text-[10px] sm:text-xs tracking-[0.18em] text-yellow-300 uppercase mt-1 mb-4">
-        6 LODÍ // 24 ZBRANÍ + 3 SYNERGIE // 3 OBTÍŽNOSTI // PODPORA GAMEPADU
+      <p class="font-orbitron text-[10px] sm:text-xs tracking-[0.16em] text-yellow-300 uppercase mt-1 mb-3">
+        8 LODÍ // 32 ZBRANÍ + 13 SYNERGIÍ // DENNÍ MUTÁTORY // KVANTOVÝ OVERCLOCK
       </p>
 
-      <!-- Navigation Tabs for Clean Layout -->
-      <div class="flex border-b border-cyan-500/30 mb-3 gap-2">
-        <button id="tab-btn-ships"
-          class="px-5 py-2 font-orbitron text-xs font-black bg-cyan-500/20 border-t border-x border-cyan-400 text-white">
-          🚀 1. VÝBĚR TŘÍDY VZNÁŠEDLA (6)
-        </button>
-        <button id="tab-btn-slots"
-          class="px-5 py-2 font-orbitron text-xs font-bold bg-slate-950/60 border-t border-x border-slate-800 text-slate-400 hover:text-white">
-          💾 2. PAMĚŤOVÉ SLOTY (3) & OVLÁDÁNÍ
-        </button>
+      <!-- Navigation Tabs & Custom Color Picker -->
+      <div class="flex flex-wrap justify-between items-center border-b border-cyan-500/30 mb-3 gap-2 pb-1">
+        <div class="flex gap-2">
+          <button id="tab-btn-ships"
+            class="px-4 py-1.5 font-orbitron text-xs font-black bg-cyan-500/20 border-t border-x border-cyan-400 text-white">
+            🚀 1. VÝBĚR TŘÍDY VZNÁŠEDLA (8)
+          </button>
+          <button id="tab-btn-slots"
+            class="px-4 py-1.5 font-orbitron text-xs font-bold bg-slate-950/60 border-t border-x border-slate-800 text-slate-400 hover:text-white">
+            💾 2. PAMĚŤOVÉ SLOTY (3) & OVLÁDÁNÍ
+          </button>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-950/80 border border-slate-800 px-3 py-1">
+          <span class="font-orbitron text-[10px] text-cyan-300 uppercase font-bold">🎨 BARVA LODI:</span>
+          <div id="ship-color-picker" class="flex items-center gap-1.5"></div>
+        </div>
       </div>
 
-      <!-- TAB 1: SHIP SELECTOR -->
+      <!-- TAB 1: SHIP SELECTOR (8 SHIPS) -->
       <div id="menu-tab-ships" class="text-left mb-3">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5" id="ship-selector-grid"></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2" id="ship-selector-grid"></div>
       </div>
 
       <!-- TAB 2: SAVE SLOTS & SYNERGY / GAMEPAD GUIDE -->
@@ -280,94 +259,94 @@
         <div id="save-slots-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-3"></div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-[11px] bg-slate-950/90 border border-slate-800 p-3">
           <div>
-            <div class="font-orbitron text-cyan-300 font-bold mb-1">
-              ⚡ SYNERGIE ZBRANÍ (AUTOMATICKÉ FÚZE):
-            </div>
-            <ul class="text-slate-300 space-y-0.5">
-              <li>
-                •
-                <span class="text-orange-400 font-bold">Sluneční Supernova:</span>
-                Plamenomet + Bumerangy
-              </li>
-              <li>
-                •
-                <span class="text-sky-300 font-bold">Bouřková Matrice:</span>
-                Teslův Oblouk + Drony
-              </li>
-              <li>
-                •
-                <span class="text-pink-400 font-bold">Hvězdná Singularita:</span>
-                Drtič Gravitace + Ion-Satelit
-              </li>
+            <div class="font-orbitron text-cyan-300 font-bold mb-1">⚡ 13 FÚZNÍCH SYNERGIÍ ZBRANÍ (AUTOMATICKÉ):</div>
+            <ul class="text-slate-300 space-y-0.5 text-[10px]">
+              <li>• <span class="text-orange-400 font-bold">Sluneční Supernova:</span> Plamenomet + Bumerangy</li>
+              <li>• <span class="text-sky-300 font-bold">Bouřková Matrice:</span> Teslův Oblouk + Drony</li>
+              <li>• <span class="text-pink-400 font-bold">Hvězdná Singularita:</span> Drtič Gravitace + Ion-Satelit</li>
+              <li>• <span class="text-emerald-300 font-bold">Vortexový Cyklon:</span> Plazmový Bič + Bumerangy</li>
+              <li>• <span class="text-yellow-300 font-bold">Kobercové Bombardování:</span> Kvantový Minomet + Miny</li>
+              <li>• <span class="text-purple-300 font-bold">ZrcadlováKletba & 7 dalších fúzí v aréně!</span></li>
             </ul>
           </div>
           <div>
-            <div class="font-orbitron text-yellow-300 font-bold mb-1">
-              🎮 OVLÁDÁNÍ (KLÁVESNICE / DUALSHOCK 4):
-            </div>
-            <ul class="text-slate-300 space-y-0.5">
-              <li>
-                •
-                <span class="text-white font-bold">Pohyb & Míření:</span> WASD
-                + Myš / Levá + Pravá páčka
-              </li>
-              <li>
-                •
-                <span class="text-white font-bold">Hyper-Skok & Černá díra:</span>
-                Mezerník (Křížek/R1) / Q,E (Čtverec/L1)
-              </li>
-              <li>
-                •
-                <span class="text-white font-bold">Přetlak & Výběr vylepšení:</span>
-                Klávesa F (Trojúhelník) / D-Pad (Šipky)
-              </li>
+            <div class="font-orbitron text-yellow-300 font-bold mb-1">🎮 OVLÁDÁNÍ (KLÁVESNICE / DUALSHOCK 4):</div>
+            <ul class="text-slate-300 space-y-0.5 text-[10px]">
+              <li>• <span class="text-white font-bold">Pohyb & Míření:</span> WASD + Myš / Levá + Pravá páčka</li>
+              <li>• <span class="text-white font-bold">Hyper-Skok & Černá díra:</span> Mezerník (Křížek/R1) / Q,E
+                (Čtverec/L1)</li>
+              <li>• <span class="text-white font-bold">Přetlak & Výběr vylepšení:</span> Klávesa F (Trojúhelník) / D-Pad
+                (Šipky)</li>
+              <li>• <span class="text-white font-bold">Vlastní MP3 & Jazyk:</span> Klávesa [O] pro MP3 // Klávesa [L]
+                pro CZ/EN</li>
             </ul>
           </div>
         </div>
       </div>
 
-      <!-- DIFFICULTY SELECTOR -->
-      <div class="text-left mb-3 bg-slate-950/80 border border-cyan-500/30 p-2.5">
-        <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-1.5 gap-1">
-          <span class="text-[11px] font-orbitron text-cyan-300 uppercase tracking-widest font-bold">
-            ⚔️ VYBER OBTÍŽNOST SIMULACE:
-          </span>
-          <span id="difficulty-desc-text" class="text-[11px] font-orbitron text-yellow-300">
-            ARCADE: Standardní aréna (100 % HP, běžný zisk Čipů, vítězství ve 12. vlně)
-          </span>
+      <!-- DIFFICULTY & DAILY MUTATOR SELECTOR -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-2.5 text-left mb-3">
+        <div class="bg-slate-950/80 border border-cyan-500/30 p-2.5">
+          <div class="flex justify-between items-center mb-1.5">
+            <span class="text-[10px] font-orbitron text-cyan-300 uppercase tracking-widest font-bold">⚔️ OBTÍŽNOST
+              SIMULACE:</span>
+            <span id="difficulty-desc-text" class="text-[10px] font-orbitron text-yellow-300 truncate ml-2">ARCADE: 100
+              % HP, cíl 12. vlna</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5" id="difficulty-selector-grid">
+            <button type="button" data-diff="ARCADE"
+              class="cyber-btn-outline py-1.5 text-[10px] font-bold border-cyan-400 bg-cyan-500/20 text-white">🛡️
+              ARCADE</button>
+            <button type="button" data-diff="HARDCORE"
+              class="cyber-btn-outline py-1.5 text-[10px] font-bold text-slate-400 border-slate-700">💀 HARDCORE
+              (2x◈)</button>
+            <button type="button" data-diff="ULTRA"
+              class="cyber-btn-outline py-1.5 text-[10px] font-bold text-slate-400 border-slate-700">🔥 ULTRA
+              (3x◈)</button>
+            <button type="button" data-diff="ENDLESS"
+              class="cyber-btn-outline py-1.5 text-[10px] font-bold text-slate-400 border-slate-700">♾️ ENDLESS</button>
+          </div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2" id="difficulty-selector-grid">
-          <button type="button" data-diff="ARCADE"
-            class="cyber-btn-outline py-2 text-[11px] font-bold border-cyan-400 bg-cyan-500/20 text-white">
-            🛡️ ARCADE (STANDARD // 12 VLN)
-          </button>
-          <button type="button" data-diff="HARDCORE"
-            class="cyber-btn-outline py-2 text-[11px] font-bold text-slate-400 border-slate-700">
-            💀 HARDCORE (70 % HP // 2x ČIPY ◈)
-          </button>
-          <button type="button" data-diff="ENDLESS"
-            class="cyber-btn-outline py-2 text-[11px] font-bold text-slate-400 border-slate-700">
-            ♾️ ENDLESS (NEKONEČNÁ VÝZVA)
-          </button>
+
+        <div class="bg-slate-950/80 border border-pink-500/30 p-2.5">
+          <div class="flex justify-between items-center mb-1.5">
+            <span class="text-[10px] font-orbitron text-pink-400 uppercase tracking-widest font-bold">🎲 DENNÍ VÝZVA /
+              MUTÁTOR:</span>
+            <span id="mutator-desc-text" class="text-[10px] font-orbitron text-emerald-300 truncate ml-2">STANDARD:
+              Běžná pravidla bez mutace</span>
+          </div>
+          <div class="grid grid-cols-4 gap-1.5" id="mutator-selector-grid">
+            <button type="button" data-mut="NONE"
+              class="cyber-btn-outline py-1.5 text-[10px] font-bold border-cyan-400 bg-cyan-500/20 text-white">STANDARD</button>
+            <button type="button" data-mut="GLASS_CANNON"
+              class="cyber-btn-outline py-1.5 text-[10px] font-bold text-slate-400 border-slate-700">💥 SKLENĚNÁ
+              DĚLA</button>
+            <button type="button" data-mut="HYPER_DRIVE"
+              class="cyber-btn-outline py-1.5 text-[10px] font-bold text-slate-400 border-slate-700">⚡ NEKONEČNÝ
+              SKOK</button>
+            <button type="button" data-mut="SWARM_CHAOS"
+              class="cyber-btn-outline py-1.5 text-[10px] font-bold text-slate-400 border-slate-700">👾 ROJE
+              CHAOSU</button>
+          </div>
         </div>
       </div>
 
       <!-- SAVED GAME RESUME BANNER -->
-      <div id="resume-save-box" class="hidden flex-col gap-1 mb-3">
-        <button id="btn-resume-saved" class="cyber-btn-gold w-full py-3 text-sm sm:text-base shadow-xl">
+      <div id="resume-save-box" class="hidden flex-col gap-1 mb-2.5">
+        <button id="btn-resume-saved" class="cyber-btn-gold w-full py-2.5 text-sm sm:text-base shadow-xl">
           ⚡ POKRAČOVAT V ULOŽENÉ MISI (VYBRANÝ SLOT)
         </button>
         <div id="saved-meta-text" class="text-[11px] font-orbitron text-yellow-200/90 tracking-wider"></div>
       </div>
 
       <!-- BOTTOM ACTION BUTTONS -->
-      <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
         <button id="btn-open-shop" class="cyber-btn-outline py-3 text-xs flex items-center justify-center gap-1.5">
-          <span>◈ CYBER-SHOP (8)</span>
+          <span>◈ CYBER-SHOP (12) & OVERCLOCK</span>
         </button>
         <button id="btn-open-achievements"
           class="cyber-btn-outline py-3 text-xs flex items-center justify-center gap-1.5 border-yellow-400/50 text-yellow-300">
-          <span>🏆 TROFEJE (24)</span>
+          <span>🏆 TROFEJE (36)</span>
         </button>
         <button id="btn-start" class="cyber-btn sm:col-span-2 py-3 text-base sm:text-lg shadow-xl">
           SPUSTIT NOVOU MISI DO SLOTU [ENTER]
@@ -376,29 +355,44 @@
     </div>
   </div>
 
-  <!-- PERMANENT CYBER-SHOP MODAL -->
+  <!-- PERMANENT CYBER-SHOP & QUANTUM OVERCLOCK MODAL -->
   <div id="shop-modal"
     class="fixed inset-0 z-40 hidden items-center justify-center p-4 bg-black/85 backdrop-blur-lg ui-interactive overflow-y-auto">
-    <div class="cyber-box max-w-4xl w-full p-6 sm:p-8 border-t-2 border-yellow-400 my-auto">
+    <div class="cyber-box max-w-5xl w-full p-6 sm:p-7 border-t-2 border-yellow-400 my-auto">
       <div class="flex justify-between items-center mb-3">
         <div>
           <div class="text-xs font-orbitron text-yellow-300 uppercase tracking-widest">
-            TRVALÁ META-PROGRESE JÁDRA (8 MODULŮ)
+            TRVALÁ META-PROGRESE JÁDRA (12 MODULŮ + NEKONEČNÝ OVERCLOCK)
           </div>
-          <h2 class="font-orbitron text-2xl sm:text-4xl font-black text-white neon-cyan">
-            CYBER-SHOP
-          </h2>
+          <h2 class="font-orbitron text-2xl sm:text-4xl font-black text-white neon-cyan">CYBER-SHOP & OVERCLOCK</h2>
         </div>
         <div
           class="px-4 py-2 bg-yellow-400/20 border border-yellow-400 text-yellow-300 font-orbitron text-sm sm:text-base font-black">
           ◈ <span id="shop-shards-count">0</span> ČIPŮ
         </div>
       </div>
-      <div id="shop-items-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5 max-h-[60vh] overflow-y-auto pr-1">
+
+      <div id="shop-items-grid"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 mb-4 max-h-[42vh] overflow-y-auto pr-1"></div>
+
+      <!-- QUANTUM OVERCLOCK (INFINITE CHIP SINK) -->
+      <div class="cyber-box-gold p-3.5 mb-4">
+        <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-2 gap-1">
+          <div>
+            <span class="font-orbitron text-xs sm:text-sm font-black text-yellow-300 uppercase">♾️ KVANTOVÝ OVERCLOCK
+              (NEKONEČNÉ BONUSY PRO PŘEBYTEČNÉ ČIPY)</span>
+            <p class="text-[11px] text-slate-300">Každá úroveň stojí 50 ◈ Čipů a trvale posiluje všechny tvé lodě bez
+              omezení úrovně!</p>
+          </div>
+          <span id="overclock-total-badge"
+            class="px-2.5 py-1 bg-black/60 border border-yellow-400/60 font-orbitron text-xs text-yellow-300 font-black shrink-0">
+            CELKEM OVERCLOCK: LV 0
+          </span>
+        </div>
+        <div id="overclock-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5"></div>
       </div>
-      <button id="btn-close-shop" class="cyber-btn w-full py-3.5 text-base">
-        ULOŽIT A ZPĚT DO HANGÁRU
-      </button>
+
+      <button id="btn-close-shop" class="cyber-btn w-full py-3 text-base">ULOŽIT A ZPĚT DO HANGÁRU</button>
     </div>
   </div>
 
@@ -408,23 +402,17 @@
     <div class="cyber-box max-w-4xl w-full p-6 sm:p-8 border-t-2 border-yellow-400 my-auto">
       <div class="flex justify-between items-center mb-4">
         <div>
-          <div class="text-xs font-orbitron text-yellow-300 uppercase tracking-widest">
-            SÍŇ SLÁVY SINGULARITY
-          </div>
-          <h2 class="font-orbitron text-2xl sm:text-4xl font-black text-white neon-cyan">
-            TROFEJE & VÝZVY (24)
-          </h2>
+          <div class="text-xs font-orbitron text-yellow-300 uppercase tracking-widest">SÍŇ SLÁVY SINGULARITY</div>
+          <h2 class="font-orbitron text-2xl sm:text-4xl font-black text-white neon-cyan">TROFEJE & VÝZVY (36)</h2>
         </div>
         <div
           class="px-4 py-2 bg-purple-500/20 border border-purple-400 text-purple-200 font-orbitron text-sm font-black">
-          🏆 <span id="modal-ach-progress">0 / 24</span>
+          🏆 <span id="modal-ach-progress">0 / 36</span>
         </div>
       </div>
       <div id="achievements-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 max-h-[58vh] overflow-y-auto pr-1">
       </div>
-      <button id="btn-close-achievements" class="cyber-btn w-full py-3.5 text-base">
-        ZPĚT DO HANGÁRU
-      </button>
+      <button id="btn-close-achievements" class="cyber-btn w-full py-3.5 text-base">ZPĚT DO HANGÁRU</button>
     </div>
   </div>
 
@@ -434,74 +422,45 @@
     <div class="cyber-box max-w-xl w-full p-6 sm:p-8 text-center border-t-2 border-yellow-400">
       <div
         class="inline-block px-3 py-1 bg-yellow-400/20 border border-yellow-400 text-yellow-300 font-orbitron text-xs tracking-widest uppercase mb-2">
-        TAKTICKÁ HIBERNACE // AKTIVNÍ SLOT
-        <span id="pause-active-slot">#1</span>
+        TAKTICKÁ HIBERNACE // AKTIVNÍ SLOT <span id="pause-active-slot">#1</span>
       </div>
-      <h2 class="font-orbitron text-3xl sm:text-4xl font-black text-white neon-cyan mb-4">
-        HRA POZASTAVENA
-      </h2>
+      <h2 class="font-orbitron text-3xl sm:text-4xl font-black text-white neon-cyan mb-4">HRA POZASTAVENA</h2>
       <div class="grid grid-cols-3 gap-2.5 mb-4 text-left">
         <div class="bg-slate-950/90 border border-cyan-500/30 p-3">
-          <div class="text-[10px] text-slate-400 uppercase font-orbitron">
-            Rozehrané Skóre
-          </div>
-          <div id="pause-score" class="font-orbitron text-lg font-black text-cyan-300 mt-0.5">
-            0
-          </div>
+          <div class="text-[10px] text-slate-400 uppercase font-orbitron">Rozehrané Skóre</div>
+          <div id="pause-score" class="font-orbitron text-lg font-black text-cyan-300 mt-0.5">0</div>
         </div>
         <div class="bg-slate-950/90 border border-pink-500/30 p-3">
-          <div class="text-[10px] text-slate-400 uppercase font-orbitron">
-            Aktuální Vlna
-          </div>
-          <div id="pause-wave" class="font-orbitron text-lg font-black text-pink-400 mt-0.5">
-            VLNA 1
-          </div>
+          <div class="text-[10px] text-slate-400 uppercase font-orbitron">Aktuální Vlna</div>
+          <div id="pause-wave" class="font-orbitron text-lg font-black text-pink-400 mt-0.5">VLNA 1</div>
         </div>
         <div class="bg-slate-950/90 border border-yellow-400/30 p-3">
-          <div class="text-[10px] text-slate-400 uppercase font-orbitron">
-            Úroveň Lodi
-          </div>
-          <div id="pause-level" class="font-orbitron text-lg font-black text-yellow-300 mt-0.5">
-            LV 1
-          </div>
+          <div class="text-[10px] text-slate-400 uppercase font-orbitron">Úroveň Lodi</div>
+          <div id="pause-level" class="font-orbitron text-lg font-black text-yellow-300 mt-0.5">LV 1</div>
         </div>
       </div>
 
       <div class="bg-slate-950/80 border border-slate-800 p-3 mb-4 text-left">
-        <div class="text-[10px] font-orbitron text-slate-400 uppercase mb-1.5">
-          NAINSTALOVANÉ SYSTÉMY & SYNERGIE:
-        </div>
+        <div class="text-[10px] font-orbitron text-slate-400 uppercase mb-1.5">NAINSTALOVANÉ SYSTÉMY & SYNERGIE:</div>
         <div id="pause-arsenal-list" class="flex flex-wrap gap-1.5"></div>
       </div>
 
       <div class="text-left mb-4">
-        <div class="text-[10px] font-orbitron text-yellow-300 uppercase mb-1.5 tracking-wider">
-          💾 RYCHLÉ ULOŽENÍ POZICE DO SLOTU:
-        </div>
+        <div class="text-[10px] font-orbitron text-yellow-300 uppercase mb-1.5 tracking-wider">💾 RYCHLÉ ULOŽENÍ POZICE
+          DO SLOTU:</div>
         <div class="grid grid-cols-3 gap-2">
-          <button id="btn-save-slot-1" class="cyber-btn-outline py-2 text-[11px]">
-            ULOŽIT -> SLOT 1
-          </button>
-          <button id="btn-save-slot-2" class="cyber-btn-outline py-2 text-[11px]">
-            ULOŽIT -> SLOT 2
-          </button>
-          <button id="btn-save-slot-3" class="cyber-btn-outline py-2 text-[11px]">
-            ULOŽIT -> SLOT 3
-          </button>
+          <button id="btn-save-slot-1" class="cyber-btn-outline py-2 text-[11px]">ULOŽIT -> SLOT 1</button>
+          <button id="btn-save-slot-2" class="cyber-btn-outline py-2 text-[11px]">ULOŽIT -> SLOT 2</button>
+          <button id="btn-save-slot-3" class="cyber-btn-outline py-2 text-[11px]">ULOŽIT -> SLOT 3</button>
         </div>
       </div>
 
       <div class="flex flex-col gap-2.5">
-        <button id="btn-resume-play" class="cyber-btn w-full py-3.5 text-base sm:text-lg">
-          POKRAČOVAT V BOJI [ESC / OPTIONS]
-        </button>
+        <button id="btn-resume-play" class="cyber-btn w-full py-3.5 text-base sm:text-lg">POKRAČOVAT V BOJI [ESC /
+          OPTIONS]</button>
         <div class="grid grid-cols-2 gap-3">
-          <button id="btn-manual-save" class="cyber-btn-outline py-2.5 text-xs">
-            💾 ULOŽIT DO AKTIVNÍHO SLOTU
-          </button>
-          <button id="btn-save-exit" class="cyber-btn-outline py-2.5 text-xs">
-            🏠 ULOŽIT A DO HANGÁRU
-          </button>
+          <button id="btn-manual-save" class="cyber-btn-outline py-2.5 text-xs">💾 ULOŽIT DO AKTIVNÍHO SLOTU</button>
+          <button id="btn-save-exit" class="cyber-btn-outline py-2.5 text-xs">🏠 ULOŽIT A DO HANGÁRU</button>
         </div>
         <button id="btn-pause-restart"
           class="text-xs font-orbitron text-rose-400 hover:text-rose-300 mt-1 underline cursor-pointer">
@@ -519,9 +478,8 @@
         class="inline-block px-4 py-1 bg-yellow-400/20 border border-yellow-400 text-yellow-300 font-orbitron text-xs tracking-widest uppercase mb-2 animate-pulse">
         KVANTOVÁ EVOLUCE SYSTÉMU // KLIKNI, STISKNI [1, 2, 3] NEBO ŠIPKY NA OVLADAČI [⬅️ ⬆️ ➡️]
       </div>
-      <h2 class="font-orbitron text-3xl sm:text-5xl font-black text-white neon-cyan tracking-wide mb-6">
-        VYLEPŠENÍ ARZENÁLU
-      </h2>
+      <h2 class="font-orbitron text-3xl sm:text-5xl font-black text-white neon-cyan tracking-wide mb-6">VYLEPŠENÍ
+        ARZENÁLU</h2>
       <div id="upgrade-cards-container" class="grid grid-cols-1 md:grid-cols-3 gap-5 text-left"></div>
     </div>
   </div>
@@ -537,7 +495,7 @@
       <h2 id="go-title" class="font-orbitron text-4xl sm:text-5xl font-black text-white neon-magenta mb-6">
         KONEC PŘENOSU
       </h2>
-      <div class="grid grid-cols-2 gap-3 mb-6">
+      <div class="grid grid-cols-2 gap-3 mb-4">
         <div class="bg-slate-950/85 border border-pink-500/35 p-3.5">
           <div class="text-xs text-slate-400 uppercase">Konečné Skóre</div>
           <div id="go-score" class="font-orbitron text-2xl sm:text-3xl font-black text-cyan-300 mt-1">
@@ -565,6 +523,10 @@
           </div>
         </div>
       </div>
+
+      <!-- JEDINÝ ČISTÝ PROSTOR PRO STATISTIKY -->
+      <div id="telemetri-grid-box" class="mb-5"></div>
+
       <div class="flex flex-col sm:flex-row gap-3">
         <button id="btn-go-menu" class="cyber-btn-outline flex-1 py-4 text-sm">
           🏠 HANGÁR & SLOTY
