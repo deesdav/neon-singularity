@@ -1,83 +1,85 @@
-# NEON SINGULARITY // SYNERGY EDITION
+# NEON SINGULARITY // OMEGA EDITION
 
-> **[▶ PLAY NEON SINGULARITY](https://deesdav.github.io/neon-singularity/)** · [Source code](https://github.com/deesdav/neon-singularity)
+> **[▶ Hrát online](https://deesdav.github.io/neon-singularity/)** · [Zdrojový kód](https://github.com/deesdav/neon-singularity)
 
-**Neon Singularity** je neonově laděná sci-fi arkádová vesmírná střílečka běžící přímo v prohlížeči. Pilotuj svou loď, přežij stále náročnější vlny nepřátel, sbírej skóre a kvantové čipy, odemykej vylepšení a postav se bossům na cestě k singularitě.
+**Neon Singularity** je arkádová sci-fi survival střílečka pro webový prohlížeč. V neonové aréně ovládáš vlastní vznášedlo, bojuješ s vlnami nepřátel, sbíráš kvantové čipy, vylepšuješ arzenál a snažíš se přežít až do střetu se silnými bossy. Hra staví na rychlém pohybu, kombinování zbraní a postupném budování stále silnější sestavy.
 
-Hra kombinuje rychlý souboj, postup postavy, synergická vylepšení a cyberpunkovou atmosféru s neonovým HUDem.
+## 🎮 Zahraj si
 
-## ✨ Co hra nabízí
+**[▶ Spustit NEON SINGULARITY na GitHub Pages](https://deesdav.github.io/neon-singularity/)**
 
-- **Arkádový vesmírný souboj** – pohybuj se, miř a bojuj proti vlnám nepřátel.
-- **Postup a evoluce** – získávej zkušenosti, zvyšuj úroveň a vybírej si vylepšení.
-- **Synergie a arzenál** – kombinuj schopnosti a vytvářej silnější sestavy.
-- **Bossové** – připrav se na náročnější střety včetně Omega Archona.
-- **Speciální schopnosti** – používej hyper-skok, černou díru a přetlak.
-- **Skóre, komba a rekordy** – udržuj řetězec eliminací a překonávej své nejlepší výsledky.
-- **Ukládání postupu** – hra nabízí paměťové sloty a automatické ukládání pozice.
-- **Hudba a zvuk** – přepínej rádio i zvukové efekty.
-- **Retro-futuristický vzhled** – neonové barvy, CRT efekt a futuristické rozhraní.
+Hra běží v moderním prohlížeči a nevyžaduje instalaci. Při prvním otevření se načítá herní kód a podle použití také hudba a externí fonty/styly.
 
-## 🚀 Zahraj si online
+## ⚡ Hlavní funkce
 
-Hra je dostupná jako webová stránka přes GitHub Pages:
+- **8 tříd vznášedel** – vyber si loď podle svého herního stylu a uprav její barvu.
+- **Arzenál a evoluce** – během mise získávej úrovně a vybírej si nová vylepšení.
+- **32 zbraní a 13 fúzních synergií** – kombinuj zbraně a vytvářej silnější efekty.
+- **4 režimy obtížnosti** – Arcade, Hardcore, Ultra a Endless.
+- **Denní mutátory** – měň pravidla mise pomocí speciálních modifikátorů.
+- **Boss souboje** – sleduj zdraví bosse a připrav se na náročnější střety.
+- **Cyber-shop a Quantum Overclock** – utrácej kvantové čipy za trvalá vylepšení.
+- **36 trofejí a výzev** – plň úkoly a sleduj svůj postup.
+- **3 paměťové sloty** – ukládej a obnovuj rozehrané mise.
+- **Komba a rekordy** – řetěz eliminace, zvyšuj skóre a překonávej vlastní nejlepší výsledek.
+- **Hudební rádio** – šest vestavěných skladeb, zvukové efekty a možnost načíst vlastní MP3.
+- **Audio-reaktivní vizuály** – efekty reagují na rytmus a frekvence hudby.
+- **Čeština a angličtina** – jazyk lze přepnout přímo v menu.
+- **Klávesnice i gamepad** – hra obsahuje podporu ovládání ovladačem.
+- **Neonový CRT vzhled** – futuristický HUD, částicové efekty a cyberpunková estetika.
 
-**[▶ Spustit Neon Singularity](https://deesdav.github.io/neon-singularity/)**
+## 🕹️ Základní ovládání
 
-Po každém pushi do větve `main` se web automaticky nasadí pomocí GitHub Actions. První nasazení může několik minut trvat.
+| Akce | Klávesnice |
+|---|---|
+| Pohyb | WASD |
+| Míření | Myš |
+| Hyper-skok | Mezerník |
+| Černá díra | Q (ověř si přesné mapování v herním menu) |
+| Přetlak | F |
+| Výběr vylepšení | 1, 2, 3 nebo šipky |
+| Pauza | Esc |
+| Přepnutí plného/minimalistického HUDu | H |
+| Přepnutí hudební skladby | N |
+| Nahrání vlastní MP3 | O |
+| Přepnutí jazyka CZ/EN | L |
 
-## 💻 Lokální spuštění
+Hra zobrazuje další nápovědu přímo v menu. Ovládání gamepadem je vysvětlené v záložce paměťových slotů a ovládání.
 
-Hra je vytvořená pomocí HTML, CSS a JavaScriptu a nevyžaduje instalaci balíčků.
+## 🚀 Spuštění lokálně
 
-1. Naklonuj repozitář nebo si ho stáhni jako ZIP.
+Projekt používá HTML, CSS a JavaScript bez nutnosti instalovat balíčky.
+
+1. Naklonuj repozitář:
    ```bash
    git clone https://github.com/deesdav/neon-singularity.git
    cd neon-singularity
    ```
-2. Otevři soubor `index.html` v moderním webovém prohlížeči.
+2. Otevři `index.html` v moderním prohlížeči, nebo spusť lokální HTTP server:
+   ```bash
+   python -m http.server 8000
+   ```
+3. Otevři [http://localhost:8000](http://localhost:8000).
 
-Pro lokální vývoj můžeš spustit jednoduchý HTTP server, například pomocí Pythonu:
-```bash
-python -m http.server 8000
-```
-Potom otevři [http://localhost:8000](http://localhost:8000).
-
-> Rozhraní používá Tailwind CSS a fonty načítané z CDN, takže pro jejich načtení je potřeba internetové připojení.
-
-## 🎮 Ovládání
-
-| Akce | Klávesnice | Ovladač DualShock 4 |
-|---|---|---|
-| Pohyb a míření | WASD | Analogové páčky |
-| Hyper-skok | Mezerník | Křížek / R1 |
-| Černá díra | Q / E | Čtverec / L1 |
-| Přetlak | F | Trojúhelník |
-| Výběr vylepšení | 1, 2, 3 nebo šipky | D-pad |
-| Pauza | Esc | — |
-| Zobrazit / skrýt HUD | H | — |
-| Přepínání rádia | N nebo tlačítko v HUD | — |
-
-Některé akce se mohou lišit podle obrazovky nebo právě aktivního menu. Dostupné pokyny najdeš také přímo ve hře.
+**Poznámka:** Tailwind CSS a fonty Orbitron/Rajdhani se načítají z externích CDN, takže jejich načtení vyžaduje internetové připojení. Hra je publikovaná přes GitHub Pages a nasazení zajišťuje GitHub Actions.
 
 ## 🗂️ Struktura projektu
 
 ```text
 neon-singularity/
-├── .github/
-│   └── workflows/
-│       └── deploy-pages.yml # Automatické nasazení na GitHub Pages
-├── index.html       # Herní stránka a uživatelské rozhraní
+├── .github/workflows/
+│   └── deploy-pages.yml  # Automatické nasazení na GitHub Pages
+├── audio/                # Vestavěné MP3 soundtracky
 ├── js/
-│   ├── game.js      # Hlavní herní logika
-│   ├── combat.js    # Soubojový systém
-│   ├── renderer.js  # Vykreslování hry
-│   ├── world.js     # Herní svět
-│   ├── audio.js     # Hudba a zvuk
-│   └── i18n.js      # Jazykové texty
+│   ├── audio.js          # Hudba, zvukové efekty a audio analýza
+│   ├── combat.js         # Boj a herní mechaniky
+│   ├── game.js           # Hlavní logika, menu a postup hrou
+│   ├── i18n.js            # Jazykové texty CZ/EN
+│   ├── renderer.js       # Vykreslování arény a efektů
+│   └── world.js           # Herní svět a entity
 ├── style/
-│   └── style.css    # Vlastní styly a vizuální efekty
-├── audio/           # Herní audio soubory
+│   └── style.css         # Vlastní vzhled a CRT/neon efekty
+├── index.html            # Herní stránka a rozhraní
 └── README.md
 ```
 
@@ -86,14 +88,14 @@ neon-singularity/
 - HTML5 Canvas
 - CSS
 - JavaScript
-- Tailwind CSS (CDN)
+- Tailwind CSS přes CDN
 - Google Fonts: Orbitron a Rajdhani
-- GitHub Actions + GitHub Pages pro publikování
+- GitHub Actions a GitHub Pages
 
-## 📌 Stav projektu
+## 📦 Načítání a výkon
 
-Projekt je průběžně vyvíjen. Konkrétní dostupné funkce a herní obsah odpovídají aktuální verzi v repozitáři.
+Herní soundtrack obsahuje šest MP3 souborů o velikosti přibližně 5 MB každý. To neznamená, že se všechny musí stáhnout při otevření stránky. Pokud se hra načítá pomalu nebo se některé prvky nezobrazují, zkontroluj konzoli a síťové požadavky prohlížeče a také [stav nasazení GitHub Actions](https://github.com/deesdav/neon-singularity/actions).
 
 ## 📄 Licence
 
-Licence zatím není v repozitáři uvedena. Před dalším šířením nebo použitím částí projektu si ověř podmínky pro kód i přiložené audio soubory.
+V repozitáři zatím není uvedena licence. Před dalším šířením nebo použitím kódu a audio souborů je potřeba ověřit příslušná práva.
