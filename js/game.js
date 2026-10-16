@@ -1,9 +1,9 @@
 /*************************************************************************
  * GAME.JS - 24 WEAPONS, 3 SYNERGIES, DIFFICULTIES & DUALSHOCK 4 SUPPORT
  *************************************************************************/
-const LEGACY_SAVE_KEY = 'neon_singularity_ult_save_v1';
-const META_KEY = 'neon_singularity_ult_meta_v1';
-const BEST_KEY = 'neon_singularity_evo_best';
+const LEGACY_SAVE_KEY = 'neon_singularity_save';
+const META_KEY = 'neon_singularity_meta';
+const BEST_KEY = 'neon_singularity_best';
 
 let currentSaveSlot = 1;
 
