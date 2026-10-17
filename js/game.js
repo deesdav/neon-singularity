@@ -860,12 +860,16 @@ function update(dt) {
   if (state.shake > 0) state.shake = Math.max(0, state.shake - dt * 28);
   if (state.chromatic > 0) state.chromatic = Math.max(0, state.chromatic - dt * 2.4);
   if (state.mode !== "PLAYING") return;
+
   state.runTimer += dt;
   const mins = String(Math.floor(state.runTimer / 60)).padStart(2, "0");
   const secs = String(Math.floor(state.runTimer % 60)).padStart(2, "0");
-  const ms = Math.floor((state.runTimer % 1) * 10);
-  const timerEl = document.getElementById("hud-run-timer");
-  if (timerEl) timerEl.textContent = `${mins}:${secs}.${ms}`;
+  const timeStr = `${mins}:${secs}`;
+
+  const t1 = document.getElementById("hud-run-timer");
+  if (t1) t1.textContent = timeStr;
+  const t2 = document.getElementById("ghost-run-timer");
+  if (t2) t2.textContent = timeStr;
 
   // Pokud hráč odstartoval s vysokým startovním XP z Overclocku, vyvolá vylepšení
   if (player.xp >= player.xpNext) {
