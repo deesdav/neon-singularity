@@ -27,7 +27,7 @@
   <div id="ghost-hud"
     class="fixed top-3 inset-x-0 z-20 pointer-events-none opacity-0 transition-opacity duration-300 flex flex-col items-center">
     <div
-      class="flex flex-wrap items-center justify-center gap-5 px-5 py-1.5 rounded-full bg-black/45 backdrop-blur-md border border-cyan-500/25">
+      class="flex flex-wrap items-center justify-center gap-4 sm:gap-5 px-5 py-1.5 rounded-full bg-black/55 backdrop-blur-md border border-cyan-500/30 shadow-[0_0_20px_rgba(0,243,255,0.12)]">
       <div class="font-orbitron text-xs tracking-widest text-rose-400 font-bold">
         TRUP <span id="ghost-hp" class="text-white font-black ml-1">100 / 100</span>
       </div>
@@ -41,16 +41,34 @@
       <div class="font-orbitron text-xs tracking-widest text-emerald-300/90">
         LV <span id="ghost-level" class="text-white font-bold">01</span>
       </div>
+      <div
+        class="font-orbitron text-xs tracking-widest text-yellow-300/90 border-l border-slate-700 pl-4 hidden sm:block">
+        🕒 <span id="ghost-real-time" class="text-white font-bold">00:00</span>
+      </div>
+      <div class="font-orbitron text-xs tracking-widest text-purple-300/90 border-l border-slate-700 pl-4">
+        MODULY <span id="ghost-upgrades" class="text-white font-bold">2</span>
+      </div>
+      <div
+        class="font-orbitron text-[10px] tracking-wider text-pink-300/90 border-l border-slate-700 pl-4 hidden md:block">
+        🎵 <span id="ghost-track" class="text-white font-bold">NEON JUMP</span>
+      </div>
       <div id="ghost-overdrive" class="hidden font-orbitron text-xs font-black text-yellow-300 neon-gold animate-pulse">
         ⚡ PŘETLAK [F]
       </div>
     </div>
-    <div id="ghost-boss-bar-wrap" class="hidden items-center gap-3 mt-1.5 w-72 sm:w-96">
-      <span class="font-orbitron text-[10px] text-pink-400 font-bold uppercase tracking-wider shrink-0">BOSS</span>
-      <div class="flex-1 h-1.5 bg-black/70 border border-pink-500/40 overflow-hidden">
-        <div id="ghost-boss-bar" class="h-full bg-gradient-to-r from-red-500 to-yellow-400" style="width: 100%"></div>
+    <div id="ghost-boss-bar-wrap"
+      class="hidden flex-col items-center gap-1 mt-1.5 w-80 sm:w-[440px] bg-black/60 px-4 py-1.5 rounded-lg border border-pink-500/30 backdrop-blur-sm">
+      <div class="flex justify-between w-full items-center">
+        <span id="ghost-boss-name"
+          class="font-orbitron text-[10px] text-pink-400 font-black uppercase tracking-wider truncate">OMEGA
+          ARCHON</span>
+        <span id="ghost-boss-pct" class="font-orbitron text-[10px] text-yellow-300 font-black">100%</span>
       </div>
-      <span id="ghost-boss-pct" class="font-orbitron text-[10px] text-white font-bold">100%</span>
+      <div class="w-full h-1.5 bg-black/80 border border-pink-500/40 overflow-hidden">
+        <div id="ghost-boss-bar"
+          class="h-full bg-gradient-to-r from-red-500 via-pink-500 to-yellow-400 transition-all duration-75"
+          style="width: 100%"></div>
+      </div>
     </div>
   </div>
 
@@ -182,8 +200,9 @@
             class="text-pink-400 font-bold">0</span>
         </div>
         <div class="text-[10px] text-slate-400">
-          SLOT: <span id="hud-active-slot" class="text-yellow-300">#1</span> // OBTÍŽNOST: <span id="hud-difficulty"
-            class="text-cyan-300">ARCADE</span> // TROFEJE: <span id="hud-ach-count" class="text-yellow-300">0/36</span>
+          ČAS: <span id="hud-real-time" class="text-yellow-300 font-bold">00:00</span> // SLOT: <span
+            id="hud-active-slot" class="text-yellow-300">#1</span> // OBTÍŽNOST: <span id="hud-difficulty"
+            class="text-cyan-300">ARCADE</span>
         </div>
       </div>
     </div>
@@ -212,7 +231,7 @@
         <div class="flex gap-2">
           <div
             class="px-3 py-1 bg-purple-500/20 border border-purple-400 text-purple-200 font-orbitron text-xs font-bold">
-            🏆 TROFEJE: <span id="menu-ach-count">0/36</span>
+            🏆 TROFEJE: <span id="menu-ach-count">0/50</span>
           </div>
           <div
             class="px-3.5 py-1 bg-yellow-400/15 border border-yellow-400 text-yellow-300 font-orbitron text-xs font-black tracking-wider">
@@ -322,7 +341,7 @@
             <button type="button" data-mut="GLASS_CANNON"
               class="cyber-btn-outline py-1.5 text-[10px] font-bold text-slate-400 border-slate-700">💥 SKLENĚNÁ
               DĚLA</button>
-            <button type="button" data-mut="HYPER_DRIVE"
+            <button type="button" data-mut="INFINITE_DASH"
               class="cyber-btn-outline py-1.5 text-[10px] font-bold text-slate-400 border-slate-700">⚡ NEKONEČNÝ
               SKOK</button>
             <button type="button" data-mut="SWARM_CHAOS"
@@ -347,7 +366,7 @@
         </button>
         <button id="btn-open-achievements"
           class="cyber-btn-outline py-3 text-xs flex items-center justify-center gap-1.5 border-yellow-400/50 text-yellow-300">
-          <span>🏆 TROFEJE (36)</span>
+          <span>🏆 TROFEJE (50)</span>
         </button>
         <button id="btn-start" class="cyber-btn sm:col-span-2 py-3 text-base sm:text-lg shadow-xl">
           SPUSTIT NOVOU MISI DO SLOTU [ENTER]
@@ -404,11 +423,11 @@
       <div class="flex justify-between items-center mb-4">
         <div>
           <div class="text-xs font-orbitron text-yellow-300 uppercase tracking-widest">SÍŇ SLÁVY SINGULARITY</div>
-          <h2 class="font-orbitron text-2xl sm:text-4xl font-black text-white neon-cyan">TROFEJE & VÝZVY (36)</h2>
+          <h2 class="font-orbitron text-2xl sm:text-4xl font-black text-white neon-cyan">TROFEJE & VÝZVY (50)</h2>
         </div>
         <div
           class="px-4 py-2 bg-purple-500/20 border border-purple-400 text-purple-200 font-orbitron text-sm font-black">
-          🏆 <span id="modal-ach-progress">0 / 36</span>
+          🏆 <span id="modal-ach-progress">0 / 50</span>
         </div>
       </div>
       <div id="achievements-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 max-h-[58vh] overflow-y-auto pr-1">

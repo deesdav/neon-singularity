@@ -19,7 +19,7 @@ Hra běží v moderním prohlížeči a nevyžaduje instalaci. Při prvním otev
 - **Denní mutátory** – měň pravidla mise pomocí speciálních modifikátorů.
 - **Boss souboje** – sleduj zdraví bosse a připrav se na náročnější střety.
 - **Cyber-shop a Quantum Overclock** – utrácej kvantové čipy za trvalá vylepšení.
-- **36 trofejí a výzev** – plň úkoly a sleduj svůj postup.
+- **50 trofejí a výzev** – plň úkoly a sleduj svůj postup.
 - **3 paměťové sloty** – ukládej a obnovuj rozehrané mise.
 - **Komba a rekordy** – řetěz eliminace, zvyšuj skóre a překonávej vlastní nejlepší výsledek.
 - **Hudební rádio** – šest vestavěných skladeb, zvukové efekty a možnost načíst vlastní MP3.

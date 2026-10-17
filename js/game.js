@@ -202,6 +202,7 @@ function saveMetaProgression() {
     document.getElementById("menu-ach-count").textContent = `${unlockedCount}/${ACHIEVEMENTS_LIST.length}`;
     document.getElementById("hud-ach-count").textContent = `${unlockedCount}/${ACHIEVEMENTS_LIST.length}`;
     if (meta.shards >= 50) unlockAchievement("rich_cyber");
+    if (meta.shards >= 150) unlockAchievement("chip_hoarder");
   } catch (e) { }
 }
 
@@ -261,6 +262,9 @@ function checkWeaponSynergies() {
   });
   if (activeCount >= 3) unlockAchievement("all_synergies");
   if (activeCount >= 5) unlockAchievement("synergy_5");
+
+  const installedCount = Object.values(player.weapons).filter(lvl => lvl > 0).length;
+  if (installedCount >= 6) unlockAchievement("arsenal_expert");
 }
 
 function saveGameProgress(showNotification = false, slot = currentSaveSlot) {
@@ -293,7 +297,9 @@ function saveGameProgress(showNotification = false, slot = currentSaveSlot) {
         bombs: player.bombs, maxBombs: player.maxBombs,
         aegisReady: player.aegisReady, aegisCooldown: player.aegisCooldown,
         unlockedSynergies: { ...player.unlockedSynergies },
-        weapons: { ...player.weapons }
+        weapons: {
+          ...DEFAULT_WEAPONS_TEMPLATE
+        },
       },
       enemies: enemies.slice(0, 60),
       gems: gems.slice(0, 120),
@@ -383,6 +389,8 @@ function loadSavedGame(slot = currentSaveSlot) {
     state.bossActive = !!activeBoss;
     if (activeBoss) {
       document.getElementById("boss-name").textContent = activeBoss.name || "OMEGA ARCHON";
+      const gBossName = document.getElementById("ghost-boss-name");
+      if (gBossName) gBossName.textContent = activeBoss.name || "OMEGA ARCHON";
       document.getElementById("boss-hud").classList.remove("hidden");
       document.getElementById("boss-hud").classList.add("flex");
       document.getElementById("ghost-boss-bar-wrap").classList.remove("hidden");
@@ -439,17 +447,20 @@ function togglePauseGame() {
   }
 }
 
-const MAX_PARTICLES = 1400;
+const MAX_PARTICLES = 800;
 function spawnParticles(x, y, color, count = 20, speedMin = 80, speedMax = 420, size = 2.5, lifeMin = 0.35, lifeMax = 0.85) {
-  // Dynamická redukce při velkém vytížení pro udržení 60 FPS
+  // Pokud je aréna přehlcena, raději nové částice osekáme, aby hra nezamrzla
+  if (particles.length > MAX_PARTICLES - 50) {
+    particles.splice(0, 40); // Okamžitě smete nejstarší částice
+  }
   const loadRatio = particles.length / MAX_PARTICLES;
-  const effCount = loadRatio > 0.75 ? Math.max(2, Math.floor(count * 0.45)) : count;
+  const effCount = loadRatio > 0.6 ? Math.max(1, Math.floor(count * 0.35)) : count;
 
   for (let i = 0; i < effCount; i++) {
     const angle = Math.random() * Math.PI * 2;
     const spd = speedMin + Math.random() * (speedMax - speedMin);
     const life = lifeMin + Math.random() * (lifeMax - lifeMin);
-    const pObj = {
+    particles.push({
       x, y,
       vx: Math.cos(angle) * spd,
       vy: Math.sin(angle) * spd,
@@ -458,12 +469,7 @@ function spawnParticles(x, y, color, count = 20, speedMin = 80, speedMax = 420, 
       life,
       maxLife: life,
       drag: 0.94
-    };
-    if (particles.length >= MAX_PARTICLES) {
-      particles[Math.floor(Math.random() * MAX_PARTICLES)] = pObj;
-    } else {
-      particles.push(pObj);
-    }
+    });
   }
 }
 
@@ -805,6 +811,10 @@ let frameCount = 0;
 let fpsTimer = 0;
 
 function update(dt) {
+  // Tvrdý bezpečnostní limit proti přehlcení paměti a lagům
+  if (particles.length > 500) particles.splice(0, 200);
+  if (bullets.length > 300) bullets.splice(0, 100);
+  if (enemyBullets.length > 200) enemyBullets.splice(0, 80);
   sfx.updateAudioAnalysis(dt);
   grid.update();
   spaceBg.update(dt, player.vx, player.vy, W, H);
@@ -941,17 +951,17 @@ function update(dt) {
     }
   } else if (enemies.length === 0) {
     if (player.shipClass === "STALKER") unlockAchievement("stalker_master");
-    if (state.wave >= 3 && !state.firedAnyShot) {
-      unlockAchievement("pacifist_wave");
-    }
     state.wave++;
     if (state.wave >= 6) {
       unlockAchievement("wave_6");
       if (state.mutator !== "NONE") unlockAchievement("mutator_win");
+      if (state.difficulty === "ULTRA") unlockAchievement("ultra_survivor");
     }
     if (state.wave >= 10) unlockAchievement("wave_10");
     if (state.wave >= 15) unlockAchievement("wave_15");
     if (state.wave >= 20) unlockAchievement("wave_20");
+    if (state.difficulty === "ENDLESS" && state.wave >= 30) unlockAchievement("endless_30");
+    if (state.difficulty === "ENDLESS" && state.wave >= 50) unlockAchievement("endless_50");
 
     const baseCount = 10 + state.wave * 4;
     state.enemiesToSpawn = state.mutator === "SWARM_CHAOS" ? Math.round(baseCount * 2.0) : baseCount;
@@ -1641,13 +1651,35 @@ function update(dt) {
         }
       }
     } else if (e.type === "BOSS") {
-      e.phaseTimer += enemyDt * spdMult;
-      e.angle += e.spin * enemyDt;
-      const hcCdMult = state.difficulty === "ULTRA" ? 0.68 : (state.difficulty === "HARDCORE" ? 0.82 : 1.0);
+      const isEnraged = e.hp < e.maxHp * 0.5;
+      const enrageMult = isEnraged ? 1.35 : 1.0;
+
+      // Jednorázový efekt při přechodu Bosse do Enrage fáze (pod 50 % HP)
+      if (isEnraged && !e.enrageTriggered) {
+        e.enrageTriggered = true;
+        sfx.playExplosion(2.0);
+        spawnShockwave(e.x, e.y, 480, "#ff0055", 7, 650);
+        spawnLensFlare(e.x, e.y, "#ff0055", 650);
+        state.shake = Math.max(state.shake, 16);
+        addFloatingText(e.x, e.y - 60, `⚠️ ${e.name}: FÁZE ZUŘIVOSTI!`, "#ff0055", 1.35);
+      }
+
+      e.phaseTimer += enemyDt * spdMult * enrageMult;
+      e.angle += e.spin * enemyDt * enrageMult;
+      const hcCdMult = (state.difficulty === "ULTRA" ? 0.68 : (state.difficulty === "HARDCORE" ? 0.82 : 1.0)) / enrageMult;
 
       if (e.subtype === "ARCHON") {
+        // 1. OMEGA ARCHON: Spirálové salvy + gravitační přitahování
         e.x = W / 2 + Math.cos(e.phaseTimer * 0.85) * (W * 0.3);
         e.y = 140 + Math.sin(e.phaseTimer * 1.4) * 60;
+        grid.applyForce(e.x, e.y, 260, 14, true, true);
+
+        // Jemný gravitační tah na hráče v Enrage fázi
+        if (isEnraged && dist < 480) {
+          player.x -= dirX * 55 * enemyDt;
+          player.y -= dirY * 55 * enemyDt;
+        }
+
         e.shootTimer -= enemyDt * spdMult;
         if (e.shootTimer <= 0) {
           e.shootTimer = 1.15 * hcCdMult;
@@ -1655,38 +1687,56 @@ function update(dt) {
           for (let k = 0; k < spokes; k++) {
             const ba = e.angle + (k * Math.PI * 2) / spokes;
             enemyBullets.push({ x: e.x, y: e.y, vx: Math.cos(ba) * 290, vy: Math.sin(ba) * 290, radius: 6.5, color: "#ff0055" });
+            if (isEnraged && k % 2 === 0) {
+              const ba2 = -e.angle + (k * Math.PI * 2) / spokes;
+              enemyBullets.push({ x: e.x, y: e.y, vx: Math.cos(ba2) * 220, vy: Math.sin(ba2) * 220, radius: 5.5, color: "#00f3ff" });
+            }
           }
         }
+
       } else if (e.subtype === "SERAPH") {
-        e.x += Math.cos(e.phaseTimer * 1.6) * 240 * enemyDt;
-        e.y += Math.sin(e.phaseTimer * 2.1) * 140 * enemyDt;
+        // 2. CHRONO SERAPH: Rychlé nálety (Hyper-Lunges) a světelné oštěpy
+        e.angle = Math.atan2(dy, dx);
+        const dashWave = Math.sin(e.phaseTimer * 2.2) > 0.65 ? 2.4 : 0.85;
+        e.x += dirX * effSpeed * dashWave * enemyDt;
+        e.y += dirY * effSpeed * dashWave * enemyDt;
+
         e.shootTimer -= enemyDt * spdMult;
         if (e.shootTimer <= 0) {
-          e.shootTimer = 0.95 * hcCdMult;
+          e.shootTimer = 0.92 * hcCdMult;
           const aimA = Math.atan2(player.y - e.y, player.x - e.x);
-          for (let k = -2; k <= 2; k++) {
-            const ba = aimA + k * 0.18;
-            enemyBullets.push({ x: e.x, y: e.y, vx: Math.cos(ba) * 350, vy: Math.sin(ba) * 350, radius: 6, color: "#fcee09" });
+          const count = isEnraged ? 3 : 2;
+          for (let k = -count; k <= count; k++) {
+            const ba = aimA + k * 0.15;
+            enemyBullets.push({ x: e.x, y: e.y, vx: Math.cos(ba) * 380, vy: Math.sin(ba) * 380, radius: 6, color: "#fcee09" });
           }
         }
+
       } else if (e.subtype === "HYDRA") {
+        // 3. NEXUS HYDRA: Kroužící 3 uzly pálící na hráče + spawnování Mini-Swarmů
         e.x = W / 2 + Math.sin(e.phaseTimer * 0.7) * (W * 0.25);
         e.y = H * 0.3 + Math.cos(e.phaseTimer * 1.1) * 90;
         e.shootTimer -= enemyDt * spdMult;
         if (e.shootTimer <= 0) {
-          e.shootTimer = 1.3 * hcCdMult;
+          e.shootTimer = 1.25 * hcCdMult;
           for (let node = 0; node < 3; node++) {
             const na = e.angle + (node * Math.PI * 2) / 3;
             const nx = e.x + Math.cos(na) * 48;
             const ny = e.y + Math.sin(na) * 48;
             const aimA = Math.atan2(player.y - ny, player.x - nx);
-            enemyBullets.push({ x: nx, y: ny, vx: Math.cos(aimA) * 310, vy: Math.sin(aimA) * 310, radius: 6.5, color: "#00ffaa" });
+            enemyBullets.push({ x: nx, y: ny, vx: Math.cos(aimA) * 320, vy: Math.sin(aimA) * 320, radius: 6.5, color: "#00ffaa" });
+          }
+          if (isEnraged && enemies.length < 25 && Math.random() < 0.35) {
+            spawnEnemy("MINI_SWARM", e.x, e.y);
           }
         }
+
       } else if (e.subtype === "LEVIATHAN") {
+        // 4. VOID LEVIATHAN: Kyber-had útočící hlavou i ocasem
         const targetA = Math.atan2(dy, dx) + Math.sin(e.phaseTimer * 3.0) * 0.65;
-        e.x += Math.cos(targetA) * 185 * spdMult * enemyDt;
-        e.y += Math.sin(targetA) * 185 * spdMult * enemyDt;
+        e.angle = targetA;
+        e.x += Math.cos(targetA) * 195 * spdMult * enrageMult * enemyDt;
+        e.y += Math.sin(targetA) * 195 * spdMult * enrageMult * enemyDt;
 
         let prevX = e.x, prevY = e.y;
         for (const seg of (e.segments || [])) {
@@ -1705,12 +1755,63 @@ function update(dt) {
 
         e.shootTimer -= enemyDt * spdMult;
         if (e.shootTimer <= 0) {
-          e.shootTimer = 1.25 * hcCdMult;
+          e.shootTimer = 1.2 * hcCdMult;
           const segs = e.segments || [];
           const tail = segs[segs.length - 1] || e;
           for (let k = 0; k < 6; k++) {
-            const ba = e.angle + (k * Math.PI) / 3;
+            const ba = e.phaseTimer + (k * Math.PI) / 3;
             enemyBullets.push({ x: tail.x, y: tail.y, vx: Math.cos(ba) * 270, vy: Math.sin(ba) * 270, radius: 6, color: "#bc13fe" });
+          }
+          if (isEnraged) {
+            const headAim = Math.atan2(dy, dx);
+            enemyBullets.push({ x: e.x, y: e.y, vx: Math.cos(headAim) * 370, vy: Math.sin(headAim) * 370, radius: 7.5, color: "#00f3ff" });
+          }
+        }
+
+      } else if (e.subtype === "NEMESIS") {
+        // 5. AETHER NEMESIS: Fázové teleporty + křížové šokové vlny
+        e.x += Math.cos(e.phaseTimer * 1.5) * 160 * enemyDt;
+        e.y += Math.sin(e.phaseTimer * 2.2) * 120 * enemyDt;
+
+        e.teleportTimer = (e.teleportTimer || 4.2) - enemyDt;
+        if (e.teleportTimer <= 0) {
+          e.teleportTimer = isEnraged ? 2.8 : 4.2;
+          spawnShockwave(e.x, e.y, 160, "#38bdf8", 4, 480);
+          const jumpA = Math.random() * Math.PI * 2;
+          e.x = Math.max(90, Math.min(W - 90, player.x + Math.cos(jumpA) * 320));
+          e.y = Math.max(90, Math.min(H - 90, player.y + Math.sin(jumpA) * 320));
+          spawnShockwave(e.x, e.y, 200, "#ff007f", 4, 520);
+          grid.applyForce(e.x, e.y, 260, 45, false, true);
+        }
+
+        e.shootTimer -= enemyDt * spdMult;
+        if (e.shootTimer <= 0) {
+          e.shootTimer = 1.05 * hcCdMult;
+          const aimA = Math.atan2(player.y - e.y, player.x - e.x);
+          for (let k = -1; k <= 1; k++) {
+            const ba = aimA + k * 0.22;
+            enemyBullets.push({ x: e.x, y: e.y, vx: Math.cos(ba) * 395, vy: Math.sin(ba) * 395, radius: 6, color: "#38bdf8" });
+          }
+          for (let k = 0; k < 8; k++) {
+            const ba = e.angle + (k * Math.PI) / 4;
+            enemyBullets.push({ x: e.x, y: e.y, vx: Math.cos(ba) * 255, vy: Math.sin(ba) * 255, radius: 5.5, color: "#ff007f" });
+          }
+        }
+
+      } else if (e.subtype === "COLOSSUS") {
+        // 6. SOLARIS COLOSSUS: Neúprosná sluneční tvrz + Energy Orby
+        e.x += dirX * (effSpeed * 0.65) * enemyDt;
+        e.y += dirY * (effSpeed * 0.65) * enemyDt;
+        e.shootTimer -= enemyDt * spdMult;
+        if (e.shootTimer <= 0) {
+          e.shootTimer = 1.3 * hcCdMult;
+          const arms = state.difficulty === "ULTRA" ? 16 : (isEnraged ? 14 : 12);
+          for (let k = 0; k < arms; k++) {
+            const ba = e.angle * 0.5 + (k * Math.PI * 2) / arms;
+            enemyBullets.push({ x: e.x, y: e.y, vx: Math.cos(ba) * 300, vy: Math.sin(ba) * 300, radius: 7, color: "#fb923c" });
+          }
+          if (enemies.length < 30 && Math.random() < (isEnraged ? 0.75 : 0.45)) {
+            spawnEnemy("ENERGY_ORB", e.x + (Math.random() - 0.5) * 60, e.y + (Math.random() - 0.5) * 60);
           }
         }
       }
@@ -1929,6 +2030,8 @@ window.addEventListener("keydown", (e) => {
   if (e.code === "KeyN") {
     const label = sfx.cycleStyle();
     document.getElementById("btn-track").textContent = `🎵 RÁDIO: ${label}`;
+    const gTrack = document.getElementById("ghost-track");
+    if (gTrack) gTrack.textContent = label;
   }
 });
 
@@ -2013,6 +2116,8 @@ document.getElementById("btn-audio").addEventListener("click", () => {
 document.getElementById("btn-track").addEventListener("click", () => {
   const label = sfx.cycleStyle();
   document.getElementById("btn-track").textContent = `🎵 RÁDIO: ${label}`;
+  const gTrack = document.getElementById("ghost-track");
+  if (gTrack) gTrack.textContent = label;
 });
 
 function setupHangarInterface() {

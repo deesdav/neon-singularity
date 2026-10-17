@@ -10,6 +10,7 @@ class DarksynthSoundtrackEngine {
     this.mediaSource = null;
     this.muted = false;
     this.styleIndex = 0;
+    this.listenedTracks = new Set([0]);
 
     // Audio-reaktivní telemetrie pro grafiku, 360° halo a hratelnost
     this.beatPulse = 0; // 0.0 až 1.0 (okamžitý úder beatu)
@@ -104,6 +105,8 @@ class DarksynthSoundtrackEngine {
 
       const btn = document.getElementById("btn-track");
       if (btn) btn.textContent = `🎵 RÁDIO: ${cleanName}`;
+      const gTrack = document.getElementById("ghost-track");
+      if (gTrack) gTrack.textContent = cleanName;
       if (typeof showSaveToast === "function") {
         showSaveToast(`🎵 NAHRÁNA AUDIO-REAKTIVNÍ SKLADBA: ${cleanName}`);
       }
@@ -267,6 +270,10 @@ class DarksynthSoundtrackEngine {
 
   cycleStyle() {
     this.styleIndex = (this.styleIndex + 1) % this.tracks.length;
+    this.listenedTracks.add(this.styleIndex);
+    if (this.listenedTracks.size >= 6 && typeof unlockAchievement === "function") {
+      unlockAchievement("audiophile");
+    }
     const track = this.tracks[this.styleIndex];
     this.bgm.src = track.url;
     if (!this.muted && state.mode === "PLAYING") {

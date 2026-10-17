@@ -410,6 +410,19 @@ function updateHUD() {
   document.getElementById("ghost-wave").textContent = `${state.wave} (${tierRoman})`;
   document.getElementById("ghost-level").textContent = String(player.level).padStart(2, "0");
 
+  // Spočítání všech úrovní zbraní a aktivních synergií pro Ghost HUD
+  const totalUpgradesCount = Object.values(player.weapons).reduce((acc, val) => acc + (val || 0), 0);
+  const activeSynCount = SYNERGIES_LIST.filter(s => s.check(player.weapons)).length;
+  const ghostUpgEl = document.getElementById("ghost-upgrades");
+  if (ghostUpgEl) {
+    ghostUpgEl.textContent = activeSynCount > 0 ? `${totalUpgradesCount} (+${activeSynCount}★)` : `${totalUpgradesCount}`;
+  }
+
+  // Zobrazení aktuálně hrající skladby v Ghost HUDu
+  const ghostTrackEl = document.getElementById("ghost-track");
+  if (ghostTrackEl && typeof sfx !== "undefined" && sfx.tracks && sfx.tracks[sfx.styleIndex]) {
+    ghostTrackEl.textContent = sfx.tracks[sfx.styleIndex].label;
+  }
   const ghostOd = document.getElementById("ghost-overdrive");
   if (state.overdrive >= 100 || state.overdriveTimer > 0) {
     ghostOd.classList.remove("hidden");
@@ -484,6 +497,22 @@ function updateHUD() {
   if (player.weapons.dronesLvl > 0) addBadge(`DRONY x${player.weapons.dronesLvl}`, "#38bdf8");
   if (player.weapons.bladesLvl > 0) addBadge(`ČEPELE x${player.weapons.bladesLvl}`, "#bc13fe");
   if (player.weapons.teslaLvl > 0) addBadge(`TESLA LV${player.weapons.teslaLvl}`, "#5ffbff");
+
+  // Aktualizace reálného času a data v HUDech
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const timeStr = `${hours}:${minutes}`;
+
+  const day = String(now.getDate()).padStart(2, "0");
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const dateStr = `${day}.${month}.`;
+
+  const timeEl1 = document.getElementById("hud-real-time");
+  if (timeEl1) timeEl1.textContent = `${dateStr} ${timeStr}`; // V plném HUDu: Datum + Čas
+
+  const timeEl2 = document.getElementById("ghost-real-time");
+  if (timeEl2) timeEl2.textContent = timeStr; // V Ghost HUDu: Pouze Čas
 }
 
 function drawSonicEqualizerHalo(ctx, x, y, baseRadius, color) {
@@ -871,6 +900,7 @@ function render() {
     ctx.lineTo(p.x - p.vx * 0.038, p.y - p.vy * 0.038);
     ctx.stroke();
   }
+
   ctx.globalAlpha = 1.0;
 
   for (const rb of railBeams) {
@@ -1068,22 +1098,186 @@ function render() {
           ctx.stroke();
         }
       } else if (e.type === "BOSS") {
-        for (let layer = 0; layer < 3; layer++) {
+        const isEnraged = e.hp < e.maxHp * 0.5;
+        const corePulse = 1 + (sfx.beatPulse || 0) * 0.25 + (isEnraged ? 0.15 : 0);
+
+        // Enrage varovná aura pod 50 % HP
+        if (isEnraged) {
           ctx.save();
-          ctx.rotate(layer % 2 === 0 ? e.angle : -e.angle);
-          const lr = r - layer * 12;
-          ctx.strokeStyle = layer === 0 ? strokeCol : layer === 1 ? "#fcee09" : "#00f3ff";
-          ctx.lineWidth = 3.2;
+          ctx.strokeStyle = "#ff0055";
+          ctx.lineWidth = 2.0;
+          ctx.setLineDash([10, 6]);
           ctx.beginPath();
-          for (let k = 0; k < 16; k++) {
-            const rad = k % 2 === 0 ? lr * 1.12 : lr * 0.78;
-            const a = (k * Math.PI) / 8;
+          ctx.arc(0, 0, r * 1.35, -e.angle * 2, -e.angle * 2 + Math.PI * 2);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.restore();
+        }
+
+        if (e.subtype === "ARCHON") {
+          // 1. OMEGA ARCHON: Prstence singularity + temné jádro
+          for (let layer = 0; layer < 3; layer++) {
+            ctx.save();
+            ctx.rotate(layer % 2 === 0 ? e.angle : -e.angle * 1.4);
+            const lr = r - layer * 11;
+            ctx.strokeStyle = layer === 0 ? strokeCol : layer === 1 ? "#fcee09" : "#00f3ff";
+            ctx.lineWidth = 3.2;
+            ctx.beginPath();
+            for (let k = 0; k < 16; k++) {
+              const rad = k % 2 === 0 ? lr * 1.15 : lr * 0.72;
+              const a = (k * Math.PI) / 8;
+              if (k === 0) ctx.moveTo(Math.cos(a) * rad, Math.sin(a) * rad);
+              else ctx.lineTo(Math.cos(a) * rad, Math.sin(a) * rad);
+            }
+            ctx.closePath();
+            ctx.stroke();
+            ctx.restore();
+          }
+          ctx.fillStyle = "#050010";
+          ctx.beginPath();
+          ctx.arc(0, 0, r * 0.35 * corePulse, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = "#ffffff";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+        } else if (e.subtype === "SERAPH") {
+          // 2. CHRONO SERAPH: Zlatá mechanická křídla Valkýry
+          ctx.save();
+          const wingSpread = Math.sin(performance.now() * 0.008) * 0.15;
+          [-1, 1].forEach((dir) => {
+            ctx.save();
+            ctx.scale(1, dir);
+            ctx.rotate(wingSpread);
+            ctx.strokeStyle = "#fcee09";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(10, 8);
+            ctx.lineTo(-15, r * 1.45);
+            ctx.lineTo(-35, r * 1.15);
+            ctx.lineTo(-12, r * 0.65);
+            ctx.lineTo(-42, r * 0.75);
+            ctx.lineTo(-20, 12);
+            ctx.closePath();
+            ctx.stroke();
+            ctx.restore();
+          });
+          // Centrální kopí a svatozář
+          ctx.strokeStyle = "#ffffff";
+          ctx.lineWidth = 2.8;
+          ctx.beginPath();
+          ctx.moveTo(r * 1.3, 0);
+          ctx.lineTo(0, -r * 0.45);
+          ctx.lineTo(-r * 0.9, 0);
+          ctx.lineTo(0, r * 0.45);
+          ctx.closePath();
+          ctx.stroke();
+          ctx.strokeStyle = "#00f3ff";
+          ctx.beginPath();
+          ctx.arc(-8, 0, r * 0.55, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+
+        } else if (e.subtype === "HYDRA") {
+          // 3. NEXUS HYDRA: Centrální šestiúhelník + 3 obíhající reaktorové uzly
+          ctx.strokeStyle = strokeCol;
+          ctx.lineWidth = 3.5;
+          ctx.beginPath();
+          for (let k = 0; k < 6; k++) {
+            const a = (k * Math.PI) / 3;
+            if (k === 0) ctx.moveTo(Math.cos(a) * r * 0.65, Math.sin(a) * r * 0.65);
+            else ctx.lineTo(Math.cos(a) * r * 0.65, Math.sin(a) * r * 0.65);
+          }
+          ctx.closePath();
+          ctx.stroke();
+
+          for (let node = 0; node < 3; node++) {
+            const na = (node * Math.PI * 2) / 3;
+            const nx = Math.cos(na) * 48;
+            const ny = Math.sin(na) * 48;
+            // Energetický paprsek do uzlu
+            ctx.strokeStyle = "#fcee09";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(nx, ny);
+            ctx.stroke();
+            // Uzel
+            ctx.fillStyle = "#021814";
+            ctx.strokeStyle = "#00ffaa";
+            ctx.lineWidth = 2.8;
+            ctx.beginPath();
+            ctx.arc(nx, ny, 15 * corePulse, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+          }
+
+        } else if (e.subtype === "LEVIATHAN") {
+          // 4. VOID LEVIATHAN: Dračí kyber-hlava s kusadly
+          ctx.strokeStyle = strokeCol;
+          ctx.lineWidth = 3.5;
+          ctx.beginPath();
+          ctx.moveTo(r * 1.15, 0);
+          ctx.lineTo(r * 0.2, -r * 0.85);
+          ctx.lineTo(-r * 0.8, -r * 0.6);
+          ctx.lineTo(-r * 0.4, 0);
+          ctx.lineTo(-r * 0.8, r * 0.6);
+          ctx.lineTo(r * 0.2, r * 0.85);
+          ctx.closePath();
+          ctx.stroke();
+          // Kusadla
+          ctx.strokeStyle = "#00f3ff";
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(r * 0.6, -r * 0.5);
+          ctx.lineTo(r * 1.35, -r * 0.25);
+          ctx.moveTo(r * 0.6, r * 0.5);
+          ctx.lineTo(r * 1.35, r * 0.25);
+          ctx.stroke();
+
+        } else if (e.subtype === "NEMESIS") {
+          // 5. AETHER NEMESIS: Čtyřcípá fázová hvězdice (Shuriken)
+          for (let layer = 0; layer < 2; layer++) {
+            ctx.save();
+            ctx.rotate(layer === 0 ? 0 : Math.PI / 4);
+            ctx.strokeStyle = layer === 0 ? "#38bdf8" : "#ff007f";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            for (let k = 0; k < 8; k++) {
+              const rad = k % 2 === 0 ? r * 1.25 : r * 0.35;
+              const a = (k * Math.PI) / 4;
+              if (k === 0) ctx.moveTo(Math.cos(a) * rad, Math.sin(a) * rad);
+              else ctx.lineTo(Math.cos(a) * rad, Math.sin(a) * rad);
+            }
+            ctx.closePath();
+            ctx.stroke();
+            ctx.restore();
+          }
+          ctx.strokeStyle = "#ffffff";
+          ctx.strokeRect(-10, -10, 20, 20);
+
+        } else {
+          // 6. SOLARIS COLOSSUS: Hvězdná kovárna s ozubeným prstencem a korónou
+          ctx.strokeStyle = "#fb923c";
+          ctx.lineWidth = 3.5;
+          ctx.beginPath();
+          const teeth = 24;
+          for (let k = 0; k < teeth; k++) {
+            const rad = k % 2 === 0 ? r * 1.15 : r * 0.88;
+            const a = (k * Math.PI * 2) / teeth;
             if (k === 0) ctx.moveTo(Math.cos(a) * rad, Math.sin(a) * rad);
             else ctx.lineTo(Math.cos(a) * rad, Math.sin(a) * rad);
           }
           ctx.closePath();
           ctx.stroke();
-          ctx.restore();
+
+          ctx.fillStyle = "rgba(251, 146, 60, 0.35)";
+          ctx.strokeStyle = "#fcee09";
+          ctx.lineWidth = 2.8;
+          ctx.beginPath();
+          ctx.arc(0, 0, r * 0.55 * corePulse, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
         }
       }
     };

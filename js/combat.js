@@ -382,12 +382,14 @@ function spawnEnemy(forcedType = null, xOverride = null, yOverride = null) {
         });
     } else if (type === "BOSS") {
         state.bossActive = true;
-        const bossIndex = Math.floor(((state.wave / 3) - 1) % 4);
+        const bossIndex = Math.floor(((state.wave / 3) - 1) % 6);
         const bossProfiles = [
             { subtype: "ARCHON", name: "OMEGA ARCHON // SINGULARITA", color: "#ff0055", hpMult: 1.0, radius: 56 },
-            { subtype: "SERAPH", name: "CHRONO SERAPH // VALKÝRA", color: "#fcee09", hpMult: 0.92, radius: 52 },
+            { subtype: "SERAPH", name: "CHRONO SERAPH // VALKÝRA", color: "#fcee09", hpMult: 0.95, radius: 52 },
             { subtype: "HYDRA", name: "NEXUS HYDRA // TRI-CORE MATRIX", color: "#00ffaa", hpMult: 1.15, radius: 58 },
-            { subtype: "LEVIATHAN", name: "VOID LEVIATHAN // KYBER-HAD", color: "#bc13fe", hpMult: 1.25, radius: 54 }
+            { subtype: "LEVIATHAN", name: "VOID LEVIATHAN // KYBER-HAD", color: "#bc13fe", hpMult: 1.25, radius: 54 },
+            { subtype: "NEMESIS", name: "AETHER NEMESIS // FÁZOVÝ PŘÍZRAK", color: "#38bdf8", hpMult: 1.20, radius: 52 },
+            { subtype: "COLOSSUS", name: "SOLARIS COLOSSUS // HVĚZDNÁ KOVÁRNA", color: "#fb923c", hpMult: 1.38, radius: 62 }
         ];
         const profile = bossProfiles[bossIndex];
         const bossHp = 2100 * waveScale * profile.hpMult;
@@ -408,6 +410,8 @@ function spawnEnemy(forcedType = null, xOverride = null, yOverride = null) {
 
         enemies.push(bossObj);
         document.getElementById("boss-name").textContent = profile.name;
+        const ghostBossName = document.getElementById("ghost-boss-name");
+        if (ghostBossName) ghostBossName.textContent = profile.name;
         document.getElementById("boss-hud").classList.remove("hidden");
         document.getElementById("boss-hud").classList.add("flex");
         document.getElementById("ghost-boss-bar-wrap").classList.remove("hidden");
@@ -446,6 +450,8 @@ function triggerQuantumOverdrive() {
     state.overdrive = 0;
     state.overdriveTimer = 5.5 + (meta.upgrades.overdriveLvl || 0) * 0.8;
     unlockAchievement("overdrive_use");
+    state.overdriveUses = (state.overdriveUses || 0) + 1;
+    if (state.overdriveUses >= 5) unlockAchievement("overdrive_master");
     sfx.playLevelUp();
 
     unleashQuantumExplosion(false);
@@ -591,7 +597,8 @@ function dropQuantumMine() {
 function triggerKineticShockwave(customRadius = null, customDmg = null, customCol = "#38bdf8") {
     const radius = customRadius || (210 + player.weapons.shockwaveLvl * 45);
     spawnShockwave(player.x, player.y, radius, customCol, 4.5, 580);
-    grid.applyForce(player.x, player.y, radius, 42, false, true);
+    // Grid force voláme jen u menších vln, u gigantických to vynecháme, ať to nezatíží CPU
+    if (radius < 400) grid.applyForce(player.x, player.y, radius, 30, false, false);
 
     for (const e of enemies) {
         const dx = e.x - player.x;
@@ -874,6 +881,10 @@ function triggerHyperDash() {
         spawnHoloDecoy();
     }
 
+    if (player.hp <= player.maxHp * 0.2) {
+        unlockAchievement("clutch_dash");
+    }
+
     let dx = (keys.d ? 1 : 0) - (keys.a ? 1 : 0);
     let dy = (keys.s ? 1 : 0) - (keys.w ? 1 : 0);
     let dashAngle = player.angle;
@@ -995,6 +1006,7 @@ function damageEnemy(e, dmg, hitColor = "#00f3ff", shieldBonus = false, fromBoom
 
         state.combo = Math.min(20.0, +(state.combo + 0.25).toFixed(2));
         if (state.combo > state.maxCombo) state.maxCombo = state.combo;
+        if (state.combo >= 5.0) unlockAchievement("combo_5");
         if (state.combo >= 10.0) unlockAchievement("combo_10");
         if (state.combo >= 20.0) unlockAchievement("combo_20");
         state.comboTimer = 3.8;
@@ -1033,6 +1045,13 @@ function damageEnemy(e, dmg, hitColor = "#00f3ff", shieldBonus = false, fromBoom
 
         if (isBoss) {
             unlockAchievement("boss_slayer");
+            if (e.subtype === "NEMESIS") unlockAchievement("boss_nemesis");
+            if (e.subtype === "COLOSSUS") unlockAchievement("boss_colossus");
+            if (e.subtype === "SERAPH") unlockAchievement("boss_seraph");
+            if (e.subtype === "HYDRA") unlockAchievement("boss_hydra");
+            if (e.subtype === "LEVIATHAN") unlockAchievement("boss_leviathan");
+            if (e.enrageTriggered) unlockAchievement("enrage_tamer");
+
             if (e.spawnTime && (performance.now() - e.spawnTime) <= 10000) {
                 unlockAchievement("speed_boss");
             }
