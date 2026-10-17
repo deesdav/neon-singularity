@@ -1408,16 +1408,53 @@ function render() {
     }
   }
 
-  ctx.save();
-  ctx.translate(mouse.x, mouse.y);
-  ctx.strokeStyle = state.overdriveTimer > 0 ? "#fcee09" : player.color;
-  ctx.lineWidth = 1.8;
-  ctx.beginPath();
-  ctx.arc(0, 0, 12 + (sfx.beatPulse || 0) * 6, 0, Math.PI * 2);
-  ctx.moveTo(-18, 0); ctx.lineTo(-8, 0); ctx.moveTo(8, 0); ctx.lineTo(18, 0);
-  ctx.moveTo(0, -18); ctx.lineTo(0, -8); ctx.moveTo(0, 8); ctx.lineTo(0, 18);
-  ctx.stroke();
-  ctx.restore();
+  // HIGH-VISIBILITY SCI-FI CROSSHAIR
+  if (state.mode === "PLAYING" || state.mode === "PAUSED") {
+    ctx.save();
+    ctx.translate(mouse.x, mouse.y);
+
+    // Zrušíme aditivní prosvětlování, aby byl zaměřovač vždy 100% viditelný i na explozích
+    ctx.globalCompositeOperation = "source-over";
+    ctx.globalAlpha = 1.0;
+
+    const crosshairCol = state.overdriveTimer > 0 ? "#fcee09" : "#00f3ff";
+    const pulse = (sfx.beatPulse || 0) * 4;
+    const r = 13 + pulse;
+
+    // 1. Černý kontrastní stín pod zaměřovačem (aby nesplýval na neonovém pozadí)
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.moveTo(-22 - pulse, 0); ctx.lineTo(-6, 0);
+    ctx.moveTo(6, 0); ctx.lineTo(22 + pulse, 0);
+    ctx.moveTo(0, -22 - pulse); ctx.lineTo(0, -6);
+    ctx.moveTo(0, 6); ctx.lineTo(0, 22 + pulse);
+    ctx.stroke();
+
+    // 2. Hlavní neonový svítící kroužek a kříž
+    ctx.strokeStyle = crosshairCol;
+    ctx.shadowColor = crosshairCol;
+    ctx.shadowBlur = 10;
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.moveTo(-20 - pulse, 0); ctx.lineTo(-6, 0);
+    ctx.moveTo(6, 0); ctx.lineTo(20 + pulse, 0);
+    ctx.moveTo(0, -20 - pulse); ctx.lineTo(0, -6);
+    ctx.moveTo(0, 6); ctx.lineTo(0, 20 + pulse);
+    ctx.stroke();
+
+    // 3. Svítící červeno-bílý středový zaměřovací bod (přesné míření)
+    ctx.fillStyle = "#ffffff";
+    ctx.shadowColor = "#ff0055";
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    ctx.arc(0, 0, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
 
   ctx.restore();
 }
