@@ -10,6 +10,24 @@ const EN_DICTIONARY = {
     "DUALSHOCK / GAMEPAD: AKTIVNÍ": "DUALSHOCK / GAMEPAD: ACTIVE",
     "GAMEPAD: AKTIVNÍ": "GAMEPAD: ACTIVE",
     "TROFEJE:": "TROPHIES:",
+    "1. LODĚ (8)": "1. SHIPS (8)",
+    "2. SLOTY & ZÁLOHY": "2. SLOTS & BACKUPS",
+    "3. SÍŇ SLÁVY": "3. HALL OF FAME",
+    "4. AUDIO & ZVUK": "4. AUDIO & SOUND",
+    "CELOŽIVOTNÍ STATISTIKA PILOTA:": "LIFETIME PILOT TELEMETRY:",
+    "CELKEM ELIMINACÍ": "TOTAL ELIMINATIONS",
+    "ZNIČENÝCH BOSSŮ": "BOSSES DEFEATED",
+    "SEBRANÝCH XP": "XP COLLECTED",
+    "ČERNÝCH DĚR": "BLACK HOLES",
+    "MIN POLOŽENO": "MINES DEPLOYED",
+    "ODRAŽENÝCH STŘEL": "BULLETS REFLECTED",
+    "NEJVYŠŠÍ REKORD": "HIGH SCORE",
+    "AKTIVNÍCH TROFEJÍ": "ACTIVE TROPHIES",
+    "HLASITOST HUDBY (BGM)": "MUSIC VOLUME (BGM)",
+    "HLASITOST EFEKTŮ (SFX)": "SFX VOLUME",
+    "EXPORTOVAT PROFIL (.JSON)": "EXPORT PROFILE (.JSON)",
+    "IMPORTOVAT PROFIL": "IMPORT PROFILE",
+    "STOPKY:": "TIMER:",
     "ČIPY:": "CHIPS:",
     "ČIPŮ": "CHIPS",
     "8 LODÍ // 32 ZBRANÍ + 13 SYNERGIÍ // DENNÍ MUTÁTORY // KVANTOVÝ OVERCLOCK": "8 SHIPS // 32 WEAPONS + 13 SYNERGIES // DAILY MUTATORS // QUANTUM OVERCLOCK",
@@ -25,6 +43,42 @@ const EN_DICTIONARY = {
     "Připraven pro novou misi": "Ready for a new mission",
     "POŠKOZENÁ DATA": "CORRUPTED DATA",
     "AKTIVNÍ": "ACTIVE",
+    // Záložky a ovládání v Hangáru
+    "1. LODĚ (8)": "1. SHIPS (8)",
+    "2. SLOTY & ZÁLOHY": "2. SLOTS & BACKUPS",
+    "3. SÍŇ SLÁVY": "3. HALL OF FAME",
+    "4. AUDIO & ZVUK": "4. AUDIO & SOUND",
+    "🚀 1. LODĚ (8)": "🚀 1. SHIPS (8)",
+    "💾 2. SLOTY & ZÁLOHY": "💾 2. SLOTS & BACKUPS",
+    "🏛️ 3. SÍŇ SLÁVY": "🏛️ 3. HALL OF FAME",
+    "⚙️ 4. AUDIO & ZVUK": "⚙️ 4. AUDIO & SOUND",
+
+    // Export & Import
+    "📤 EXPORTOVAT PROFIL (.JSON)": "📤 EXPORT PROFILE (.JSON)",
+    "📥 IMPORTOVAT PROFIL": "📥 IMPORT PROFILE",
+    "EXPORTOVAT PROFIL (.JSON)": "EXPORT PROFILE (.JSON)",
+    "IMPORTOVAT PROFIL": "IMPORT PROFILE",
+
+    // Audio nastavení
+    "🎵 HLASITOST HUDBY (BGM)": "🎵 MUSIC VOLUME (BGM)",
+    "💥 HLASITOST EFEKTŮ (SFX)": "💥 SFX VOLUME",
+    "HLASITOST HUDBY (BGM)": "MUSIC VOLUME (BGM)",
+    "HLASITOST EFEKTŮ (SFX)": "SFX VOLUME",
+
+    // Síň slávy
+    "🏛️ CELOŽIVOTNÍ STATISTIKA PILOTA:": "🏛️ LIFETIME PILOT TELEMETRY:",
+    "CELOŽIVOTNÍ STATISTIKA PILOTA:": "LIFETIME PILOT TELEMETRY:",
+    "CELKEM ELIMINACÍ": "TOTAL ELIMINATIONS",
+    "ZNIČENÝCH BOSSŮ": "BOSSES DEFEATED",
+    "SEBRANÝCH XP": "XP COLLECTED",
+    "ČERNÝCH DĚR": "BLACK HOLES",
+    "MIN POLOŽENO": "MINES DEPLOYED",
+    "ODRAŽENÝCH STŘEL": "BULLETS REFLECTED",
+    "NEJVYŠŠÍ REKORD": "HIGH SCORE",
+    "AKTIVNÍCH TROFEJÍ": "ACTIVE TROPHIES",
+
+    // HUD Stopky
+    "STOPKY:": "TIMER:",
     "VYBRÁN": "SELECTED",
     "RYCH:": "SPD:",
     "VYBER OBTÍŽNOST SIMULACE:": "SELECT SIMULATION DIFFICULTY:",
@@ -466,7 +520,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const langBtn = document.getElementById("btn-lang-toggle");
     if (langBtn) langBtn.addEventListener("click", toggleLanguage);
 
-    ["btn-open-shop", "btn-open-achievements", "tab-btn-ships", "tab-btn-slots", "tab-btn-mutators"].forEach(id => {
+    ["btn-open-shop", "btn-open-achievements", "tab-btn-ships", "tab-btn-slots", "tab-btn-hall", "tab-btn-settings"].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener("click", () => { if (currentLang === "en") setTimeout(applyDOMTranslations, 15); });
     });

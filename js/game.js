@@ -86,6 +86,7 @@ const state = {
   chromatic: 0,
   hudVisible: true,
   fps: 60,
+  runTimer: 0,
   runStats: {
     totalKills: 0,
     eliteKills: 0,
@@ -568,6 +569,7 @@ function startNewGame() {
     gemsCollected: 0,
     weaponDmg: {}
   };
+  state.runTimer = 0;
   state.mode = "PLAYING";
 
   document.getElementById("start-modal").classList.add("hidden");
@@ -858,6 +860,12 @@ function update(dt) {
   if (state.shake > 0) state.shake = Math.max(0, state.shake - dt * 28);
   if (state.chromatic > 0) state.chromatic = Math.max(0, state.chromatic - dt * 2.4);
   if (state.mode !== "PLAYING") return;
+  state.runTimer += dt;
+  const mins = String(Math.floor(state.runTimer / 60)).padStart(2, "0");
+  const secs = String(Math.floor(state.runTimer % 60)).padStart(2, "0");
+  const ms = Math.floor((state.runTimer % 1) * 10);
+  const timerEl = document.getElementById("hud-run-timer");
+  if (timerEl) timerEl.textContent = `${mins}:${secs}.${ms}`;
 
   // Pokud hráč odstartoval s vysokým startovním XP z Overclocku, vyvolá vylepšení
   if (player.xp >= player.xpNext) {
@@ -1911,6 +1919,7 @@ function update(dt) {
 
     if (d < player.radius + 14) {
       player.xp += g.val;
+      meta.stats.totalGemsLifetime = (meta.stats.totalGemsLifetime || 0) + 1;
       if (state.runStats) state.runStats.gemsCollected++;
       state.score += Math.floor(25 * state.combo);
       if (state.score >= 100000) unlockAchievement("score_100k");
@@ -2139,11 +2148,91 @@ document.getElementById("btn-track").addEventListener("click", () => {
   if (gTrack) gTrack.textContent = label;
 });
 
+function renderHallOfFame() {
+  const container = document.getElementById("hall-of-fame-grid");
+  if (!container) return;
+  const s = meta.stats || {};
+  const items = [
+    { label: "CELKEM ELIMINACÍ", val: (s.totalKillsLifetime || 0).toLocaleString("cs-CZ"), col: "text-white" },
+    { label: "ZNIČENÝCH BOSSŮ", val: (s.totalBossKillsLifetime || 0).toLocaleString("cs-CZ"), col: "text-pink-400" },
+    { label: "SEBRANÝCH XP", val: (s.totalGemsLifetime || 0).toLocaleString("cs-CZ"), col: "text-emerald-300" },
+    { label: "ČERNÝCH DĚR", val: (s.blackHolesUsed || 0).toLocaleString("cs-CZ"), col: "text-purple-300" },
+    { label: "MIN POLOŽENO", val: (s.minesDropped || 0).toLocaleString("cs-CZ"), col: "text-yellow-300" },
+    { label: "ODRAŽENÝCH STŘEL", val: (s.reflectedBullets || 0).toLocaleString("cs-CZ"), col: "text-sky-300" },
+    { label: "NEJVYŠŠÍ REKORD", val: (state.bestScore || 0).toLocaleString("cs-CZ"), col: "text-cyan-300" },
+    { label: "AKTIVNÍCH TROFEJÍ", val: `${Object.keys(meta.achievements || {}).length} / 50`, col: "text-yellow-400" }
+  ];
+  container.innerHTML = items.map(it => `
+    <div class="bg-slate-950/80 border border-slate-800 p-2.5">
+      <div class="text-[9px] text-slate-400">${it.label}</div>
+      <div class="text-base font-black ${it.col} mt-0.5">${it.val}</div>
+    </div>
+  `).join("");
+}
+
+function exportSaveProfile() {
+  const backup = {
+    meta: meta,
+    slots: {
+      slot1: localStorage.getItem(getSaveKey(1)),
+      slot2: localStorage.getItem(getSaveKey(2)),
+      slot3: localStorage.getItem(getSaveKey(3)),
+      name1: localStorage.getItem("neon_singularity_slot_name_1"),
+      name2: localStorage.getItem("neon_singularity_slot_name_2"),
+      name3: localStorage.getItem("neon_singularity_slot_name_3")
+    }
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `neon_singularity_backup_${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  showSaveToast("📤 PROFIL BYL EXPORTOVÁN DO SOUBORU");
+}
+
+function setupProfileExportImport() {
+  const btnExp = document.getElementById("btn-export-profile");
+  const btnImp = document.getElementById("btn-import-profile");
+  const inputImp = document.getElementById("import-profile-input");
+
+  if (btnExp) btnExp.addEventListener("click", exportSaveProfile);
+  if (btnImp && inputImp) {
+    btnImp.addEventListener("click", () => inputImp.click());
+    inputImp.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const parsed = JSON.parse(event.target.result);
+          if (parsed.meta) {
+            Object.assign(meta, parsed.meta);
+            saveMetaProgression();
+          }
+          if (parsed.slots) {
+            [1, 2, 3].forEach(s => {
+              if (parsed.slots[`slot${s}`]) localStorage.setItem(getSaveKey(s), parsed.slots[`slot${s}`]);
+              if (parsed.slots[`name${s}`]) localStorage.setItem(`neon_singularity_slot_name_${s}`, parsed.slots[`name${s}`]);
+            });
+          }
+          refreshMenuSaveUI();
+          renderShipSelector();
+          showSaveToast("📥 PROFIL A SLOTY BYLY ÚSPĚŠNĚ NAČTENY!");
+        } catch (err) {
+          showSaveToast("❌ CHYBA PŘI NAČÍTÁNÍ ZÁLOHY!");
+        }
+      };
+      reader.readAsText(file);
+    });
+  }
+}
+
 function setupHangarInterface() {
   const tabs = [
     { btn: document.getElementById("tab-btn-ships"), panel: document.getElementById("menu-tab-ships") },
     { btn: document.getElementById("tab-btn-slots"), panel: document.getElementById("menu-tab-slots") },
-    { btn: document.getElementById("tab-btn-mutators"), panel: document.getElementById("menu-tab-mutators") }
+    { btn: document.getElementById("tab-btn-hall"), panel: document.getElementById("menu-tab-hall") },
+    { btn: document.getElementById("tab-btn-settings"), panel: document.getElementById("menu-tab-settings") }
   ];
 
   tabs.forEach((t, idx) => {
@@ -2152,14 +2241,44 @@ function setupHangarInterface() {
       tabs.forEach(other => {
         if (!other.btn || !other.panel) return;
         other.panel.classList.add("hidden");
-        other.btn.className = "px-4 py-1.5 font-orbitron text-xs font-bold bg-slate-950/60 border-t border-x border-slate-800 text-slate-400 hover:text-white";
+        other.btn.className = "px-3.5 py-1.5 font-orbitron text-xs font-bold bg-slate-950/60 border-t border-x border-slate-800 text-slate-400 hover:text-white";
       });
       t.panel.classList.remove("hidden");
-      t.btn.className = "px-4 py-1.5 font-orbitron text-xs font-black bg-cyan-500/20 border-t border-x border-cyan-400 text-white";
+      t.btn.className = "px-3.5 py-1.5 font-orbitron text-xs font-black bg-cyan-500/20 border-t border-x border-cyan-400 text-white";
       if (idx === 1) renderSaveSlotsUI();
-      if (idx === 2 && typeof renderMutatorsUI === "function") renderMutatorsUI();
+      if (idx === 2 && typeof renderHallOfFame === "function") renderHallOfFame();
     });
   });
+
+  // POSUVNÍKY HLASITOSTI - PŘÍMÉ NAPOJENÍ NA AUDIO.JS
+  const sliderBgm = document.getElementById("slider-bgm-vol");
+  const labelBgm = document.getElementById("label-bgm-vol");
+  const sliderSfx = document.getElementById("slider-sfx-vol");
+  const labelSfx = document.getElementById("label-sfx-vol");
+
+  if (sliderBgm && labelBgm) {
+    sliderBgm.value = sfx.bgmVolume !== undefined ? sfx.bgmVolume : 0.55;
+    labelBgm.textContent = `${Math.round(sliderBgm.value * 100)}%`;
+    sliderBgm.addEventListener("input", (e) => {
+      const val = parseFloat(e.target.value);
+      sfx.setBgmVolume(val);
+      labelBgm.textContent = `${Math.round(val * 100)}%`;
+    });
+  }
+
+  if (sliderSfx && labelSfx) {
+    sliderSfx.value = sfx.sfxVolume !== undefined ? sfx.sfxVolume : 0.8;
+    labelSfx.textContent = `${Math.round(sliderSfx.value * 100)}%`;
+    sliderSfx.addEventListener("input", (e) => {
+      const val = parseFloat(e.target.value);
+      sfx.setSfxVolume(val);
+      labelSfx.textContent = `${Math.round(val * 100)}%`;
+    });
+  }
+
+  if (typeof setupProfileExportImport === "function") {
+    setupProfileExportImport();
+  }
 
   const diffDescriptions = {
     ARCADE: "100 % HP // Běžné čipy // Cíl: 12. vlna",
@@ -2191,7 +2310,6 @@ function setupHangarInterface() {
     });
   });
 }
-
 /*************************************************************************
  * KOMPLETNÍ OBSLUHA MUTÁTORŮ (SPODNÍ TLAČÍTKA I HORNÍ KARTY)
  *************************************************************************/
@@ -2249,7 +2367,7 @@ function selectMutatorMode(mutId) {
     mutDescEl.style.color = mutObj.color;
   }
 
-  const allBtns = Array.from(document.querySelectorAll("#mutator-selector-grid button, #start-modal button"));
+  const allBtns = Array.from(document.querySelectorAll("#mutator-selector-grid button"));
   allBtns.forEach(btn => {
     const cleanTxt = btn.textContent.replace(/\s+/g, " ").trim().toUpperCase();
     let btnMutId = null;
@@ -2268,15 +2386,10 @@ function selectMutatorMode(mutId) {
     }
   });
 
-  if (typeof renderMutatorsUI === "function") {
-    renderMutatorsUI();
-  }
-
   if (typeof showSaveToast === "function") {
     showSaveToast(`🎲 ${mutObj.shortDesc}`);
   }
 }
-
 function renderMutatorsUI() {
   const gridEl = document.getElementById("mutators-grid");
   if (!gridEl) return;
@@ -2333,7 +2446,6 @@ window.onload = () => {
   loadMetaProgression();
   saveMetaProgression();
   renderShipSelector();
-  if (typeof renderMutatorsUI === "function") renderMutatorsUI();
   setupHangarInterface();
   document.getElementById("best-score-display").textContent = String(state.bestScore).padStart(7, "0");
   refreshMenuSaveUI();

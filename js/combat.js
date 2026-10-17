@@ -8,6 +8,21 @@ function recordWeaponDmg(weaponName, amount) {
     state.runStats.weaponDmg[weaponName] = (state.runStats.weaponDmg[weaponName] || 0) + amount;
 }
 
+function triggerGamepadRumble(duration = 180, strong = 0.5, weak = 0.5) {
+    if (!navigator.getGamepads) return;
+    const pads = navigator.getGamepads();
+    for (const gp of pads) {
+        if (gp && gp.vibrationActuator && typeof gp.vibrationActuator.playEffect === "function") {
+            gp.vibrationActuator.playEffect("dual-rumble", {
+                startDelay: 0,
+                duration: duration,
+                weakMagnitude: weak,
+                strongMagnitude: strong
+            }).catch(() => { });
+        }
+    }
+}
+
 // 32 ROGUELITE UPGRADE MODULES (24 ORIGINAL + 8 NEW GADGETS)
 const UPGRADE_POOL = [
     {
@@ -917,6 +932,7 @@ function triggerHyperDash() {
 
 function deploySingularityBomb() {
     if (state.mode !== "PLAYING" || player.bombs <= 0) return;
+    triggerGamepadRumble(350, 0.9, 0.7);
     player.bombs--;
     meta.stats.blackHolesUsed = (meta.stats.blackHolesUsed || 0) + 1;
     if (state.runStats) state.runStats.blackHolesUsed++;
@@ -988,6 +1004,12 @@ function damageEnemy(e, dmg, hitColor = "#00f3ff", shieldBonus = false, fromBoom
     if (e.hp <= 0 && !e.dead) {
         e.dead = true;
         unlockAchievement("first_blood");
+
+        // Záznam pro celoživotní Síň slávy
+        meta.stats.totalKillsLifetime = (meta.stats.totalKillsLifetime || 0) + 1;
+        if (e.type === "BOSS") {
+            meta.stats.totalBossKillsLifetime = (meta.stats.totalBossKillsLifetime || 0) + 1;
+        }
 
         if (state.runStats) {
             state.runStats.totalKills++;
@@ -1112,6 +1134,7 @@ function damageEnemy(e, dmg, hitColor = "#00f3ff", shieldBonus = false, fromBoom
 }
 
 function damagePlayer(amount) {
+
     if (player.invulnTimer > 0 || state.mode !== "PLAYING") return;
 
     const aegisMaxCd = (player.weapons.nanoShieldLvl > 0 && player.weapons.aegisLvl > 0)
@@ -1123,6 +1146,7 @@ function damagePlayer(amount) {
         player.aegisCooldown = aegisMaxCd;
         player.invulnTimer = 0.9;
         state.chromatic = 0.65;
+        triggerGamepadRumble(150, 0.4, 0.6);
         spawnShockwave(player.x, player.y, 290, "#60a5fa", 6, 580);
         spawnLensFlare(player.x, player.y, "#60a5fa", 480);
         grid.applyForce(player.x, player.y, 320, 55, false, true);
@@ -1136,6 +1160,9 @@ function damagePlayer(amount) {
         updateHUD();
         return;
     }
+
+    // Skutečný zásah trupu – silná haptická odezva
+    triggerGamepadRumble(220, 0.8, 0.4);
 
     let mult = (state.difficulty === "ULTRA" ? 1.5 : (state.difficulty === "HARDCORE" ? 1.25 : 1.0)) * (state.mutator === "GLASS_CANNON" ? 2.0 : 1.0);
     if (player.weapons.nanoShieldLvl > 0) {

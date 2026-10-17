@@ -25,6 +25,9 @@ class DarksynthSoundtrackEngine {
     this.lastBeatCooldown = 0;
     this.bands = new Array(16).fill(0); // 16 pásem pro kruhový ekvalizér kolem lodi
 
+    this.bgmVolume = parseFloat(localStorage.getItem("neon_bgm_vol") || "0.55");
+    this.sfxVolume = parseFloat(localStorage.getItem("neon_sfx_vol") || "0.8");
+
     this.tracks = [
       {
         label: "NEON JUMP",
@@ -69,11 +72,26 @@ class DarksynthSoundtrackEngine {
     this.bgm = new Audio();
     this.bgm.crossOrigin = "anonymous";
     this.bgm.loop = true;
-    this.bgm.volume = 0.55;
+    this.bgm.volume = this.bgmVolume;
     this.bgm.src = this.tracks[0].url;
 
     this.useRealtimeFFT = false;
     this.setupCustomMp3Loader();
+  }
+
+  setBgmVolume(val) {
+    this.bgmVolume = Math.max(0, Math.min(1, val));
+    if (this.bgm) {
+      this.bgm.volume = this.muted ? 0 : this.bgmVolume;
+    }
+    localStorage.setItem("neon_bgm_vol", String(this.bgmVolume));
+  }
+  setSfxVolume(val) {
+    this.sfxVolume = Math.max(0, Math.min(1, val));
+    if (this.master && this.ctx) {
+      this.master.gain.setValueAtTime(this.sfxVolume, this.ctx.currentTime);
+    }
+    localStorage.setItem("neon_sfx_vol", String(this.sfxVolume));
   }
 
   setupCustomMp3Loader() {
@@ -130,7 +148,7 @@ class DarksynthSoundtrackEngine {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       this.ctx = new AudioCtx();
       this.master = this.ctx.createGain();
-      this.master.gain.value = 0.8;
+      this.master.gain.setValueAtTime(this.sfxVolume !== undefined ? this.sfxVolume : 0.8, this.ctx.currentTime);
       this.master.connect(this.ctx.destination);
     }
     if (this.ctx.state === "suspended") {
@@ -265,7 +283,7 @@ class DarksynthSoundtrackEngine {
     if (!this.bgm.src.endsWith(track.url)) {
       this.bgm.src = track.url;
     }
-    this.bgm.volume = 0.55;
+    this.bgm.volume = this.bgmVolume;
     this.bgm.play().catch(() => { });
   }
 
@@ -277,6 +295,7 @@ class DarksynthSoundtrackEngine {
     }
     const track = this.tracks[this.styleIndex];
     this.bgm.src = track.url;
+    this.bgm.volume = this.bgmVolume;
     if (!this.muted && state.mode === "PLAYING") {
       this.bgm.play().catch(() => { });
     }

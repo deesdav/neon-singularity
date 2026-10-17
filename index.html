@@ -200,9 +200,9 @@
             class="text-pink-400 font-bold">0</span>
         </div>
         <div class="text-[10px] text-slate-400">
-          ČAS: <span id="hud-real-time" class="text-yellow-300 font-bold">00:00</span> // SLOT: <span
-            id="hud-active-slot" class="text-yellow-300">#1</span> // OBTÍŽNOST: <span id="hud-difficulty"
-            class="text-cyan-300">ARCADE</span>
+          STOPKY: <span id="hud-run-timer" class="text-emerald-300 font-bold">00:00.0</span> // ČAS: <span
+            id="hud-real-time" class="text-yellow-300 font-bold">00:00</span> // SLOT: <span id="hud-active-slot"
+            class="text-yellow-300">#1</span>
         </div>
       </div>
     </div>
@@ -250,22 +250,25 @@
 
       <!-- Navigation Tabs & Custom Color Picker -->
       <div class="flex flex-wrap justify-between items-center border-b border-cyan-500/30 mb-3 gap-2 pb-1">
-        <div class="flex gap-2">
+        <div class="flex gap-2 flex-wrap">
           <button id="tab-btn-ships"
-            class="px-4 py-1.5 font-orbitron text-xs font-black bg-cyan-500/20 border-t border-x border-cyan-400 text-white">
-            🚀 1. VÝBĚR TŘÍDY VZNÁŠEDLA (8)
-          </button>
+            class="px-3.5 py-1.5 font-orbitron text-xs font-black bg-cyan-500/20 border-t border-x border-cyan-400 text-white">🚀
+            1. LODĚ (8)</button>
           <button id="tab-btn-slots"
-            class="px-4 py-1.5 font-orbitron text-xs font-bold bg-slate-950/60 border-t border-x border-slate-800 text-slate-400 hover:text-white">
-            💾 2. PAMĚŤOVÉ SLOTY (3) & OVLÁDÁNÍ
-          </button>
+            class="px-3.5 py-1.5 font-orbitron text-xs font-bold bg-slate-950/60 border-t border-x border-slate-800 text-slate-400 hover:text-white">💾
+            2. SLOTY & ZÁLOHY</button>
+          <button id="tab-btn-hall"
+            class="px-3.5 py-1.5 font-orbitron text-xs font-bold bg-slate-950/60 border-t border-x border-slate-800 text-slate-400 hover:text-white">🏛️
+            3. SÍŇ SLÁVY</button>
+          <button id="tab-btn-settings"
+            class="px-3.5 py-1.5 font-orbitron text-xs font-bold bg-slate-950/60 border-t border-x border-slate-800 text-slate-400 hover:text-white">⚙️
+            4. AUDIO & ZVUK</button>
         </div>
         <div class="flex items-center gap-2 bg-slate-950/80 border border-slate-800 px-3 py-1">
           <span class="font-orbitron text-[10px] text-cyan-300 uppercase font-bold">🎨 BARVA LODI:</span>
           <div id="ship-color-picker" class="flex items-center gap-1.5"></div>
         </div>
       </div>
-
       <!-- TAB 1: SHIP SELECTOR (8 SHIPS) -->
       <div id="menu-tab-ships" class="text-left mb-3">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2" id="ship-selector-grid"></div>
@@ -277,6 +280,16 @@
           VYBER AKTIVNÍ SLOT PRO UKLÁDÁNÍ NEBO PŘEJMENOVÁNÍ ROZEHRANÉ MISE:
         </div>
         <div id="save-slots-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-3"></div>
+
+        <div class="flex gap-2.5 mb-3">
+          <button id="btn-export-profile" type="button"
+            class="cyber-btn-outline flex-1 py-2 text-xs text-yellow-300 border-yellow-400/50">📤 EXPORTOVAT PROFIL
+            (.JSON)</button>
+          <button id="btn-import-profile" type="button"
+            class="cyber-btn-outline flex-1 py-2 text-xs text-cyan-300 border-cyan-400/50">📥 IMPORTOVAT PROFIL</button>
+          <input type="file" id="import-profile-input" accept=".json" class="hidden">
+        </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-[11px] bg-slate-950/90 border border-slate-800 p-3">
           <div>
             <div class="font-orbitron text-cyan-300 font-bold mb-1">⚡ 13 FÚZNÍCH SYNERGIÍ ZBRANÍ (AUTOMATICKÉ):</div>
@@ -286,7 +299,7 @@
               <li>• <span class="text-pink-400 font-bold">Hvězdná Singularita:</span> Drtič Gravitace + Ion-Satelit</li>
               <li>• <span class="text-emerald-300 font-bold">Vortexový Cyklon:</span> Plazmový Bič + Bumerangy</li>
               <li>• <span class="text-yellow-300 font-bold">Kobercové Bombardování:</span> Kvantový Minomet + Miny</li>
-              <li>• <span class="text-purple-300 font-bold">ZrcadlováKletba & 7 dalších fúzí v aréně!</span></li>
+              <li>• <span class="text-purple-300 font-bold">Zrcadlová Kletba & 7 dalších fúzí v aréně!</span></li>
             </ul>
           </div>
           <div>
@@ -300,6 +313,35 @@
               <li>• <span class="text-white font-bold">Vlastní MP3 & Jazyk:</span> Klávesa [O] pro MP3 // Klávesa [L]
                 pro CZ/EN</li>
             </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: SÍŇ SLÁVY (CELKOVÁ STATISTIKA) -->
+      <div id="menu-tab-hall" class="hidden text-left mb-3">
+        <div class="text-xs font-orbitron text-yellow-300 uppercase tracking-widest mb-2 font-bold">🏛️ CELOŽIVOTNÍ
+          STATISTIKA PILOTA:</div>
+        <div id="hall-of-fame-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 font-orbitron text-center"></div>
+      </div>
+
+      <!-- TAB 4: AUDIO NASTAVENÍ -->
+      <div id="menu-tab-settings" class="hidden text-left mb-3">
+        <div class="bg-slate-950/90 border border-cyan-500/30 p-4 max-w-xl mx-auto space-y-4 font-orbitron">
+          <div>
+            <div class="flex justify-between text-xs text-pink-300 mb-1">
+              <span>🎵 HLASITOST HUDBY (BGM)</span>
+              <span id="label-bgm-vol">55%</span>
+            </div>
+            <input type="range" id="slider-bgm-vol" min="0" max="1" step="0.05" value="0.55"
+              class="w-full accent-pink-500 cursor-pointer">
+          </div>
+          <div>
+            <div class="flex justify-between text-xs text-cyan-300 mb-1">
+              <span>💥 HLASITOST EFEKTŮ (SFX)</span>
+              <span id="label-sfx-vol">80%</span>
+            </div>
+            <input type="range" id="slider-sfx-vol" min="0" max="1" step="0.05" value="0.8"
+              class="w-full accent-cyan-400 cursor-pointer">
           </div>
         </div>
       </div>
