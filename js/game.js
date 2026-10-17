@@ -55,14 +55,17 @@ canvas.height = H;
 const grid = new SpringGrid(46);
 const spaceBg = new DeepSpaceBackdrop(W, H);
 
-window.addEventListener("resize", () => {
+function resizeGameView() {
   W = window.innerWidth;
   H = window.innerHeight;
   canvas.width = W;
   canvas.height = H;
   grid.resize(W, H);
   spaceBg.init(W, H);
-});
+}
+
+window.addEventListener("resize", resizeGameView);
+window.addEventListener("orientationchange", () => setTimeout(resizeGameView, 200));
 
 const state = {
   mode: "MENU",
@@ -598,7 +601,13 @@ function startNewGame() {
     const gTrack = document.getElementById("ghost-track");
     if (gTrack) gTrack.textContent = sfx.tracks[sfx.styleIndex].label;
   }
+
+  if (window.matchMedia("(pointer: coarse)").matches) {
+    toggleAppFullscreen();
+  }
 }
+
+
 
 function triggerGameOver(isVictory = false) {
   state.mode = "GAMEOVER";
@@ -1027,8 +1036,25 @@ function update(dt) {
   player.vy = player.vy * 0.82 + moveY * player.speed * spdBoost * 0.18;
   player.x = Math.max(player.radius, Math.min(W - player.radius, player.x + player.vx * dt));
   player.y = Math.max(player.radius, Math.min(H - player.radius, player.y + player.vy * dt));
+
   if (gpMove.moveX === 0 && gpMove.moveY === 0) {
-    player.angle = Math.atan2(mouse.y - player.y, mouse.x - player.x);
+    // Pokud je na mobilu (touch controls aktivní), zaměří nejbližšího nepřítele
+    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
+    if (isTouchDevice && enemies.length > 0) {
+      let nearest = null;
+      let minD = Infinity;
+      for (const e of enemies) {
+        const d = Math.hypot(e.x - player.x, e.y - player.y);
+        if (d < minD) { minD = d; nearest = e; }
+      }
+      if (nearest) {
+        player.angle = Math.atan2(nearest.y - player.y, nearest.x - player.x);
+        mouse.x = nearest.x;
+        mouse.y = nearest.y;
+      }
+    } else if (!isTouchDevice) {
+      player.angle = Math.atan2(mouse.y - player.y, mouse.x - player.x);
+    }
   }
 
   if (Math.hypot(player.vx, player.vy) > 120) {
@@ -2431,6 +2457,28 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+function toggleAppFullscreen() {
+  const doc = window.document;
+  const docEl = doc.documentElement;
+
+  const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+  const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+  if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+    if (requestFullScreen) requestFullScreen.call(docEl).catch(() => { });
+  } else {
+    if (cancelFullScreen) cancelFullScreen.call(doc);
+  }
+}
+
+const fsBtn = document.getElementById("btn-fullscreen-toggle");
+if (fsBtn) {
+  fsBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    toggleAppFullscreen();
+  });
+}
 
 window.onload = () => {
   loadMetaProgression();

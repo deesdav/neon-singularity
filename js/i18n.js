@@ -433,16 +433,13 @@ function setupResponsiveTouchControls() {
     const touchWrap = document.createElement("div");
     touchWrap.id = "touch-controls";
     touchWrap.innerHTML = `
-    <div id="joy-left" class="touch-zone" style="left: 20px;">
+    <div id="joy-left" class="touch-zone" style="left: 24px; bottom: 24px;">
       <div id="joy-left-knob" class="touch-knob"></div>
     </div>
-    <div id="joy-right" class="touch-zone" style="right: 20px;">
-      <div id="joy-right-knob" class="touch-knob" style="background: radial-gradient(circle, #ff007f 0%, rgba(255,0,127,0.3) 100%); box-shadow: 0 0 15px #ff007f;"></div>
-    </div>
-    <div class="touch-action-btns">
-      <button id="touch-btn-dash" class="cyber-btn px-3 py-2 text-[10px]">SKOK</button>
-      <button id="touch-btn-bomb" class="cyber-btn-outline px-3 py-2 text-[10px] border-pink-500 text-pink-300">NOVA</button>
-      <button id="touch-btn-od" class="cyber-btn-gold px-3 py-2 text-[10px]">PŘETLAK</button>
+    <div class="touch-action-btns" style="bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 10px;">
+      <button id="touch-btn-dash" class="cyber-btn px-4 py-3 text-xs shadow-lg">⚡ SKOK</button>
+      <button id="touch-btn-bomb" class="cyber-btn-outline px-4 py-3 text-xs border-pink-500 text-pink-300 shadow-lg">💥 NOVA</button>
+      <button id="touch-btn-od" class="cyber-btn-gold px-4 py-2.5 text-xs shadow-lg">🔥 PŘETLAK</button>
     </div>
   `;
     document.body.appendChild(touchWrap);
@@ -463,7 +460,7 @@ function setupResponsiveTouchControls() {
                     let dx = t.clientX - cx;
                     let dy = t.clientY - cy;
                     const dist = Math.hypot(dx, dy);
-                    const maxR = rect.width / 2 - 12;
+                    const maxR = rect.width / 2 - 10;
                     if (dist > maxR) { dx = (dx / dist) * maxR; dy = (dy / dist) * maxR; }
                     knob.style.transform = `translate(${dx}px, ${dy}px)`;
                     onMove(dx / maxR, dy / maxR, true);
@@ -487,23 +484,11 @@ function setupResponsiveTouchControls() {
         zone.addEventListener("touchcancel", endTouch);
     };
 
-    bindStick("joy-left", "joy-left-knob", (nx, ny) => {
-        keys.a = nx < -0.22;
-        keys.d = nx > 0.22;
-        keys.w = ny < -0.22;
-        keys.s = ny > 0.22;
-    });
-
-    bindStick("joy-right", "joy-right-knob", (nx, ny, active) => {
-        if (active && (Math.abs(nx) > 0.1 || Math.abs(ny) > 0.1)) {
-            const aimA = Math.atan2(ny, nx);
-            player.angle = aimA;
-            mouse.x = player.x + Math.cos(aimA) * 180;
-            mouse.y = player.y + Math.sin(aimA) * 180;
-            mouse.down = true;
-        } else {
-            mouse.down = false;
-        }
+    bindStick("joy-left", "joy-left-knob", (nx, ny, active) => {
+        keys.a = active && nx < -0.22;
+        keys.d = active && nx > 0.22;
+        keys.w = active && ny < -0.22;
+        keys.s = active && ny > 0.22;
     });
 
     document.getElementById("touch-btn-dash").addEventListener("touchstart", (e) => { e.preventDefault(); triggerHyperDash(); });
