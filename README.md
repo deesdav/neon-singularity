@@ -30,19 +30,19 @@ Hra běží v moderním prohlížeči a nevyžaduje instalaci. Při prvním otev
 
 ## 🕹️ Základní ovládání
 
-| Akce | Klávesnice |
-|---|---|
-| Pohyb | WASD |
-| Míření | Myš |
-| Hyper-skok | Mezerník |
-| Černá díra | Q (ověř si přesné mapování v herním menu) |
-| Přetlak | F |
-| Výběr vylepšení | 1, 2, 3 nebo šipky |
-| Pauza | Esc |
-| Přepnutí plného/minimalistického HUDu | H |
-| Přepnutí hudební skladby | N |
-| Nahrání vlastní MP3 | O |
-| Přepnutí jazyka CZ/EN | L |
+| Akce                                  | Klávesnice                                |
+| ------------------------------------- | ----------------------------------------- |
+| Pohyb                                 | WASD                                      |
+| Míření                                | Myš                                       |
+| Hyper-skok                            | Mezerník                                  |
+| Černá díra                            | Q (ověř si přesné mapování v herním menu) |
+| Přetlak                               | F                                         |
+| Výběr vylepšení                       | 1, 2, 3 nebo šipky                        |
+| Pauza                                 | Esc                                       |
+| Přepnutí plného/minimalistického HUDu | H                                         |
+| Přepnutí hudební skladby              | N                                         |
+| Nahrání vlastní MP3                   | O                                         |
+| Přepnutí jazyka CZ/EN                 | L                                         |
 
 Hra zobrazuje další nápovědu přímo v menu. Ovládání gamepadem je vysvětlené v záložce paměťových slotů a ovládání.
 
@@ -56,9 +56,17 @@ Projekt používá HTML, CSS a JavaScript bez nutnosti instalovat balíčky.
    cd neon-singularity
    ```
 2. Otevři `index.html` v moderním prohlížeči, nebo spusť lokální HTTP server:
+
    ```bash
    python -m http.server 8000
    ```
+
+   nebo:
+
+   ```bash
+   py -m http.server 8000
+   ```
+
 3. Otevři [http://localhost:8000](http://localhost:8000).
 
 **Poznámka:** Tailwind CSS a fonty Orbitron/Rajdhani se načítají z externích CDN, takže jejich načtení vyžaduje internetové připojení. Hra je publikovaná přes GitHub Pages a nasazení zajišťuje GitHub Actions.

@@ -827,6 +827,25 @@ function update(dt) {
     if (sfx.justBarDrop) {
       triggerKineticShockwave(175, 22 * player.dmgMult, "#ff007f");
       state.chromatic = Math.max(state.chromatic, 0.25);
+
+      // Audio-reaktivní sonický pulz bosse na každý 4. beat
+      for (const e of enemies) {
+        if (e.type === "BOSS") {
+          spawnShockwave(e.x, e.y, 160, e.color, 3.5, 480);
+          // Vystřelí 4 hudební pulzy do kříže přesně v momentě dropu
+          for (let k = 0; k < 4; k++) {
+            const ba = e.angle + (k * Math.PI) / 2;
+            enemyBullets.push({
+              x: e.x,
+              y: e.y,
+              vx: Math.cos(ba) * 260,
+              vy: Math.sin(ba) * 260,
+              radius: 5.5,
+              color: e.color
+            });
+          }
+        }
+      }
     }
 
     for (const e of enemies) {

@@ -67,6 +67,7 @@ class DarksynthSoundtrackEngine {
     this.styles = this.tracks.map((t) => t.label);
 
     this.bgm = new Audio();
+    this.bgm.crossOrigin = "anonymous";
     this.bgm.loop = true;
     this.bgm.volume = 0.55;
     this.bgm.src = this.tracks[0].url;
