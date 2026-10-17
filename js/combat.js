@@ -199,7 +199,8 @@ function selectUpgradeCard(index) {
     document.getElementById("upgrade-modal").classList.add("hidden");
     document.getElementById("upgrade-modal").classList.remove("flex");
     state.mode = "PLAYING";
-    saveGameProgress(true, currentSaveSlot);
+    syncHudVisibilityDOM();
+    saveGameProgress(false, currentSaveSlot);
     spawnShockwave(player.x, player.y, 340, upg.color, 5, 560);
     spawnLensFlare(player.x, player.y, upg.color, 450);
     grid.applyForce(player.x, player.y, 300, 40, false, true);
@@ -1107,7 +1108,7 @@ function damageEnemy(e, dmg, hitColor = "#00f3ff", shieldBonus = false, fromBoom
             document.getElementById("ghost-boss-bar-wrap").classList.remove("flex");
             player.bombs = Math.min(player.maxBombs, player.bombs + 1);
             addFloatingText(e.x, e.y - 30, `${e.name} ZNIČEN! +1 ČERNÁ DÍRA`, "#fcee09", 1.45);
-            saveGameProgress(true, currentSaveSlot);
+            saveGameProgress(false, currentSaveSlot);
 
             if (state.difficulty !== "ENDLESS" && state.wave >= 12) {
                 if (state.difficulty === "HARDCORE" || state.difficulty === "ULTRA") unlockAchievement("hardcore_victor");
@@ -1196,6 +1197,13 @@ function damagePlayer(amount) {
     grid.applyForce(player.x, player.y, 320, 52, false, true);
     addFloatingText(player.x, player.y - 25, `-${Math.floor(finalAmount)} TRUP!`, "#ff0055", 1.25);
 
+    // Pokud HP klesne pod 1 (nebo zbyde jen nepatrný zlomek), loď je okamžitě zničena
+    if (player.hp < 1) {
+        player.hp = 0;
+        updateHUD();
+        triggerGameOver(false);
+        return;
+    }
+
     updateHUD();
-    if (player.hp <= 0) triggerGameOver(false);
 }

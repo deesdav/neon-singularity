@@ -224,7 +224,6 @@ function renderSaveSlotsUI() {
         e.stopPropagation();
         const s = parseInt(e.target.getAttribute("data-del-slot"), 10);
         clearSavedGame(s);
-        showSaveToast(`🗑️ SLOT #${s} BYL VYMAZÁN`);
         return;
       }
       currentSaveSlot = slot;
@@ -380,7 +379,15 @@ function toggleHudVisibility() {
 
 let toastTimeout = null;
 function showSaveToast(msg = "⚡ POZICE AUTOMATICKY ULOŽENA") {
+  // POKUD JSME V MENU, NIKDY NIC NEUKAZUJ A ROVNOU SKONČI
+  if (typeof state !== "undefined" && state.mode === "MENU") {
+    const el = document.getElementById("save-toast");
+    if (el) el.style.opacity = "0";
+    return;
+  }
+
   const el = document.getElementById("save-toast");
+  if (!el) return;
   el.textContent = msg;
   el.style.opacity = "1";
   if (toastTimeout) clearTimeout(toastTimeout);

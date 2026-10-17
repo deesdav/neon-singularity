@@ -35,7 +35,7 @@ Hra běží v moderním prohlížeči a nevyžaduje instalaci. Při prvním otev
 | Pohyb                                 | WASD                                      |
 | Míření                                | Myš                                       |
 | Hyper-skok                            | Mezerník                                  |
-| Černá díra                            | Q (ověř si přesné mapování v herním menu) |
+| Černá díra                            | Q / E                                     |
 | Přetlak                               | F                                         |
 | Výběr vylepšení                       | 1, 2, 3 nebo šipky                        |
 | Pauza                                 | Esc                                       |

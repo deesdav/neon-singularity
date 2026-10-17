@@ -12,6 +12,11 @@ class DarksynthSoundtrackEngine {
     this.styleIndex = 0;
     this.listenedTracks = new Set([0]);
 
+    this.menuBgmActive = false;
+    this.menuTimer = null;
+    this.menuNotes = [110, 130.81, 146.83, 164.81, 196, 220]; // Darksynth A-moll pentatonika
+    this.menuStep = 0;
+
     // Audio-reaktivní telemetrie pro grafiku, 360° halo a hratelnost
     this.beatPulse = 0; // 0.0 až 1.0 (okamžitý úder beatu)
     this.bassEnergy = 0; // 0.0 až 1.0 (hluboké basy)
@@ -65,15 +70,38 @@ class DarksynthSoundtrackEngine {
         bpm: 160,
         url: "audio/darksynth_fury.mp3",
       },
+      {
+        label: "CHRONO OVERDRIVE",
+        name: "TRACK 07 // CHRONO OVERDRIVE (148 BPM)",
+        bpm: 148,
+        url: "audio/chrono_overdrive.mp3",
+      },
+      {
+        label: "VOID LEVIATHAN",
+        name: "TRACK 08 // VOID LEVIATHAN (165 BPM)",
+        bpm: 165,
+        url: "audio/void_leviathan.mp3",
+      },
+      {
+        label: "SINGULARITY HORIZON",
+        name: "TRACK 09 // SINGULARITY HORIZON (136 BPM)",
+        bpm: 136,
+        url: "audio/singularity_horizon.mp3",
+      },
     ];
 
     this.styles = this.tracks.map((t) => t.label);
 
     this.bgm = new Audio();
     this.bgm.crossOrigin = "anonymous";
-    this.bgm.loop = true;
+    this.bgm.loop = false; // <-- Vypneme nekonečnou smyčku jedné skladby
     this.bgm.volume = this.bgmVolume;
     this.bgm.src = this.tracks[0].url;
+
+    // Jakmile skladba skončí, automaticky vylosuje a spustí náhodnou další
+    this.bgm.addEventListener("ended", () => {
+      this.playRandomTrack();
+    });
 
     this.useRealtimeFFT = false;
     this.setupCustomMp3Loader();
@@ -84,14 +112,98 @@ class DarksynthSoundtrackEngine {
     if (this.bgm) {
       this.bgm.volume = this.muted ? 0 : this.bgmVolume;
     }
+    if (this.menuMaster) {
+      this.menuMaster.gain.setValueAtTime(this.muted ? 0 : this.bgmVolume * 0.35, this.ctx ? this.ctx.currentTime : 0);
+    }
     localStorage.setItem("neon_bgm_vol", String(this.bgmVolume));
   }
+
   setSfxVolume(val) {
     this.sfxVolume = Math.max(0, Math.min(1, val));
     if (this.master && this.ctx) {
       this.master.gain.setValueAtTime(this.sfxVolume, this.ctx.currentTime);
     }
     localStorage.setItem("neon_sfx_vol", String(this.sfxVolume));
+  }
+
+  // Jemné sci-fi pípnutí při kliknutí na tlačítka a karty v menu
+  playButtonClick(pitch = 1) {
+    if (!this.ctx || this.muted) return;
+    try {
+      if (this.ctx.state === "suspended") this.ctx.resume();
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(580 * pitch, now);
+      osc.frequency.exponentialRampToValueAtTime(880 * pitch, now + 0.045);
+      gain.gain.setValueAtTime(0.04, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+      osc.connect(gain);
+      gain.connect(this.master);
+      osc.start(now);
+      osc.stop(now + 0.055);
+    } catch (e) { }
+  }
+
+  // Nekonečný procedurální darksynth ambient přímo z Web Audio API (žádná MP3)
+  startMenuAmbient() {
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      this.ctx = new AudioCtx();
+      this.master = this.ctx.createGain();
+      this.master.gain.setValueAtTime(this.sfxVolume, this.ctx.currentTime);
+      this.master.connect(this.ctx.destination);
+    }
+    if (this.menuBgmActive) return;
+    this.menuBgmActive = true;
+
+    if (!this.menuMaster) {
+      this.menuMaster = this.ctx.createGain();
+      this.menuMaster.gain.setValueAtTime(this.muted ? 0 : this.bgmVolume * 0.35, this.ctx.currentTime);
+      this.menuMaster.connect(this.ctx.destination);
+    }
+
+    const stepSeq = () => {
+      if (!this.menuBgmActive || state.mode !== "MENU") return;
+      if (!this.muted && this.ctx && this.ctx.state === "running") {
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const filter = this.ctx.createBiquadFilter();
+        const gain = this.ctx.createGain();
+
+        const note = this.menuNotes[this.menuStep % this.menuNotes.length];
+        this.menuStep++;
+
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(note / 2, now); // Temná basová linka
+
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(320, now);
+        filter.frequency.exponentialRampToValueAtTime(140, now + 0.35);
+
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.menuMaster);
+
+        osc.start(now);
+        osc.stop(now + 0.4);
+      }
+      this.menuTimer = setTimeout(stepSeq, 280); // Rytmická smyčka cca 107 BPM
+    };
+
+    stepSeq();
+  }
+
+  stopMenuAmbient() {
+    this.menuBgmActive = false;
+    if (this.menuTimer) {
+      clearTimeout(this.menuTimer);
+      this.menuTimer = null;
+    }
   }
 
   setupCustomMp3Loader() {
@@ -144,6 +256,7 @@ class DarksynthSoundtrackEngine {
   }
 
   init() {
+    this.stopMenuAmbient();
     if (!this.ctx) {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       this.ctx = new AudioCtx();
@@ -303,6 +416,37 @@ class DarksynthSoundtrackEngine {
       showSaveToast(`🎵 ${track.name} (STISKNI [O] PRO VLASTNÍ MP3)`);
     }
     return track.label;
+  }
+
+  playRandomTrack() {
+    if (this.tracks.length <= 1) return;
+    let nextIndex = this.styleIndex;
+    // Vylosuje náhodný track, ale nikdy ne ten stejný, který právě dohrál
+    while (nextIndex === this.styleIndex) {
+      nextIndex = Math.floor(Math.random() * this.tracks.length);
+    }
+    this.styleIndex = nextIndex;
+    this.listenedTracks.add(this.styleIndex);
+    if (this.listenedTracks.size >= 6 && typeof unlockAchievement === "function") {
+      unlockAchievement("audiophile");
+    }
+
+    const track = this.tracks[this.styleIndex];
+    this.bgm.src = track.url;
+    this.bgm.volume = this.bgmVolume;
+
+    if (!this.muted && state.mode === "PLAYING") {
+      this.bgm.play().catch(() => { });
+    }
+
+    // Aktualizace popisků v HUDu
+    const btn = document.getElementById("btn-track");
+    if (btn) btn.textContent = `🎵 RÁDIO: ${track.label}`;
+    const gTrack = document.getElementById("ghost-track");
+    if (gTrack) gTrack.textContent = track.label;
+    if (typeof showSaveToast === "function") {
+      showSaveToast(`🎵 DALŠÍ SKLADBA: ${track.name}`);
+    }
   }
 
   playLaser(pitchMod = 1) {

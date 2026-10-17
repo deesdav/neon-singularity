@@ -589,6 +589,15 @@ function startNewGame() {
   spawnLensFlare(player.x, player.y, player.color, 550);
   grid.applyForce(player.x, player.y, 350, 45, false, true);
   addFloatingText(player.x, player.y - 40, `${chosenShip.name} // ${state.difficulty}`, player.color, 1.35);
+
+  if (typeof sfx !== "undefined" && sfx.tracks && sfx.tracks.length > 1) {
+    sfx.styleIndex = Math.floor(Math.random() * sfx.tracks.length);
+    sfx.playCurrentTrack();
+    const btn = document.getElementById("btn-track");
+    if (btn) btn.textContent = `🎵 RÁDIO: ${sfx.tracks[sfx.styleIndex].label}`;
+    const gTrack = document.getElementById("ghost-track");
+    if (gTrack) gTrack.textContent = sfx.tracks[sfx.styleIndex].label;
+  }
 }
 
 function triggerGameOver(isVictory = false) {
@@ -1002,7 +1011,7 @@ function update(dt) {
 
     if (state.wave % 3 === 0) spawnEnemy("BOSS");
     updateHUD();
-    saveGameProgress(true, currentSaveSlot);
+    saveGameProgress(false, currentSaveSlot);
   }
 
   let moveX = ((keys.d ? 1 : 0) - (keys.a ? 1 : 0)) + gpMove.moveX;
@@ -2106,12 +2115,18 @@ document.getElementById("btn-close-achievements").addEventListener("click", () =
 
 document.getElementById("btn-go-menu").addEventListener("click", () => {
   state.mode = "MENU";
+  if (typeof sfx !== "undefined") {
+    if (sfx.bgm && !sfx.bgm.paused) sfx.bgm.pause();
+    sfx.startMenuAmbient();
+  }
   document.getElementById("gameover-modal").classList.add("hidden");
   document.getElementById("gameover-modal").classList.remove("flex");
   syncHudVisibilityDOM();
   document.getElementById("start-modal").classList.remove("hidden");
   renderShipSelector();
   refreshMenuSaveUI();
+  const toastEl = document.getElementById("save-toast");
+  if (toastEl) toastEl.style.opacity = "0";
 });
 
 document.getElementById("btn-pause-hud").addEventListener("click", togglePauseGame);
@@ -2130,14 +2145,20 @@ document.getElementById("btn-manual-save").addEventListener("click", () => saveG
 });
 
 document.getElementById("btn-save-exit").addEventListener("click", () => {
-  saveGameProgress(true, currentSaveSlot);
+  saveGameProgress(false, currentSaveSlot);
   state.mode = "MENU";
+  if (typeof sfx !== "undefined") {
+    if (sfx.bgm && !sfx.bgm.paused) sfx.bgm.pause();
+    sfx.startMenuAmbient();
+  }
   document.getElementById("pause-modal").classList.add("hidden");
   document.getElementById("pause-modal").classList.remove("flex");
   syncHudVisibilityDOM();
   document.getElementById("start-modal").classList.remove("hidden");
   renderShipSelector();
   refreshMenuSaveUI();
+  const toastEl = document.getElementById("save-toast");
+  if (toastEl) toastEl.style.opacity = "0";
 });
 document.getElementById("btn-pause-restart").addEventListener("click", startNewGame);
 
@@ -2310,7 +2331,6 @@ function setupHangarInterface() {
       if (descEl && diffDescriptions[chosenDiff]) {
         descEl.textContent = diffDescriptions[chosenDiff];
       }
-      showSaveToast(`⚔️ OBTÍŽNOST NASTAVENA NA: ${chosenDiff}`);
     });
   });
 }
@@ -2390,40 +2410,6 @@ function selectMutatorMode(mutId) {
     }
   });
 
-  if (typeof showSaveToast === "function") {
-    showSaveToast(`🎲 ${mutObj.shortDesc}`);
-  }
-}
-function renderMutatorsUI() {
-  const gridEl = document.getElementById("mutators-grid");
-  if (!gridEl) return;
-  gridEl.innerHTML = "";
-
-  window.DAILY_MUTATORS.forEach((mut) => {
-    const isSel = state.mutator === mut.id;
-    const card = document.createElement("div");
-    card.className = `ship-card p-3.5 text-left transition flex flex-col justify-between ${isSel ? "selected" : ""}`;
-    card.style.borderColor = isSel ? mut.color : "rgba(100, 116, 139, 0.4)";
-
-    card.innerHTML = `
-      <div>
-        <div class="flex justify-between items-center mb-1">
-          <span class="font-orbitron text-[10px] font-bold uppercase tracking-wider" style="color: ${mut.color}">
-            ${mut.subtitle}
-          </span>
-          <span class="px-2 py-0.5 font-orbitron text-[9px] font-black ${isSel ? "bg-cyan-400 text-black" : "bg-slate-900 text-yellow-300 border border-yellow-400/40"
-      }">
-            ${isSel ? "✓ AKTIVNÍ" : (mut.bonusChips > 0 ? `+${mut.bonusChips} ◈ BONUS` : "STANDARD")}
-          </span>
-        </div>
-        <div class="font-orbitron text-sm font-black text-white mb-1">${mut.name}</div>
-        <p class="text-xs text-slate-300 leading-snug">${mut.desc}</p>
-      </div>
-    `;
-
-    card.addEventListener("click", () => selectMutatorMode(mut.id));
-    gridEl.appendChild(card);
-  });
 }
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -2455,3 +2441,14 @@ window.onload = () => {
   refreshMenuSaveUI();
   requestAnimationFrame(gameLoop);
 };
+
+document.addEventListener("click", (e) => {
+  const target = e.target.closest("button, .ship-card, .cyber-card, input[type='range']");
+  if (target && typeof sfx !== "undefined") {
+    // Prohlížeče vyžadují první interakci pro odemknutí zvuku
+    if (state.mode === "MENU" && !sfx.menuBgmActive) {
+      sfx.startMenuAmbient();
+    }
+    sfx.playButtonClick();
+  }
+});
