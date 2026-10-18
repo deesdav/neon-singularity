@@ -273,6 +273,10 @@ const EN_DICTIONARY = {
     "50 trofejí": "50 trophies",
     "ODMĚNA VYZVEDNUTA": "REWARD COLLECTED",
 
+    "⚠️ RESET POSTUPU": "⚠️ PROGRESS RESET",
+    "Smaže odemčené lodě a vylepšení, čipy, trofeje, nejlepší skóre i všechny tři uložené mise. Nastavení hlasitosti zůstane zachováno.": "It deletes unlocked ships and upgrades, chips, trophies, high scores, and all three saved missions. Volume settings will be preserved.",
+    "🗑️ RESETOVAT VEŠKERÝ HERNÍ POSTUP": "🗑️ RESET ALL GAME PROGRESS",
+
     // 7. 32 Zbraní & Vylepšení (UPGRADE_POOL)
     "KVANTOVÁ EVOLUCE SYSTÉMU // KLIKNI, STISKNI [1, 2, 3] NEBO ŠIPKY NA OVLADAČI [⬅️ ⬆️ ➡️]": "QUANTUM SYSTEM EVOLUTION // CLICK, PRESS [1, 2, 3] OR D-PAD [⬅️ ⬆️ ➡️]",
     "VYLEPŠENÍ ARZENÁLU": "ARSENAL UPGRADE",
