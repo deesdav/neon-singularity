@@ -765,8 +765,14 @@ function triggerGameOver(isVictory = false) {
     }
     if (titleEl) titleEl.textContent = "MISE SPLNĚNA!";
   } else {
+    // I při prohře dostane pilot čipy podle dosažené vlny a nasbíraného skóre
+    const diffChipMult = state.difficulty === "ULTRA" ? 3 : (state.difficulty === "HARDCORE" ? 2 : 1);
+    constconsolationShards = Math.max(1, (state.wave - 1) * 2 + Math.floor(state.score / 25000)) * diffChipMult;
+    meta.shards += consolationShards;
+    saveMetaProgression();
+
     if (badgeEl) {
-      badgeEl.textContent = "KOLAPS JÁDRA // SYSTÉM ZNIČEN";
+      badgeEl.textContent = `KOLAPS JÁDRA // ZISK Z MISE: +${consolationShards} ◈ ČIPŮ`;
       badgeEl.className = "inline-block px-3 py-1 bg-red-500/20 border border-red-500 text-red-300 font-orbitron text-xs tracking-widest uppercase mb-2 animate-pulse";
     }
     if (titleEl) titleEl.textContent = "KONEC PŘENOSU";
@@ -1178,6 +1184,10 @@ function update(dt) {
     }
   } else if (enemies.length === 0) {
     if (player.shipClass === "STALKER") unlockAchievement("stalker_master");
+
+    const diffChipMult = state.difficulty === "ULTRA" ? 3 : (state.difficulty === "HARDCORE" ? 2 : 1);
+    const waveClearShards = (2 + Math.floor(state.wave / 2) + (meta.upgrades.shardHunterLvl || 0)) * diffChipMult;
+    meta.shards += waveClearShards;
     state.wave++;
     if (state.wave >= 6) {
       unlockAchievement("wave_6");
@@ -1193,7 +1203,7 @@ function update(dt) {
     const baseCount = 10 + state.wave * 4;
     state.enemiesToSpawn = state.mutator === "SWARM_CHAOS" ? Math.round(baseCount * 2.0) : baseCount;
     const tierRoman = ["I", "II", "III", "IV"][getAITier() - 1];
-    addFloatingText(W / 2, H / 2 - 60, `VLNA ${state.wave} // AI TIER ${tierRoman}`, "#fcee09", 1.45);
+    addFloatingText(W / 2, H / 2 - 60, `VLNA ${state.wave} // +${waveClearShards} ◈ ČIPŮ!`, "#fcee09", 1.45);
     spawnShockwave(player.x, player.y, 320, "#fcee09", 3, 480);
 
     if (state.wave % 3 === 0) spawnEnemy("BOSS");

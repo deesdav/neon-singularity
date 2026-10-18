@@ -390,7 +390,8 @@ function spawnEnemy(forcedType = null, xOverride = null, yOverride = null) {
         else type = state.wave >= 3 ? "GUARDIAN" : "JUGGERNAUT";
     }
 
-    const eliteChance = Math.min(0.75, (state.wave - 1) * 0.08 + (state.difficulty === "ULTRA" ? 0.22 : (state.difficulty === "HARDCORE" ? 0.14 : 0)));
+    // Základní šance 18 % už v 1. vlně, aby Elity a čipy padaly od začátku hry
+    const eliteChance = Math.min(0.80, 0.18 + (state.wave - 1) * 0.08 + (state.difficulty === "ULTRA" ? 0.22 : (state.difficulty === "HARDCORE" ? 0.14 : 0)));
     const isElite = Math.random() < eliteChance && type !== "MINI_SWARM" && type !== "ENERGY_ORB";
     const shieldMult = isElite ? 0.55 : tier >= 3 ? 0.25 : 0;
 
@@ -483,7 +484,7 @@ function spawnEnemy(forcedType = null, xOverride = null, yOverride = null) {
             type, x, y, vx: 0, vy: 0, radius: 17,
             hp: baseHp, maxHp: baseHp, shield: baseHp * 0.35, maxShield: baseHp * 0.35,
             speed: 95 * diffSpdMult, color: "#ff0055", score: 340,
-            angle: 0, spin: 0, shootTimer: 2.4, aiming: false, slowTimer: 0, burnTimer: 0, isElite
+            angle: 0, spin: 0, shootTimer: 2.4, aiming: false, slowTimer: 0, burnTimer: 0, isElite: true
         });
     } else if (type === "WARP_MINER") {
         const baseHp = 105 * waveScale;
@@ -1249,11 +1250,18 @@ function damageEnemy(e, dmg, hitColor = "#00f3ff", shieldBonus = false, fromBoom
             meta.shards += rewardShards;
             saveMetaProgression();
             addFloatingText(e.x, e.y - 55, `+${rewardShards} ◈ KVANTOVÝCH ČIPŮ!`, "#fcee09", 1.4);
-        } else if (e.isElite && Math.random() < (0.35 + shardHunterBonus * 0.10)) {
+        } else if (e.isElite && Math.random() < (0.55 + shardHunterBonus * 0.12)) {
             const eliteShards = 1 * diffChipMult;
             meta.shards += eliteShards;
             saveMetaProgression();
+            updateHUD();
             addFloatingText(e.x, e.y - 22, `+${eliteShards} ◈ ČIP`, "#fcee09", 1.05);
+        } else if (!e.isElite && e.type !== "ENERGY_ORB" && Math.random() < (0.08 + shardHunterBonus * 0.03)) {
+            const normShards = 1 * diffChipMult;
+            meta.shards += normShards;
+            saveMetaProgression();
+            updateHUD();
+            addFloatingText(e.x, e.y - 22, `+${normShards} ◈ ČIP`, "#fcee09", 0.95);
         }
 
         if (player.weapons.critLvl > 0 && (e.isElite || isBoss)) {
