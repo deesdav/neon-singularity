@@ -256,6 +256,7 @@ function saveMetaProgression() {
 let achPopupTimer = null;
 function showBannerPopup(title, subtitle, rewardText) {
   const banner = document.getElementById("achievement-popup");
+  document.getElementById("ach-popup-subtitle").textContent = subtitle;
   document.getElementById("ach-popup-title").textContent = title;
   document.getElementById("ach-popup-reward").textContent = rewardText;
   banner.classList.remove("opacity-0", "-translate-y-4");
@@ -302,8 +303,9 @@ function checkWeaponSynergies() {
         sfx.playLevelUp();
         spawnShockwave(player.x, player.y, 440, syn.color, 6, 620);
         addFloatingText(player.x, player.y - 55, syn.name, syn.color, 1.45);
-        showBannerPopup(syn.name, "FÚZNÍ SYNERGIE AKTIVNÍ!", "ZBRANĚ SPOJENY DO SUPER-SYSTÉMU");
         unlockAchievement("synergy_unlock");
+        // Show the synergy after the trophy notification so it is not immediately overwritten.
+        showBannerPopup(syn.name, "FÚZNÍ SYNERGIE AKTIVNÍ!", "ZBRANĚ SPOJENY DO SUPER-SYSTÉMU");
       }
     }
   });
@@ -2357,6 +2359,8 @@ window.addEventListener("contextmenu", (e) => e.preventDefault());
 
 window.addEventListener("keydown", (e) => {
   if (document.activeElement && document.activeElement.tagName === "INPUT") return;
+  // Prevent browser key-repeat from retriggering one-shot actions (dash, bombs, pause, etc.).
+  if (e.repeat) return;
 
   if (e.code === "KeyW" || e.code === "ArrowUp") keys.w = true;
   if (e.code === "KeyA" || e.code === "ArrowLeft") keys.a = true;
