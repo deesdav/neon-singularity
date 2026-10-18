@@ -1,5 +1,5 @@
 /*************************************************************************
- * COMBAT.JS - 32 WEAPONS, 13 SYNERGIES, KAMIKAZE & DISRUPTOR ENEMIES
+ * COMBAT.JS - 36 WEAPONS, 15 SYNERGIES, NEW ENEMIES & UPGRADE REROLLS
  *************************************************************************/
 const decoys = [];
 
@@ -219,7 +219,7 @@ const UPGRADE_POOL = [
     },
     {
         id: "stasis_field", name: "CHRONO-STÁZOVÁ BOMBA", subtitle: "ČASOPROSTOROVÁ ANOMÁLIE",
-        desc: "Vypouští za loď modré stázové pole, které zmrazí pohyb nepřátel a rozkládá jejich molekuly.",
+        desc: "Vypouští za loď modré stázové pole, které výrazně zpomaluje nepřátele a postupně je poškozuje.",
         color: "#38bdf8", apply: () => { player.weapons.stasisFieldLvl++; }
     }
 ];
@@ -695,13 +695,15 @@ function fireVoidLance() {
 }
 
 function dropStasisField() {
+    const trailOffset = player.radius + 34;
     plasmaPools.push({
-        x: player.x,
-        y: player.y,
+        x: player.x - Math.cos(player.angle) * trailOffset,
+        y: player.y - Math.sin(player.angle) * trailOffset,
         radius: 68 + player.weapons.stasisFieldLvl * 14,
         dmg: (78 + player.weapons.stasisFieldLvl * 28) * player.dmgMult,
         color: "#38bdf8",
         isTrap: true,
+        weaponName: "CHRONO-STÁZOVÁ BOMBA",
         life: 5.0,
         maxLife: 5.0
     });
