@@ -447,9 +447,9 @@ function updateHUD() {
   if (player.weapons.aegisLvl > 0 || player.weapons.nanoShieldLvl > 0) {
     aegisRow.classList.remove("hidden");
     aegisRow.classList.add("flex");
-    document.getElementById("aegis-status").textContent = player.aegisReady
-      ? "AKTIVNÍ (100%)"
-      : `DOBÍJENÍ (${player.aegisCooldown.toFixed(1)}s)`;
+    document.getElementById("aegis-status").textContent = player.weapons.aegisLvl <= 0
+      ? "NANOBOTOVÝ ŠTÍT AKTIVNÍ"
+      : (player.aegisReady ? "AKTIVNÍ (100%)" : `DOBÍJENÍ (${player.aegisCooldown.toFixed(1)}s)`);
   } else {
     aegisRow.classList.add("hidden");
   }
