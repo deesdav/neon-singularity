@@ -2450,6 +2450,10 @@ window.addEventListener("keyup", (e) => {
 });
 
 window.addEventListener("beforeunload", () => {
+  // If the meta key was removed (for example, by a full progress reset),
+  // do not recreate the deleted progress from the still-live in-memory state.
+  if (!localStorage.getItem(META_KEY)) return;
+
   saveMetaProgression();
   if (state.mode === "PLAYING" || state.mode === "PAUSED") {
     saveGameProgress(false, currentSaveSlot);
