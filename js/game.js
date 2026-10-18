@@ -271,6 +271,11 @@ function checkWeaponSynergies() {
   if (installedCount >= 6) unlockAchievement("arsenal_expert");
 }
 
+// XP growth is centralized so normal level-ups and Overclock start XP use identical rules.
+function getNextXpThreshold(currentThreshold) {
+  return Math.max(1, Math.floor(currentThreshold * 1.32));
+}
+
 function saveGameProgress(showNotification = false, slot = currentSaveSlot) {
   if (state.mode === "GAMEOVER" || state.mode === "MENU" || player.hp <= 0) return;
   currentSaveSlot = slot;
@@ -288,25 +293,26 @@ function saveGameProgress(showNotification = false, slot = currentSaveSlot) {
         mutator: state.mutator,
         score: state.score, combo: state.combo, maxCombo: state.maxCombo,
         wave: state.wave, enemiesToSpawn: state.enemiesToSpawn,
+        spawnCooldown: state.spawnCooldown,
         runTimer: state.runTimer,
+        supplyTimer: state.supplyTimer, wormholeTimer: state.wormholeTimer,
+        comboTimer: state.comboTimer, overdriveUses: state.overdriveUses || 0,
+        firedAnyShot: state.firedAnyShot,
         bossActive: state.bossActive, overdrive: state.overdrive,
         overdriveTimer: state.overdriveTimer,
-        runStats: state.runStats
+        runStats: { ...state.runStats, weaponDmg: { ...(state.runStats.weaponDmg || {}) } }
       },
+      // Persist the complete player runtime state, including weapon cooldowns.
       player: {
-        shipClass: player.shipClass, color: player.color,
-        x: player.x, y: player.y, hp: player.hp, maxHp: player.maxHp,
-        xp: player.xp, xpNext: player.xpNext, level: player.level,
-        speed: player.speed, dmgMult: player.dmgMult,
-        dashMaxCooldown: player.dashMaxCooldown,
-        bombs: player.bombs, maxBombs: player.maxBombs,
-        aegisReady: player.aegisReady, aegisCooldown: player.aegisCooldown,
+        ...player,
+        afterimages: [],
         unlockedSynergies: { ...player.unlockedSynergies },
-        weapons: { ...player.weapons },
+        weapons: { ...player.weapons }
       },
-      enemies: enemies.slice(0, 60),
-      gems: gems.slice(0, 120),
-      supplyPods: supplyPods.slice(0, 10)
+      // Do not silently discard enemies or XP gems when a save is made mid-wave.
+      enemies: enemies.map(e => ({ ...e })),
+      gems: gems.map(g => ({ ...g })),
+      supplyPods: supplyPods.map(pod => ({ ...pod }))
     };
     localStorage.setItem(getSaveKey(slot), JSON.stringify(payload));
     saveMetaProgression();
@@ -373,15 +379,26 @@ function loadSavedGame(slot = currentSaveSlot) {
     decoys.length = 0;
 
     Object.assign(state, data.state);
-    // Backward compatibility with save slots created before runTimer was persisted.
+    // Backward-compatible defaults for older save slots.
     state.runTimer = Number.isFinite(data.state.runTimer) ? data.state.runTimer : 0;
+    state.spawnCooldown = Number.isFinite(data.state.spawnCooldown) ? data.state.spawnCooldown : 0.5;
+    state.supplyTimer = Number.isFinite(data.state.supplyTimer) ? data.state.supplyTimer : 18;
+    state.wormholeTimer = Number.isFinite(data.state.wormholeTimer) ? data.state.wormholeTimer : 48;
+    state.comboTimer = Number.isFinite(data.state.comboTimer) ? data.state.comboTimer : 0;
+    state.overdriveUses = Number.isFinite(data.state.overdriveUses) ? data.state.overdriveUses : 0;
+    state.firedAnyShot = !!data.state.firedAnyShot;
     state.difficulty = data.state.difficulty || "ARCADE";
     state.mutator = data.state.mutator || "NONE";
-    state.runStats = data.state.runStats || { totalKills: 0, eliteKills: 0, bossKills: 0, blackHolesUsed: 0, gemsCollected: 0, weaponDmg: {} };
+    state.runStats = {
+      totalKills: 0, eliteKills: 0, bossKills: 0, blackHolesUsed: 0,
+      gemsCollected: 0, weaponDmg: {}, ...(data.state.runStats || {})
+    };
+    state.runStats.weaponDmg = { ...(state.runStats.weaponDmg || {}) };
 
     Object.assign(player, data.player);
     player.weapons = { ...player.weapons, ...(data.player.weapons || {}) };
     player.unlockedSynergies = { ...(data.player.unlockedSynergies || {}) };
+    player.afterimages = [];
     player.x = Math.max(40, Math.min(W - 40, player.x || W / 2));
     player.y = Math.max(40, Math.min(H - 40, player.y || H / 2));
     player.invulnTimer = 1.5;
@@ -941,7 +958,7 @@ function update(dt) {
   if (player.xp >= player.xpNext) {
     player.xp -= player.xpNext;
     player.level++;
-    player.xpNext = Math.floor(player.xpNext * 1.32);
+    player.xpNext = getNextXpThreshold(player.xpNext);
     triggerUpgradeSelection();
     updateHUD();
     return;
@@ -2020,8 +2037,7 @@ function update(dt) {
         player.level++;
         if (player.level >= 10) unlockAchievement("level_10");
         if (player.level >= 15) unlockAchievement("level_15");
-        const xpReqDiscount = 1 - (meta.upgrades.rerollDiscountLvl || 0) * 0.05;
-        player.xpNext = Math.floor(player.xpNext * 1.28 * xpReqDiscount);
+        player.xpNext = getNextXpThreshold(player.xpNext);
         triggerUpgradeSelection();
       }
       updateHUD();
