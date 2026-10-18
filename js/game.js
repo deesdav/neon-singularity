@@ -577,6 +577,15 @@ function startNewGame() {
     lightningTrapLvl: 0, riftSlicerLvl: 0, prismLaserLvl: 0, overchargeCoreLvl: 0,
     ...chosenShip.initWeapons
   };
+  // Clear every run-specific weapon timer so a new run never inherits cooldowns or effects.
+  [
+    "fireTimer", "missileTimer", "teslaTimer", "railgunTimer", "droneTimer",
+    "trailTimer", "cryoTimer", "flameTickTimer", "satelliteTimer", "boomerangTimer",
+    "mineTimer", "shockwaveTimer", "solarHaloTimer", "swarmBotsTimer", "gravCannonTimer",
+    "whipTimer", "mortarTimer", "decoyTimer", "trapTimer", "slicerTimer",
+    "aegisCooldown", "bladeAngle", "droneAngle"
+  ].forEach(key => { player[key] = 0; });
+  player.afterimages = [];
   player.aegisReady = player.weapons.aegisLvl > 0 || player.weapons.nanoShieldLvl > 0;
   player.aegisCooldown = 0;
 
@@ -587,6 +596,10 @@ function startNewGame() {
   state.score = 0;
   state.combo = 1.0;
   state.maxCombo = 1.0;
+  state.comboTimer = 0;
+  state.overdriveUses = 0;
+  state.shake = 0;
+  state.chromatic = 0;
   state.wave = 1;
   state.firedAnyShot = false;
   state.enemiesToSpawn = state.mutator === "SWARM_CHAOS" ? 20 : 10;
