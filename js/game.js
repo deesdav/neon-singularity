@@ -38,7 +38,6 @@ const meta = {
     spent: 0
   },
   achievements: {},
-  selectedTrophySkin: null,
   trophyMilestones: {},
   stats: {
     totalKillsLifetime: 0,
@@ -202,7 +201,6 @@ function loadMetaProgression() {
         if (parsed.overclock.spentShards && !meta.overclock.spent) meta.overclock.spent = parsed.overclock.spentShards;
       }
       meta.achievements = { ...(parsed.achievements || {}) };
-      meta.selectedTrophySkin = parsed.selectedTrophySkin || null;
       meta.trophyMilestones = { ...(parsed.trophyMilestones || {}) };
       meta.stats = { ...meta.stats, ...(parsed.stats || {}) };
     }
@@ -213,18 +211,6 @@ function getUnlockedAchievementCount() {
   if (typeof ACHIEVEMENTS_LIST === "undefined" || !Array.isArray(ACHIEVEMENTS_LIST)) return 0;
   return ACHIEVEMENTS_LIST.filter(ach => meta.achievements && meta.achievements[ach.id] === true).length;
 }
-
-function getTrophySkinRequired(skin) {
-  if (skin.requiredPercent) return Math.ceil(ACHIEVEMENTS_LIST.length * skin.requiredPercent);
-  return skin.required || 0;
-}
-
-const TROPHY_SKINS = [
-  { id: "void_reaper", name: "VOID REAPER", subtitle: "Černý pancíř // cyan reaktor", required: 10, color: "#00f3ff", rarity: "EPICKÝ" },
-  { id: "phantom_overdrive", name: "PHANTOM OVERDRIVE", subtitle: "Fialová plazma // spektrální křídla", required: 25, color: "#d946ef", rarity: "LEGENDÁRNÍ" },
-  { id: "celestial_anomaly", name: "CELESTIAL ANOMALY", subtitle: "Kosmická aura // gravitační prstence", requiredPercent: 0.75, color: "#a78bfa", rarity: "MYTICKÝ" },
-  { id: "neon_god", name: "NEON GOD", subtitle: "Černý chrom // božské energetické jádro", requiredPercent: 1, color: "#fef08a", rarity: "TRANSCENDENTNÍ" }
-];
 
 const TROPHY_MILESTONES = [
   { id: "trophy_milestone_10", required: 10, reward: 50, name: "LOVEC TROFEJÍ I" },
