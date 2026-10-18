@@ -836,8 +836,12 @@ function update(dt) {
   if (bullets.length > 300) bullets.splice(0, 100);
   if (enemyBullets.length > 200) enemyBullets.splice(0, 80);
   sfx.updateAudioAnalysis(dt);
+
+  // V menu necháme hvězdné pozadí plynule plout vesmírem, v boji reaguje na pohyb lodi
   grid.update();
-  spaceBg.update(dt, player.vx, player.vy, W, H);
+  const bgVx = state.mode === "MENU" ? 95 : player.vx;
+  const bgVy = state.mode === "MENU" ? 45 : player.vy;
+  spaceBg.update(dt, bgVx, bgVy, W, H);
   const gpMove = pollGamepadInput(dt);
 
   if (sfx.justBeat && state.mode === "PLAYING") {
@@ -877,6 +881,50 @@ function update(dt) {
 
   if (state.shake > 0) state.shake = Math.max(0, state.shake - dt * 28);
   if (state.chromatic > 0) state.chromatic = Math.max(0, state.chromatic - dt * 2.4);
+
+  // ŽIVÉ INTERAKTIVNÍ POZADÍ V HANGÁRU (MENU)
+  if (state.mode === "MENU") {
+    const t = performance.now() * 0.001;
+    // Loď v pozadí jemně krouží a natáčí se
+    player.x = W / 2 + Math.cos(t * 0.6) * 140;
+    player.y = H / 2 + Math.sin(t * 0.9) * 90;
+    player.angle = t * 0.7;
+
+    // 1. Plynulá gravitační stopa kolem lodi a kurzoru myši
+    if (Math.random() < 0.35) {
+      grid.applyForce(player.x, player.y, 170, 14, false, true);
+    }
+    if (Math.random() < 0.25) {
+      grid.applyForce(mouse.x, mouse.y, 130, 10, false, false);
+    }
+
+    // 2. Náhodné neonové šokové vlny a gejzíry částic na pozadí
+    if (Math.random() < 0.045) {
+      const rx = Math.random() * W;
+      const ry = Math.random() * H;
+      const cols = ["#00f3ff", "#ff007f", "#fcee09", "#bc13fe", "#00ffaa"];
+      const col = cols[Math.floor(Math.random() * cols.length)];
+      grid.applyForce(rx, ry, 280, 42, Math.random() < 0.35, true);
+      spawnShockwave(rx, ry, 180 + Math.random() * 140, col, 3, 360);
+      spawnParticles(rx, ry, col, 14, 50, 220, 2.2);
+    }
+
+    // 3. Aktualizace dohasínání částic a šokových vln i v menu
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      p.vx *= p.drag; p.vy *= p.drag;
+      p.life -= dt;
+      if (p.life <= 0) fastRemove(particles, i);
+    }
+    for (let i = shockwaves.length - 1; i >= 0; i--) {
+      const sw = shockwaves[i];
+      sw.radius += sw.speed * dt;
+      if (sw.radius >= sw.maxRadius) fastRemove(shockwaves, i);
+    }
+    return;
+  }
+
   if (state.mode !== "PLAYING") return;
 
   state.runTimer += dt;
@@ -886,8 +934,7 @@ function update(dt) {
 
   const t1 = document.getElementById("hud-run-timer");
   if (t1) t1.textContent = timeStr;
-  const t2 = document.getElementById("ghost-run-timer");
-  if (t2) t2.textContent = timeStr;
+  const t2 = document.getElementById("ghost-run-timer"); if (t2) t2.textContent = timeStr;
 
   // Pokud hráč odstartoval s vysokým startovním XP z Overclocku, vyvolá vylepšení
   if (player.xp >= player.xpNext) {

@@ -110,10 +110,16 @@ class DarksynthSoundtrackEngine {
   setBgmVolume(val) {
     this.bgmVolume = Math.max(0, Math.min(1, val));
     if (this.bgm) {
-      this.bgm.volume = this.muted ? 0 : this.bgmVolume;
+      this.bgm.volume = (this.muted || this.bgmVolume <= 0.001) ? 0 : this.bgmVolume;
+      if (this.bgmVolume <= 0.001 && !this.bgm.paused) {
+        this.bgm.pause();
+      } else if (this.bgmVolume > 0.001 && !this.muted && typeof state !== "undefined" && state.mode === "PLAYING" && this.bgm.paused) {
+        this.bgm.play().catch(() => { });
+      }
     }
-    if (this.menuMaster) {
-      this.menuMaster.gain.setValueAtTime(this.muted ? 0 : this.bgmVolume * 0.35, this.ctx ? this.ctx.currentTime : 0);
+    if (this.menuMaster && this.ctx) {
+      const targetGain = (this.muted || this.bgmVolume <= 0.001) ? 0 : this.bgmVolume * 0.85;
+      this.menuMaster.gain.setValueAtTime(targetGain, this.ctx.currentTime);
     }
     localStorage.setItem("neon_bgm_vol", String(this.bgmVolume));
   }
@@ -146,7 +152,6 @@ class DarksynthSoundtrackEngine {
     } catch (e) { }
   }
 
-  // Nekonečný procedurální darksynth ambient přímo z Web Audio API (žádná MP3)
   startMenuAmbient() {
     if (!this.ctx) {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -160,39 +165,50 @@ class DarksynthSoundtrackEngine {
 
     if (!this.menuMaster) {
       this.menuMaster = this.ctx.createGain();
-      this.menuMaster.gain.setValueAtTime(this.muted ? 0 : this.bgmVolume * 0.35, this.ctx.currentTime);
       this.menuMaster.connect(this.ctx.destination);
     }
+    const initGain = (this.muted || this.bgmVolume <= 0.001) ? 0 : this.bgmVolume * 0.85;
+    this.menuMaster.gain.setValueAtTime(initGain, this.ctx.currentTime);
 
     const stepSeq = () => {
       if (!this.menuBgmActive || state.mode !== "MENU") return;
-      if (!this.muted && this.ctx && this.ctx.state === "running") {
+      if (!this.muted && this.bgmVolume > 0.001 && this.ctx && this.ctx.state === "running") {
         const now = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator();
+        const osc1 = this.ctx.createOscillator();
+        const osc2 = this.ctx.createOscillator();
         const filter = this.ctx.createBiquadFilter();
         const gain = this.ctx.createGain();
 
         const note = this.menuNotes[this.menuStep % this.menuNotes.length];
         this.menuStep++;
 
-        osc.type = "sawtooth";
-        osc.frequency.setValueAtTime(note / 2, now); // Temná basová linka
+        // 1. Hluboká basová pila + 2. Středový sub-synth pro jasnou slyšitelnost
+        osc1.type = "sawtooth";
+        osc1.frequency.setValueAtTime(note / 2, now);
 
+        osc2.type = "triangle";
+        osc2.frequency.setValueAtTime(note, now);
+
+        // Vyšší frekvence filtru (950 Hz -> 220 Hz), aby basová linka výrazně prořízla mix
         filter.type = "lowpass";
-        filter.frequency.setValueAtTime(320, now);
-        filter.frequency.exponentialRampToValueAtTime(140, now + 0.35);
+        filter.Q.setValueAtTime(4.5, now);
+        filter.frequency.setValueAtTime(950, now);
+        filter.frequency.exponentialRampToValueAtTime(220, now + 0.25);
 
-        gain.gain.setValueAtTime(0.18, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+        gain.gain.setValueAtTime(0.42, now);
+        gain.gain.exponentialRampToValueAtTime(0.008, now + 0.26);
 
-        osc.connect(filter);
+        osc1.connect(filter);
+        osc2.connect(filter);
         filter.connect(gain);
         gain.connect(this.menuMaster);
 
-        osc.start(now);
-        osc.stop(now + 0.4);
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 0.27);
+        osc2.stop(now + 0.27);
       }
-      this.menuTimer = setTimeout(stepSeq, 280); // Rytmická smyčka cca 107 BPM
+      this.menuTimer = setTimeout(stepSeq, 260);
     };
 
     stepSeq();
@@ -301,7 +317,8 @@ class DarksynthSoundtrackEngine {
     this.justBarDrop = false;
     if (this.lastBeatCooldown > 0) this.lastBeatCooldown -= dt;
 
-    if (this.muted || state.mode !== "PLAYING") {
+    // PŘIDÁNO: this.bgmVolume <= 0.001 zastaví hudbu i všechny audio-reaktivní efekty
+    if (this.muted || this.bgmVolume <= 0.001 || state.mode !== "PLAYING") {
       if (!this.bgm.paused) this.bgm.pause();
       this.beatPulse = Math.max(0, this.beatPulse - dt * 5);
       this.bassEnergy *= 0.9;
