@@ -22,7 +22,7 @@ Hra běží v moderním prohlížeči a nevyžaduje instalaci. Při prvním otev
 - **50 trofejí a výzev** – plň úkoly a sleduj svůj postup.
 - **3 paměťové sloty** – ukládej a obnovuj rozehrané mise.
 - **Komba a rekordy** – řetěz eliminace, zvyšuj skóre a překonávej vlastní nejlepší výsledek.
-- **Hudební rádio** – šest vestavěných skladeb, zvukové efekty a možnost načíst vlastní MP3.
+- **Hudební rádio** – devět vestavěných skladeb, zvukové efekty a možnost načíst vlastní MP3.
 - **Audio-reaktivní vizuály** – efekty reagují na rytmus a frekvence hudby.
 - **Čeština a angličtina** – jazyk lze přepnout přímo v menu.
 - **Klávesnice i gamepad** – hra obsahuje podporu ovládání ovladačem.
@@ -102,7 +102,7 @@ neon-singularity/
 
 ## 📦 Načítání a výkon
 
-Herní soundtrack obsahuje šest MP3 souborů o velikosti přibližně 5 MB každý. To neznamená, že se všechny musí stáhnout při otevření stránky. Pokud se hra načítá pomalu nebo se některé prvky nezobrazují, zkontroluj konzoli a síťové požadavky prohlížeče a také [stav nasazení GitHub Actions](https://github.com/deesdav/neon-singularity/actions).
+Herní soundtrack obsahuje devět MP3 souborů o velikosti přibližně 5 MB každý. To neznamená, že se všechny musí stáhnout při otevření stránky. Pokud se hra načítá pomalu nebo se některé prvky nezobrazují, zkontroluj konzoli a síťové požadavky prohlížeče a také [stav nasazení GitHub Actions](https://github.com/deesdav/neon-singularity/actions).
 
 ## 📄 Licence
 
