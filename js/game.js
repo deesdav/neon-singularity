@@ -39,8 +39,16 @@ const meta = {
   },
   achievements: {},
   stats: {
-    burnedCount: 0, satelliteStrikes: 0, blackHolesUsed: 0,
-    boomerangKills: 0, minesDropped: 0, kamikazeKills: 0, disruptorKills: 0,
+    totalKillsLifetime: 0,
+    totalBossKillsLifetime: 0,
+    totalGemsLifetime: 0,
+    burnedCount: 0,
+    satelliteStrikes: 0,
+    blackHolesUsed: 0,
+    boomerangKills: 0,
+    minesDropped: 0,
+    kamikazeKills: 0,
+    disruptorKills: 0,
     reflectedBullets: 0
   }
 };
@@ -200,11 +208,17 @@ function saveMetaProgression() {
   try {
     localStorage.setItem(META_KEY, JSON.stringify(meta));
     const unlockedCount = Object.keys(meta.achievements).length;
-    document.getElementById("menu-shards-count").textContent = meta.shards;
-    document.getElementById("shop-shards-count").textContent = meta.shards;
-    document.getElementById("hud-shards").textContent = meta.shards;
-    document.getElementById("menu-ach-count").textContent = `${unlockedCount}/${ACHIEVEMENTS_LIST.length}`;
-    document.getElementById("hud-ach-count").textContent = `${unlockedCount}/${ACHIEVEMENTS_LIST.length}`;
+    const menuShardsEl = document.getElementById("menu-shards-count");
+    if (menuShardsEl) menuShardsEl.textContent = meta.shards;
+    const shopShardsEl = document.getElementById("shop-shards-count");
+    if (shopShardsEl) shopShardsEl.textContent = meta.shards;
+    const hudShardsEl = document.getElementById("hud-shards");
+    if (hudShardsEl) hudShardsEl.textContent = meta.shards;
+    const menuAchEl = document.getElementById("menu-ach-count");
+    if (menuAchEl) menuAchEl.textContent = `${unlockedCount}/${ACHIEVEMENTS_LIST.length}`;
+    const hudAchEl = document.getElementById("hud-ach-count");
+    if (hudAchEl) hudAchEl.textContent = `${unlockedCount}/${ACHIEVEMENTS_LIST.length}`;
+
     if (meta.shards >= 50) unlockAchievement("rich_cyber");
     if (meta.shards >= 150) unlockAchievement("chip_hoarder");
   } catch (e) { }
@@ -271,10 +285,12 @@ function checkWeaponSynergies() {
   if (installedCount >= 6) unlockAchievement("arsenal_expert");
 }
 
-// One formula for all level-ups: discount applies to each threshold without compounding.
+// Progresivní vzorec pro XP: v rané fázi odsýpá svižně, ve vysokých levelech strměji zpomaluje, aby hra nebyla jen o vybírání karet.
 function getXpThresholdForLevel(level) {
   const xpDiscount = 1 - Math.min(4, Math.max(0, meta.upgrades.rerollDiscountLvl || 0)) * 0.05;
-  return Math.max(1, Math.floor(95 * Math.pow(1.32, Math.max(0, level - 1)) * xpDiscount));
+  const lvlIndex = Math.max(0, level - 1);
+  const dynamicBase = 1.34 + Math.min(0.14, lvlIndex * 0.008);
+  return Math.max(1, Math.floor(95 * Math.pow(dynamicBase, lvlIndex) * xpDiscount));
 }
 
 function saveGameProgress(showNotification = false, slot = currentSaveSlot) {
@@ -410,6 +426,11 @@ function loadSavedGame(slot = currentSaveSlot) {
     player.y = Math.max(40, Math.min(H - 40, player.y || H / 2));
     player.invulnTimer = 1.5;
 
+    const dashBarEl = document.getElementById("dash-bar");
+    if (dashBarEl) {
+      dashBarEl.style.width = `${Math.max(0, Math.min(100, (1 - (player.dashCooldown || 0) / (player.dashMaxCooldown || 1.45)) * 100))}%`;
+    }
+
     if (Array.isArray(data.enemies)) data.enemies.forEach(savedEnemy => {
       const enemy = { ...savedEnemy };
       if (enemy.type === "BOSS") {
@@ -526,6 +547,9 @@ function addFloatingText(x, y, text, color = "#00f3ff", scale = 1.0) {
 }
 
 function startNewGame() {
+  if (document.activeElement && typeof document.activeElement.blur === "function") {
+    document.activeElement.blur();
+  }
   clearSavedGame(currentSaveSlot);
   sfx.init();
   if (sfx.ctx && sfx.ctx.state === "suspended") sfx.ctx.resume();
@@ -566,6 +590,9 @@ function startNewGame() {
   const dashCdMult = 1 - (meta.upgrades.dashCdLvl || 0) * 0.08;
   player.dashMaxCooldown = Math.max(0.45, chosenShip.dashCd * dashCdMult);
   player.dashCooldown = 0;
+  const dashBarEl = document.getElementById("dash-bar");
+  if (dashBarEl) dashBarEl.style.width = "100%";
+
   player.portalCooldown = 0;
   player.maxBombs = 5 + (meta.upgrades.novaLvl || 0);
   player.bombs = Math.min(player.maxBombs, chosenShip.bombs + (meta.upgrades.novaLvl || 0));
@@ -653,12 +680,18 @@ function startNewGame() {
   }
 }
 
-
-
 function triggerGameOver(isVictory = false) {
   state.mode = "GAMEOVER";
   clearSavedGame(currentSaveSlot);
   syncHudVisibilityDOM();
+
+  // VŽDY uložit celoživotní statistiky a nejvyšší rekord i při prohře!
+  if (state.score > state.bestScore) {
+    state.bestScore = Math.floor(state.score);
+    localStorage.setItem(BEST_KEY, String(state.bestScore));
+  }
+  saveMetaProgression();
+  if (typeof renderHallOfFame === "function") renderHallOfFame();
 
   const badgeEl = document.getElementById("go-badge");
   const titleEl = document.getElementById("go-title");
@@ -980,7 +1013,8 @@ function update(dt) {
 
   const t1 = document.getElementById("hud-run-timer");
   if (t1) t1.textContent = timeStr;
-  const t2 = document.getElementById("ghost-run-timer"); if (t2) t2.textContent = timeStr;
+  const t2 = document.getElementById("ghost-run-timer");
+  if (t2) t2.textContent = timeStr;
 
   // Pokud hráč odstartoval s vysokým startovním XP z Overclocku, vyvolá vylepšení
   if (player.xp >= player.xpNext) {
@@ -2198,6 +2232,9 @@ window.addEventListener("keydown", (e) => {
 });
 
 window.addEventListener("keyup", (e) => {
+  if (e.code === "Space" && document.activeElement && document.activeElement.tagName === "BUTTON") {
+    e.preventDefault();
+  }
   if (e.code === "KeyW" || e.code === "ArrowUp") keys.w = false;
   if (e.code === "KeyA" || e.code === "ArrowLeft") keys.a = false;
   if (e.code === "KeyS" || e.code === "ArrowDown") keys.s = false;
@@ -2205,6 +2242,7 @@ window.addEventListener("keyup", (e) => {
 });
 
 window.addEventListener("beforeunload", () => {
+  saveMetaProgression();
   if (state.mode === "PLAYING" || state.mode === "PAUSED") {
     saveGameProgress(false, currentSaveSlot);
   }
@@ -2246,6 +2284,7 @@ document.getElementById("btn-go-menu").addEventListener("click", () => {
   document.getElementById("start-modal").classList.remove("hidden");
   renderShipSelector();
   refreshMenuSaveUI();
+  renderHallOfFame();
   const toastEl = document.getElementById("save-toast");
   if (toastEl) toastEl.style.opacity = "0";
 });
@@ -2278,6 +2317,7 @@ document.getElementById("btn-save-exit").addEventListener("click", () => {
   document.getElementById("start-modal").classList.remove("hidden");
   renderShipSelector();
   refreshMenuSaveUI();
+  renderHallOfFame();
   const toastEl = document.getElementById("save-toast");
   if (toastEl) toastEl.style.opacity = "0";
 });
@@ -2455,6 +2495,7 @@ function setupHangarInterface() {
     });
   });
 }
+
 /*************************************************************************
  * KOMPLETNÍ OBSLUHA MUTÁTORŮ (SPODNÍ TLAČÍTKA I HORNÍ KARTY)
  *************************************************************************/
@@ -2530,7 +2571,6 @@ function selectMutatorMode(mutId) {
       }
     }
   });
-
 }
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -2580,6 +2620,7 @@ window.onload = () => {
   saveMetaProgression();
   renderShipSelector();
   setupHangarInterface();
+  renderHallOfFame();
   document.getElementById("best-score-display").textContent = String(state.bestScore).padStart(7, "0");
   refreshMenuSaveUI();
   requestAnimationFrame(gameLoop);

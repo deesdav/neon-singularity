@@ -420,7 +420,7 @@ class DarksynthSoundtrackEngine {
   cycleStyle() {
     this.styleIndex = (this.styleIndex + 1) % this.tracks.length;
     this.listenedTracks.add(this.styleIndex);
-    if (this.listenedTracks.size >= 6 && typeof unlockAchievement === "function") {
+    if (this.listenedTracks.size >= 9 && typeof unlockAchievement === "function") {
       unlockAchievement("audiophile");
     }
     const track = this.tracks[this.styleIndex];
@@ -444,7 +444,7 @@ class DarksynthSoundtrackEngine {
     }
     this.styleIndex = nextIndex;
     this.listenedTracks.add(this.styleIndex);
-    if (this.listenedTracks.size >= 6 && typeof unlockAchievement === "function") {
+    if (this.listenedTracks.size >= 9 && typeof unlockAchievement === "function") {
       unlockAchievement("audiophile");
     }
 

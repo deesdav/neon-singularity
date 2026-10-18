@@ -365,7 +365,7 @@ const ACHIEVEMENTS_LIST = [
   { id: "clutch_dash", name: "HYPER-REFLEX", desc: "Proveď Hyper-skok s trupem poškozeným pod 20 % HP.", reward: 15 },
   { id: "arsenal_expert", name: "KVANTOVÝ PROFESOR", desc: "Měj současně vylepšeno alespoň 6 různých zbraní a modulů.", reward: 25 },
   { id: "ultra_survivor", name: "EXTRÉMNÍ PŘEŽIVŠÍ", desc: "Přežij do 6. vlny na brutální obtížnost ULTRA!", reward: 40 },
-  { id: "audiophile", name: "DODÁVKA ZVUKU", desc: "Přepni v rádiu všech 6 originálních skladeb.", reward: 15 },
+  { id: "audiophile", name: "DODÁVKA ZVUKU", desc: "Přepni v rádiu všech 9 originálních skladeb.", reward: 15 },
   { id: "chip_hoarder", name: "ČIPOVÝ MAGNET", desc: "Měj na účtu alespoň 150 Kvantových Čipů (◈) najednou.", reward: 30 }
 ];
 

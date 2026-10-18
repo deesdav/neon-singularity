@@ -470,7 +470,7 @@ const EN_DICTIONARY = {
     "EXTRÉMNÍ PŘEŽIVŠÍ": "EXTREME SURVIVOR",
     "Přežij do 6. vlny na brutální obtížnost ULTRA!": "Survive to Wave 6 on brutal ULTRA difficulty!",
     "DODÁVKA ZVUKU": "SOUND DELIVERY",
-    "Přepni v rádiu všech 6 originálních skladeb.": "Cycle through at least 6 original tracks on the radio.",
+    "Přepni v rádiu všech 9 originálních skladeb.": "Cycle through at least 9 original tracks on the radio.",
     "ČIPOVÝ MAGNET": "CHIP MAGNET",
     "Měj na účtu alespoň 150 Kvantových Čipů (◈) najednou.": "Hold at least 150 Quantum Chips (◈) in your bank at once.",
 
@@ -547,7 +547,13 @@ const EN_DICTIONARY = {
     "TRUP!": "HULL!",
     "KRIT ": "CRIT ",
     "PORTÁL A": "PORTAL A",
-    "PORTÁL B": "PORTAL B"
+    "PORTÁL B": "PORTAL B",
+
+    "NANOBOTOVÝ ŠTÍT AKTIVNÍ": "NANOBOT SHIELD ACTIVE",
+    "Snižuje přijaté poškození s klesajícím účinkem (max. 55 %) a zrychluje obnovu Aegis štítu. (Synergie s Aegis -> Nesmrtelná Citadela!)": "Reduces incoming damage with diminishing returns (max 55%) and speeds up Aegis recharge. (Synergy with Aegis -> Immortal Citadel!)",
+    "Nanoboty plynule opravují trup lodi (+3.5 HP/s za úroveň, max. 5) a zvýší Max HP o +15.": "Nanobots continuously repair the hull (+3.5 HP/s per level, max 5) and increase Max HP by +15.",
+    "Vytvoří dobíjecí silové pole, které plně pohltí zásah a vyvolá odrazovou vlnu (max. 4. úroveň).": "Creates a recharging forcefield that absorbs hits and triggers a blast wave (max level 4)."
+
 };
 
 // Seřazení klíčů od nejdelších po nejkratší (zabraňuje kolizím podřetězců, např. "TRUP" uvnitř "TITANOVÉ JÁDRO TRUPU")
