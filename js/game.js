@@ -552,8 +552,8 @@ function startNewGame() {
   player.hp = player.maxHp;
 
   const startXpBonus = (meta.overclock?.xpOc || 0) * 35;
-  player.xpNext = getXpThresholdForLevel(player.level);
   player.level = 1;
+  player.xpNext = getXpThresholdForLevel(player.level);
   player.xp = startXpBonus;
 
   const overclockSpd = 1 + (meta.overclock?.spdOc || 0) * 0.01;
