@@ -41,7 +41,7 @@ const UPGRADE_POOL = [
         color: "#38bdf8", apply: () => {
             if (player.weapons.nanoShieldLvl >= 4) return;
             player.weapons.nanoShieldLvl++;
-            player.aegisReady = true;
+            if (player.weapons.aegisLvl > 0) player.aegisReady = true;
         }
     },
     {
