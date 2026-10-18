@@ -507,7 +507,7 @@ function togglePauseGame() {
   }
 }
 
-const MAX_PARTICLES = 800;
+const MAX_PARTICLES = 500;
 function spawnParticles(x, y, color, count = 20, speedMin = 80, speedMax = 420, size = 2.5, lifeMin = 0.35, lifeMax = 0.85) {
   // Pokud je aréna přehlcena, raději nové částice osekáme, aby hra nezamrzla
   if (particles.length > MAX_PARTICLES - 50) {
@@ -516,7 +516,7 @@ function spawnParticles(x, y, color, count = 20, speedMin = 80, speedMax = 420, 
   const loadRatio = particles.length / MAX_PARTICLES;
   const effCount = loadRatio > 0.6 ? Math.max(1, Math.floor(count * 0.35)) : count;
 
-  for (let i = 0; i < effCount; i++) {
+  for (let i = 0; i < effCount && particles.length < MAX_PARTICLES; i++) {
     const angle = Math.random() * Math.PI * 2;
     const spd = speedMin + Math.random() * (speedMax - speedMin);
     const life = lifeMin + Math.random() * (lifeMax - lifeMin);
@@ -913,7 +913,7 @@ let fpsTimer = 0;
 
 function update(dt) {
   // Tvrdý bezpečnostní limit proti přehlcení paměti a lagům
-  if (particles.length > 500) particles.splice(0, 200);
+  if (particles.length > MAX_PARTICLES) particles.splice(0, particles.length - MAX_PARTICLES);
   if (bullets.length > 300) bullets.splice(0, 100);
   if (enemyBullets.length > 200) enemyBullets.splice(0, 80);
   sfx.updateAudioAnalysis(dt);

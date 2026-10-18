@@ -1,0 +1,29 @@
+name: Validate JavaScript
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, bugfix/update17-performance]
+
+permissions:
+  contents: read
+
+jobs:
+  syntax-check:
+    name: JavaScript syntax check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check JavaScript syntax
+        run: |
+          set -e
+          for file in js/*.js; do
+            echo "Checking $file"
+            node --check "$file"
+          done
