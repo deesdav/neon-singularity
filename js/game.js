@@ -148,7 +148,8 @@ const player = {
   boomerangTimer: 0, mineTimer: 0, shockwaveTimer: 0,
   solarHaloTimer: 0, swarmBotsTimer: 0, gravCannonTimer: 0,
   whipTimer: 0, mortarTimer: 0, decoyTimer: 0, trapTimer: 0, slicerTimer: 0,
-  aegisReady: false, aegisCooldown: 0, bladeAngle: 0, droneAngle: 0
+  aegisReady: false, aegisCooldown: 0, bladeAngle: 0, droneAngle: 0,
+  voidLanceTimer: 0, stasisTimer: 0, flailAngle: 0, laserRingAngle: 0
 };
 
 const bullets = [];
@@ -611,7 +612,7 @@ function startNewGame() {
     "trailTimer", "cryoTimer", "flameTickTimer", "satelliteTimer", "boomerangTimer",
     "mineTimer", "shockwaveTimer", "solarHaloTimer", "swarmBotsTimer", "gravCannonTimer",
     "whipTimer", "mortarTimer", "decoyTimer", "trapTimer", "slicerTimer",
-    "aegisCooldown", "bladeAngle", "droneAngle"
+    "aegisCooldown", "bladeAngle", "droneAngle", "voidLanceTimer", "stasisTimer", "flailAngle", "laserRingAngle"
   ].forEach(key => { player[key] = 0; });
   player.afterimages = [];
   player.aegisReady = player.weapons.aegisLvl > 0;
@@ -1504,6 +1505,58 @@ function update(dt) {
     }
   }
 
+  if (player.weapons.voidLanceLvl > 0) {
+    player.voidLanceTimer = (player.voidLanceTimer || 0) - dt;
+    if (player.voidLanceTimer <= 0 && enemies.length > 0) {
+      fireVoidLance();
+      player.voidLanceTimer = Math.max(0.45, (1.15 - player.weapons.voidLanceLvl * 0.12) * odFireMult);
+    }
+  }
+
+  if (player.weapons.stasisFieldLvl > 0) {
+    player.stasisTimer = (player.stasisTimer || 0) - dt;
+    if (player.stasisTimer <= 0) {
+      dropStasisField();
+      player.stasisTimer = Math.max(1.8, 3.8 - player.weapons.stasisFieldLvl * 0.35);
+    }
+  }
+
+  if (player.weapons.laserRingLvl > 0) {
+    player.laserRingAngle = (player.laserRingAngle || 0) + dt * 3.4;
+    const beamCount = 1 + player.weapons.laserRingLvl;
+    const ringRadius = 115 + (player.weapons.solarHaloLvl > 0 ? 35 : 0);
+    for (let i = 0; i < beamCount; i++) {
+      const ba = player.laserRingAngle + (i * Math.PI * 2) / beamCount;
+      const bx = player.x + Math.cos(ba) * ringRadius;
+      const by = player.y + Math.sin(ba) * ringRadius;
+      for (const e of enemies) {
+        if (Math.hypot(e.x - bx, e.y - by) < e.radius + 24) {
+          damageEnemy(e, (135 + player.weapons.laserRingLvl * 35) * player.dmgMult * dt, "#ff0055", false, false, "LASEROVÝ PRSTENEC");
+        }
+      }
+    }
+  }
+
+  if (player.weapons.chainFlailLvl > 0) {
+    player.flailAngle = (player.flailAngle || 0) + dt * 4.2;
+    const flailCount = Math.min(3, player.weapons.chainFlailLvl);
+    const orbitR = 96;
+    for (let i = 0; i < flailCount; i++) {
+      const fa = player.flailAngle + (i * Math.PI * 2) / flailCount;
+      const fx = player.x + Math.cos(fa) * orbitR;
+      const fy = player.y + Math.sin(fa) * orbitR;
+      for (const e of enemies) {
+        const d = Math.hypot(e.x - fx, e.y - fy);
+        if (d < e.radius + 20) {
+          damageEnemy(e, (195 + player.weapons.chainFlailLvl * 45) * player.dmgMult * dt, "#fcee09", true, false, "ŘETĚZOVÝ DRTIČ");
+          if (e.type !== "BOSS") {
+            e.x += Math.cos(fa) * 140 * dt;
+            e.y += Math.sin(fa) * 140 * dt;
+          }
+        }
+      }
+    }
+  }
   for (let i = supplyPods.length - 1; i >= 0; i--) {
     const sp = supplyPods[i];
     sp.angle += dt * 3.2;
@@ -1747,6 +1800,32 @@ function update(dt) {
       if (e.shootTimer <= 0) {
         e.shootTimer = state.difficulty === "ULTRA" ? 2.1 : (state.difficulty === "HARDCORE" ? 2.6 : 3.2);
         spawnEnemy("ENERGY_ORB", e.x, e.y);
+      }
+    } else if (e.type === "SNIPER") {
+      e.angle = Math.atan2(dy, dx);
+      if (dist > 380) {
+        e.x += dirX * effSpeed * enemyDt;
+        e.y += dirY * effSpeed * enemyDt;
+      } else if (dist < 240) {
+        e.x -= dirX * effSpeed * enemyDt;
+        e.y -= dirY * effSpeed * enemyDt;
+      }
+      e.shootTimer -= enemyDt * spdMult;
+      e.aiming = e.shootTimer < 0.85;
+      if (e.shootTimer <= 0) {
+        e.shootTimer = 2.6;
+        enemyBullets.push({ x: e.x, y: e.y, vx: Math.cos(e.angle) * 620, vy: Math.sin(e.angle) * 620, radius: 6, color: "#ff0055" });
+      }
+    } else if (e.type === "WARP_MINER") {
+      e.angle += Math.sin(performance.now() * 0.002 + i) * 0.8 * enemyDt;
+      e.x += Math.cos(e.angle) * effSpeed * enemyDt;
+      e.y += Math.sin(e.angle) * effSpeed * enemyDt;
+      if (e.x < 60 || e.x > W - 60) e.angle = Math.PI - e.angle;
+      if (e.y < 60 || e.y > H - 60) e.angle = -e.angle;
+      e.mineTimer = (e.mineTimer || 2.2) - enemyDt;
+      if (e.mineTimer <= 0) {
+        e.mineTimer = 2.8;
+        if (enemies.length < 35) spawnEnemy("ENERGY_ORB", e.x, e.y);
       }
     } else if (e.type === "ENERGY_ORB") {
       e.angle += e.spin * enemyDt;
@@ -2007,6 +2086,77 @@ function update(dt) {
             spawnEnemy("ENERGY_ORB", e.x + (Math.random() - 0.5) * 60, e.y + (Math.random() - 0.5) * 60);
           }
         }
+      } else if (e.subtype === "PRISM") {
+        // 7. QUANTUM PRISM: Krystalický hranol pálící paprsky a geometrické vlny
+        e.x = W / 2 + Math.sin(e.phaseTimer * 0.9) * (W * 0.28);
+        e.y = H * 0.28 + Math.cos(e.phaseTimer * 1.3) * 80;
+        e.shootTimer -= enemyDt * spdMult;
+        if (e.shootTimer <= 0) {
+          e.shootTimer = 1.15 * hcCdMult;
+          const beams = isEnraged ? 6 : 4;
+          for (let k = 0; k < beams; k++) {
+            const ba = e.angle + (k * Math.PI * 2) / beams;
+            railBeams.push({
+              x1: e.x, y1: e.y,
+              x2: e.x + Math.cos(ba) * 900, y2: e.y + Math.sin(ba) * 900,
+              color: k % 2 === 0 ? "#00f3ff" : "#ff007f", life: 0.22, maxLife: 0.22
+            });
+            enemyBullets.push({ x: e.x, y: e.y, vx: Math.cos(ba) * 340, vy: Math.sin(ba) * 340, radius: 6.5, color: "#00f3ff" });
+          }
+        }
+
+      } else if (e.subtype === "TITAN") {
+        // 8. GRAVITY TITAN: Gravitační přitahování + rotující prstence střel
+        e.x += dirX * (effSpeed * 0.55) * enemyDt;
+        e.y += dirY * (effSpeed * 0.55) * enemyDt;
+        if (dist < 520) {
+          const pullStrength = isEnraged ? 95 : 60;
+          player.x -= dirX * pullStrength * enemyDt;
+          player.y -= dirY * pullStrength * enemyDt;
+        }
+        e.shootTimer -= enemyDt * spdMult;
+        if (e.shootTimer <= 0) {
+          e.shootTimer = 1.1 * hcCdMult;
+          const count = isEnraged ? 12 : 8;
+          for (let k = 0; k < count; k++) {
+            const ba = -e.angle + (k * Math.PI * 2) / count;
+            enemyBullets.push({ x: e.x, y: e.y, vx: Math.cos(ba) * 265, vy: Math.sin(ba) * 265, radius: 6.5, color: "#a855f7" });
+          }
+        }
+
+      } else if (e.subtype === "ARACHNID") {
+        // 9. CYBER ARACHNID: Agresivní skoky na hráče a jedovaté salvy
+        const lunge = Math.sin(e.phaseTimer * 2.8) > 0.7 ? 2.6 : 0.75;
+        e.x += dirX * effSpeed * lunge * enemyDt;
+        e.y += dirY * effSpeed * lunge * enemyDt;
+        e.shootTimer -= enemyDt * spdMult;
+        if (e.shootTimer <= 0) {
+          e.shootTimer = 0.95 * hcCdMult;
+          const aimA = Math.atan2(dy, dx);
+          const spreadCount = isEnraged ? 3 : 2;
+          for (let k = -spreadCount; k <= spreadCount; k++) {
+            const ba = aimA + k * 0.18;
+            enemyBullets.push({ x: e.x, y: e.y, vx: Math.cos(ba) * 365, vy: Math.sin(ba) * 365, radius: 6, color: "#a3e635" });
+          }
+        }
+
+      } else if (e.subtype === "VALKYRIE") {
+        // 10. OMEGA VALKYRIE: Rychlý oblet kolem hráče + křížové salvy
+        const orbitA = e.phaseTimer * (isEnraged ? 1.8 : 1.2);
+        const targetX = Math.max(90, Math.min(W - 90, player.x + Math.cos(orbitA) * 270));
+        const targetY = Math.max(90, Math.min(H - 90, player.y + Math.sin(orbitA) * 220));
+        e.x += (targetX - e.x) * 2.5 * enemyDt;
+        e.y += (targetY - e.y) * 2.5 * enemyDt;
+        e.angle = Math.atan2(dy, dx);
+        e.shootTimer -= enemyDt * spdMult;
+        if (e.shootTimer <= 0) {
+          e.shootTimer = 0.88 * hcCdMult;
+          const aimA = Math.atan2(dy, dx);
+          for (let k = -1; k <= 1; k++) {
+            const ba = aimA + k * 0.14;
+            enemyBullets.push({ x: e.x, y: e.y, vx: Math.cos(ba) * 410, vy: Math.sin(ba) * 410, radius: 6, color: "#f43f5e" });
+          }
+        }
       }
 
       grid.applyForce(e.x, e.y, 220, 9, false);
@@ -2201,6 +2351,10 @@ window.addEventListener("keydown", (e) => {
     if (e.code === "Digit1" || e.code === "Numpad1") selectUpgradeCard(0);
     if (e.code === "Digit2" || e.code === "Numpad2") selectUpgradeCard(1);
     if (e.code === "Digit3" || e.code === "Numpad3") selectUpgradeCard(2);
+    if (e.code === "KeyR") {
+      const rerollBtn = document.getElementById("btn-reroll-upgrades");
+      if (rerollBtn) rerollBtn.click();
+    }
   }
 
   if (e.code === "Space") {

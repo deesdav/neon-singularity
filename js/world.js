@@ -218,7 +218,8 @@ const DEFAULT_WEAPONS_TEMPLATE = {
   shockwaveLvl: 0, gravityAmpLvl: 0, regenLvl: 0, solarHaloLvl: 0,
   swarmBotsLvl: 0, gravCannonLvl: 0, phaseMeltLvl: 0,
   whipLvl: 0, mortarLvl: 0, nanoShieldLvl: 0, decoyLvl: 0,
-  lightningTrapLvl: 0, riftSlicerLvl: 0, prismLaserLvl: 0, overchargeCoreLvl: 0
+  lightningTrapLvl: 0, riftSlicerLvl: 0, prismLaserLvl: 0, overchargeCoreLvl: 0,
+  voidLanceLvl: 0, laserRingLvl: 0, chainFlailLvl: 0, stasisFieldLvl: 0
 };
 
 // 8 HOVER-SHIP CLASSES
@@ -294,6 +295,24 @@ const SHIP_CLASSES = [
     hp: 210, speed: 325, dashCd: 1.6, bombs: 3,
     desc: "Nepřemožitelná mobilní tvrz. Má obří pancíř, automaticky odráží nepřátelské projektily zpět a nese Kvantový minomet.",
     initWeapons: { ...DEFAULT_WEAPONS_TEMPLATE, mortarLvl: 1, nanoShieldLvl: 1, regenLvl: 1 }
+  },
+  {
+    id: "CHRONO_SHIP",
+    name: "CHRONO WEAVER",
+    role: "MANIPULÁTOR ČASU // KRYO & PŘETLAK",
+    color: "#67e8f9",
+    hp: 110, speed: 405, dashCd: 1.05, bombs: 3,
+    desc: "Časoprostorový křižník. Každý Hyper-skok zmrazí okolní nepřátele a okamžitě nabije +12 % Přetlaku!",
+    initWeapons: { ...DEFAULT_WEAPONS_TEMPLATE, cryoNovaLvl: 1, overchargeCoreLvl: 1 }
+  },
+  {
+    id: "HIVE_SHIP",
+    name: "HIVE CARRIER",
+    role: "MATEŘSKÁ LOĎ // DRONY & NANOBOTY",
+    color: "#a3e635",
+    hp: 150, speed: 355, dashCd: 1.4, bombs: 2,
+    desc: "Těžký nosič letky. Vypouští do arény autonomní drony, lovecké nanoboty a explozivní klony.",
+    initWeapons: { ...DEFAULT_WEAPONS_TEMPLATE, dronesLvl: 2, swarmBotsLvl: 1, decoyLvl: 1 }
   }
 ];
 
@@ -311,7 +330,9 @@ const SYNERGIES_LIST = [
   { id: "rainbow_annihilation", name: "🌈 SYNERGIE: DUHOVÁ ANIHILACE", color: "#ff0055", check: (w) => w.prismLaserLvl > 0 && w.railgunLvl > 0 },
   { id: "supernova_reactor", name: "☀️ SYNERGIE: JÁDRO SUPERNOVY", color: "#fb923c", check: (w) => w.overchargeCoreLvl > 0 && w.solarHaloLvl > 0 },
   { id: "cryo_shatter", name: "❄️ SYNERGIE: ABSOLUTNÍ TŘÍŠTĚNÍ", color: "#38bdf8", check: (w) => w.cryoNovaLvl > 0 && w.shockwaveLvl > 0 },
-  { id: "event_horizon", name: "🌀 SYNERGIE: HORIZONT UDÁLOSTÍ", color: "#c084fc", check: (w) => w.gravCannonLvl > 0 && w.gravityAmpLvl > 0 }
+  { id: "event_horizon", name: "🌀 SYNERGIE: HORIZONT UDÁLOSTÍ", color: "#c084fc", check: (w) => w.gravCannonLvl > 0 && w.gravityAmpLvl > 0 },
+  { id: "horizon_ripper", name: "⚡ SYNERGIE: ROZPAROVAČ HORIZONTU", color: "#c084fc", check: (w) => w.voidLanceLvl > 0 && w.railgunLvl > 0 },
+  { id: "stellar_corona", name: "🔆 SYNERGIE: HVĚZDNÁ KORÓNA", color: "#fcee09", check: (w) => w.laserRingLvl > 0 && w.solarHaloLvl > 0 }
 ];
 
 // 50 ACHIEVEMENTS / TROPHIES

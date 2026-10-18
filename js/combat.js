@@ -201,6 +201,26 @@ const UPGRADE_POOL = [
         id: "nova_core", name: "JÁDRO SINGULARITY", subtitle: "+1 ČERNÁ DÍRA & +30 MAX TRUP",
         desc: "Doplní +1 nálož Černé díry, zvýší maximální integritu trupu o +30 a opraví 60 HP.",
         color: "#ff9900", apply: () => { player.maxHp += 30; player.hp = Math.min(player.maxHp, player.hp + 60); player.bombs = Math.min(player.maxBombs, player.bombs + 1); }
+    },
+    {
+        id: "void_lance", name: "SINGULARITNÍ KOPÍ", subtitle: "FÁZOVÝ PAPRSEK NA PŘÍDI",
+        desc: "Vystřeluje soustředěný fázový oštěp před příď lodi, který maže střely a taví pancíře. (Synergie s Railgunem -> Rozparovač Horizontu!)",
+        color: "#c084fc", apply: () => { player.weapons.voidLanceLvl++; }
+    },
+    {
+        id: "laser_ring", name: "ORBITÁLNÍ LASEROVÝ PRSTENEC", subtitle: "ROTUJÍCÍ PAPRSKOVÉ POLE",
+        desc: "Kolem lodi rotují souvislé laserové paprsky, které pálí vše ve středním dosahu. (Synergie se Sluneční Aurou -> Hvězdná Koróna!)",
+        color: "#ff0055", apply: () => { player.weapons.laserRingLvl = Math.min(5, (player.weapons.laserRingLvl || 0) + 1); }
+    },
+    {
+        id: "chain_flail", name: "KVANTOVÝ ŘETĚZOVÝ DRTIČ", subtitle: "TĚŽKÁ GRAVITAČNÍ KOULE",
+        desc: "Kolem lodi obíhá na energetickém řetězu masivní gravitační koule, která drtí a odhazuje nepřátele.",
+        color: "#fcee09", apply: () => { player.weapons.chainFlailLvl = Math.min(4, (player.weapons.chainFlailLvl || 0) + 1); }
+    },
+    {
+        id: "stasis_field", name: "CHRONO-STÁZOVÁ BOMBA", subtitle: "ČASOPROSTOROVÁ ANOMÁLIE",
+        desc: "Vypouští za loď modré stázové pole, které zmrazí pohyb nepřátel a rozkládá jejich molekuly.",
+        color: "#38bdf8", apply: () => { player.weapons.stasisFieldLvl++; }
     }
 ];
 
@@ -221,9 +241,14 @@ function selectUpgradeCard(index) {
     addFloatingText(player.x, player.y - 30, `${upg.name} AKTIVNÍ!`, upg.color, 1.3);
 }
 
-function triggerUpgradeSelection() {
+function triggerUpgradeSelection(isReroll = false) {
     state.mode = "UPGRADE";
-    sfx.playLevelUp();
+    if (!isReroll) {
+        sfx.playLevelUp();
+        state.freeRerollAvailable = true;
+    } else {
+        sfx.playButtonClick(1.2);
+    }
 
     const container = document.getElementById("upgrade-cards-container");
     container.innerHTML = "";
@@ -234,6 +259,8 @@ function triggerUpgradeSelection() {
         if (upg.id === "regen") return player.weapons.regenLvl >= 5;
         if (upg.id === "nano_shield") return player.weapons.nanoShieldLvl >= 4;
         if (upg.id === "aegis") return player.weapons.aegisLvl >= 4;
+        if (upg.id === "laser_ring") return player.weapons.laserRingLvl >= 5;
+        if (upg.id === "chain_flail") return player.weapons.chainFlailLvl >= 4;
         return false;
     };
     const availableUpgrades = UPGRADE_POOL.filter(upg => !maxedUpgrade(upg));
@@ -260,6 +287,34 @@ function triggerUpgradeSelection() {
         card.addEventListener("click", () => selectUpgradeCard(idx));
         container.appendChild(card);
     });
+
+    // Tlačítko pro přelosování karet (1x zdarma při každém level-upu, další za 2 čipy)
+    let rerollWrap = document.getElementById("upgrade-reroll-wrap");
+    if (!rerollWrap) {
+        rerollWrap = document.createElement("div");
+        rerollWrap.id = "upgrade-reroll-wrap";
+        rerollWrap.className = "mt-5 flex justify-center";
+        container.parentElement.appendChild(rerollWrap);
+    }
+    const rerollCost = state.freeRerollAvailable ? 0 : 2;
+    const canReroll = state.freeRerollAvailable || meta.shards >= rerollCost;
+    rerollWrap.innerHTML = `
+      <button id="btn-reroll-upgrades" type="button" class="cyber-btn-outline px-6 py-2.5 text-xs ${canReroll ? "border-yellow-400 text-yellow-300" : "opacity-40 cursor-not-allowed"}">
+        🎲 PŘELOSOVAT VÝBĚR KARET (${state.freeRerollAvailable ? "1x ZDARMA" : `◈ ${rerollCost} ČIPY`}) [KLÁVESA R]
+      </button>
+    `;
+    const rerollBtn = document.getElementById("btn-reroll-upgrades");
+    if (rerollBtn && canReroll) {
+        rerollBtn.addEventListener("click", () => {
+            if (!state.freeRerollAvailable) {
+                if (meta.shards < rerollCost) return;
+                meta.shards -= rerollCost;
+                saveMetaProgression();
+            }
+            state.freeRerollAvailable = false;
+            triggerUpgradeSelection(true);
+        });
+    }
 
     document.getElementById("upgrade-modal").classList.remove("hidden");
     document.getElementById("upgrade-modal").classList.add("flex");
@@ -323,13 +378,15 @@ function spawnEnemy(forcedType = null, xOverride = null, yOverride = null) {
     let type = forcedType;
     if (!type) {
         const r = Math.random();
-        if (r < 0.26) type = "CHASER";
-        else if (r < 0.44) type = "WEAVER";
-        else if (r < 0.58) type = "SPLITTER";
-        else if (r < 0.70) type = "KAMIKAZE";
-        else if (r < 0.80 && state.wave >= 2) type = "DISRUPTOR";
-        else if (r < 0.88) type = "JUGGERNAUT";
-        else if (r < 0.95 && state.wave >= 2) type = "PHANTOM";
+        if (r < 0.22) type = "CHASER";
+        else if (r < 0.38) type = "WEAVER";
+        else if (r < 0.50) type = "SPLITTER";
+        else if (r < 0.62) type = "KAMIKAZE";
+        else if (r < 0.72 && state.wave >= 2) type = "DISRUPTOR";
+        else if (r < 0.80 && state.wave >= 2) type = "SNIPER";
+        else if (r < 0.87 && state.wave >= 3) type = "WARP_MINER";
+        else if (r < 0.93) type = "JUGGERNAUT";
+        else if (r < 0.97 && state.wave >= 2) type = "PHANTOM";
         else type = state.wave >= 3 ? "GUARDIAN" : "JUGGERNAUT";
     }
 
@@ -420,16 +477,36 @@ function spawnEnemy(forcedType = null, xOverride = null, yOverride = null) {
             speed: 85 * diffSpdMult, color: "#38bdf8", score: 420, angle: 0, spin: 1.8,
             pulseTimer: 1.6, slowTimer: 0, burnTimer: 0, isElite: true
         });
+    } else if (type === "SNIPER") {
+        const baseHp = 64 * waveScale;
+        enemies.push({
+            type, x, y, vx: 0, vy: 0, radius: 17,
+            hp: baseHp, maxHp: baseHp, shield: baseHp * 0.35, maxShield: baseHp * 0.35,
+            speed: 95 * diffSpdMult, color: "#ff0055", score: 340,
+            angle: 0, spin: 0, shootTimer: 2.4, aiming: false, slowTimer: 0, burnTimer: 0, isElite
+        });
+    } else if (type === "WARP_MINER") {
+        const baseHp = 105 * waveScale;
+        enemies.push({
+            type, x, y, vx: 0, vy: 0, radius: 21,
+            hp: baseHp, maxHp: baseHp, shield: baseHp * 0.4, maxShield: baseHp * 0.4,
+            speed: 135 * diffSpdMult, color: "#fcee09", score: 360,
+            angle: Math.random() * Math.PI * 2, spin: 2.5, mineTimer: 2.2, slowTimer: 0, burnTimer: 0, isElite: true
+        })
     } else if (type === "BOSS") {
         state.bossActive = true;
-        const bossIndex = Math.floor(((state.wave / 3) - 1) % 6);
+        const bossIndex = Math.floor(((state.wave / 3) - 1) % 10);
         const bossProfiles = [
             { subtype: "ARCHON", name: "OMEGA ARCHON // SINGULARITA", color: "#ff0055", hpMult: 1.0, radius: 56 },
             { subtype: "SERAPH", name: "CHRONO SERAPH // VALKÝRA", color: "#fcee09", hpMult: 0.95, radius: 52 },
             { subtype: "HYDRA", name: "NEXUS HYDRA // TRI-CORE MATRIX", color: "#00ffaa", hpMult: 1.15, radius: 58 },
             { subtype: "LEVIATHAN", name: "VOID LEVIATHAN // KYBER-HAD", color: "#bc13fe", hpMult: 1.25, radius: 54 },
             { subtype: "NEMESIS", name: "AETHER NEMESIS // FÁZOVÝ PŘÍZRAK", color: "#38bdf8", hpMult: 1.20, radius: 52 },
-            { subtype: "COLOSSUS", name: "SOLARIS COLOSSUS // HVĚZDNÁ KOVÁRNA", color: "#fb923c", hpMult: 1.38, radius: 62 }
+            { subtype: "COLOSSUS", name: "SOLARIS COLOSSUS // HVĚZDNÁ KOVÁRNA", color: "#fb923c", hpMult: 1.38, radius: 62 },
+            { subtype: "PRISM", name: "QUANTUM PRISM // KRYSTALICKÝ HRANOL", color: "#00f3ff", hpMult: 1.22, radius: 54 },
+            { subtype: "TITAN", name: "GRAVITY TITAN // DVOJITÁ SINGULARITA", color: "#a855f7", hpMult: 1.32, radius: 58 },
+            { subtype: "ARACHNID", name: "CYBER ARACHNID // MECHANICKÁ TARANTULE", color: "#a3e635", hpMult: 1.18, radius: 54 },
+            { subtype: "VALKYRIE", name: "OMEGA VALKYRIE // ZRCADLOVÝ LOVEC", color: "#f43f5e", hpMult: 1.28, radius: 56 }
         ];
         const profile = bossProfiles[bossIndex];
         const bossHp = 2100 * waveScale * profile.hpMult;
@@ -577,6 +654,57 @@ function fireRiftSlicer() {
         });
     }
     sfx.playLaser(0.65);
+}
+
+function fireVoidLance() {
+    const hasSynergy = player.weapons.railgunLvl > 0;
+    const len = 250 + player.weapons.voidLanceLvl * 45 + (hasSynergy ? 140 : 0);
+    const a = player.angle;
+    const x2 = player.x + Math.cos(a) * len;
+    const y2 = player.y + Math.sin(a) * len;
+
+    railBeams.push({ x1: player.x, y1: player.y, x2, y2, color: hasSynergy ? "#fcee09" : "#c084fc", life: 0.22, maxLife: 0.22 });
+    sfx.playLaser(0.55);
+
+    const dx = Math.cos(a);
+    const dy = Math.sin(a);
+    const dmg = (90 + player.weapons.voidLanceLvl * 38) * player.dmgMult * (hasSynergy ? 1.35 : 1.0);
+
+    for (let i = enemies.length - 1; i >= 0; i--) {
+        const e = enemies[i];
+        const ex = e.x - player.x;
+        const ey = e.y - player.y;
+        const proj = ex * dx + ey * dy;
+        if (proj > 0 && proj <= len) {
+            const perpDist = Math.abs(ex * dy - ey * dx);
+            if (perpDist < e.radius + 22) {
+                damageEnemy(e, dmg, "#c084fc", true, false, "SINGULARITNÍ KOPÍ");
+            }
+        }
+    }
+    // Smaže nepřátelské střely v dráze kopí
+    for (let i = enemyBullets.length - 1; i >= 0; i--) {
+        const eb = enemyBullets[i];
+        const ex = eb.x - player.x;
+        const ey = eb.y - player.y;
+        const proj = ex * dx + ey * dy;
+        if (proj > 0 && proj <= len && Math.abs(ex * dy - ey * dx) < 26) {
+            fastRemove(enemyBullets, i);
+        }
+    }
+}
+
+function dropStasisField() {
+    plasmaPools.push({
+        x: player.x,
+        y: player.y,
+        radius: 68 + player.weapons.stasisFieldLvl * 14,
+        dmg: (78 + player.weapons.stasisFieldLvl * 28) * player.dmgMult,
+        color: "#38bdf8",
+        isTrap: true,
+        life: 5.0,
+        maxLife: 5.0
+    });
 }
 
 function firePrismFan() {
@@ -919,6 +1047,19 @@ function triggerHyperDash() {
 
     if (player.shipClass === "STALKER" || player.weapons.decoyLvl > 0) {
         spawnHoloDecoy();
+    }
+
+    if (player.shipClass === "CHRONO_SHIP") {
+        spawnShockwave(player.x, player.y, 220, "#67e8f9", 4, 520);
+        for (const e of enemies) {
+            if (Math.hypot(e.x - player.x, e.y - player.y) <= 220 + e.radius) {
+                e.slowTimer = Math.max(e.slowTimer || 0, 3.0);
+                damageEnemy(e, 45 * player.dmgMult, "#67e8f9", false, false, "KRYO-POLE");
+            }
+        }
+        if (state.overdriveTimer <= 0) {
+            state.overdrive = Math.min(100, state.overdrive + 12);
+        }
     }
 
     if (player.hp <= player.maxHp * 0.2) {

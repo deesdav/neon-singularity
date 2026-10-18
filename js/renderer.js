@@ -62,6 +62,20 @@ function getShipSVGPreview(shipId, color) {
       <path d="M 18,-16 A 22,22 0 0,1 18,16" fill="none" stroke="#fcee09" stroke-width="2.5"/>
       <rect x="-12" y="-8" width="18" height="16" fill="none" stroke="#ffffff" stroke-width="1.4"/>
     </svg>`;
+  } else if (shipId === "CHRONO_SHIP") {
+    return `<svg viewBox="-34 -28 68 56" class="w-16 h-11 mx-auto mb-1">
+      <circle cx="0" cy="0" r="22" fill="none" stroke="${color}" stroke-dasharray="3 3" stroke-width="1.4"/>
+      <polygon points="27,0 6,-19 -8,-6 -22,-18 -14,0 -22,18 -8,6 6,19" fill="rgba(103,232,249,0.15)" stroke="${color}" stroke-width="2.2"/>
+      <polygon points="12,0 0,-10 -12,0 0,10" fill="none" stroke="#fcee09" stroke-width="1.5"/>
+      <circle cx="0" cy="0" r="3.5" fill="#ffffff"/>
+    </svg>`;
+  } else if (shipId === "HIVE_SHIP") {
+    return `<svg viewBox="-34 -28 68 56" class="w-16 h-11 mx-auto mb-1">
+      <polygon points="20,-12 26,0 20,12 -6,22 -24,14 -18,0 -24,-14 -6,-22" fill="rgba(163,230,53,0.15)" stroke="${color}" stroke-width="2.2"/>
+      <rect x="-10" y="-12" width="18" height="24" fill="none" stroke="#ffffff" stroke-width="1.3"/>
+      <circle cx="-1" cy="-6" r="2.5" fill="#fcee09"/>
+      <circle cx="-1" cy="6" r="2.5" fill="#fcee09"/>
+    </svg>`;
   }
   return `<svg viewBox="-34 -28 68 56" class="w-16 h-11 mx-auto mb-1">
     <polygon points="27,0 -10,-16 -5,-5 -20,-10 -13,0 -20,10 -5,5 -10,16" fill="rgba(0,243,255,0.14)" stroke="${color}" stroke-width="2.2"/>
@@ -504,6 +518,10 @@ function updateHUD() {
   if (player.weapons.dronesLvl > 0) addBadge(`DRONY x${player.weapons.dronesLvl}`, "#38bdf8");
   if (player.weapons.bladesLvl > 0) addBadge(`ČEPELE x${player.weapons.bladesLvl}`, "#bc13fe");
   if (player.weapons.teslaLvl > 0) addBadge(`TESLA LV${player.weapons.teslaLvl}`, "#5ffbff");
+  if (player.weapons.voidLanceLvl > 0) addBadge(`KOPÍ LV${player.weapons.voidLanceLvl}`, "#c084fc");
+  if (player.weapons.laserRingLvl > 0) addBadge(`PRSTENEC LV${player.weapons.laserRingLvl}`, "#ff0055");
+  if (player.weapons.chainFlailLvl > 0) addBadge(`DRTIČ LV${player.weapons.chainFlailLvl}`, "#fcee09");
+  if (player.weapons.stasisFieldLvl > 0) addBadge(`STÁZE LV${player.weapons.stasisFieldLvl}`, "#38bdf8");
 
   // Aktualizace reálného času a data v HUDech
   const now = new Date();
@@ -627,6 +645,12 @@ function drawPlayerShipGeometry(ctx, shipClass, color) {
     } else if (shipClass === "JUGGERNAUT_SHIP") {
       ctx.moveTo(22, -14); ctx.lineTo(26, -6); ctx.lineTo(26, 6); ctx.lineTo(22, 14);
       ctx.lineTo(4, 22); ctx.lineTo(-20, 20); ctx.lineTo(-25, 10); ctx.lineTo(-25, -10); ctx.lineTo(-20, -20); ctx.lineTo(4, -22);
+    } else if (shipClass === "CHRONO_SHIP") {
+      ctx.moveTo(27, 0); ctx.lineTo(6, -19); ctx.lineTo(-8, -6); ctx.lineTo(-22, -18);
+      ctx.lineTo(-14, 0); ctx.lineTo(-22, 18); ctx.lineTo(-8, 6); ctx.lineTo(6, 19);
+    } else if (shipClass === "HIVE_SHIP") {
+      ctx.moveTo(20, -12); ctx.lineTo(26, 0); ctx.lineTo(20, 12); ctx.lineTo(-6, 22);
+      ctx.lineTo(-24, 14); ctx.lineTo(-18, 0); ctx.lineTo(-24, -14); ctx.lineTo(-6, -22)
     } else {
       ctx.moveTo(26, 0); ctx.lineTo(-10, -16); ctx.lineTo(-5, -5); ctx.lineTo(-19, -9);
       ctx.lineTo(-13, 0); ctx.lineTo(-19, 9); ctx.lineTo(-5, 5); ctx.lineTo(-10, 16);
@@ -1017,9 +1041,9 @@ function render() {
       }
     }
 
-    if (e.type === "PHANTOM" && e.aiming) {
-      ctx.strokeStyle = "rgba(255, 42, 133, 0.55)";
-      ctx.lineWidth = 1.5;
+    if ((e.type === "PHANTOM" || e.type === "SNIPER") && e.aiming) {
+      ctx.strokeStyle = e.type === "SNIPER" ? "rgba(255, 0, 51, 0.75)" : "rgba(255, 42, 133, 0.55)";
+      ctx.lineWidth = e.type === "SNIPER" ? 2.2 : 1.5;
       ctx.beginPath();
       ctx.moveTo(e.x, e.y);
       ctx.lineTo(player.x, player.y);
@@ -1088,7 +1112,31 @@ function render() {
         ctx.lineTo(-r * 0.45, 0); ctx.lineTo(-r * 0.9, r * 1.05); ctx.lineTo(r * 0.3, r * 0.35); ctx.lineTo(r * 1.4, 3);
         ctx.closePath();
         ctx.stroke();
-      } else if (e.type === "GUARDIAN" || e.type === "JUGGERNAUT") {
+      } else if (e.type === "SNIPER") {
+        ctx.beginPath();
+        ctx.moveTo(r * 1.6, 0); ctx.lineTo(-r * 0.8, -r * 0.9);
+        ctx.lineTo(-r * 0.4, 0); ctx.lineTo(-r * 0.8, r * 0.9);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.strokeStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.moveTo(-r * 0.4, 0); ctx.lineTo(r * 1.9, 0);
+        ctx.stroke();
+      } else if (e.type === "WARP_MINER") {
+        ctx.beginPath();
+        for (let k = 0; k < 6; k++) {
+          const a = (k * Math.PI) / 3;
+          if (k === 0) ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+          else ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+        }
+        ctx.closePath();
+        ctx.stroke();
+        ctx.strokeStyle = "#fcee09";
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.45, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      else if (e.type === "GUARDIAN" || e.type === "JUGGERNAUT") {
         ctx.beginPath();
         for (let k = 0; k < 8; k++) {
           const a = (k * Math.PI) / 4;
@@ -1263,6 +1311,93 @@ function render() {
           ctx.strokeStyle = "#ffffff";
           ctx.strokeRect(-10, -10, 20, 20);
 
+        } else if (e.subtype === "PRISM") {
+          // 7. QUANTUM PRISM: Krystalický osmistěn se spektrálním jádrem
+          for (let layer = 0; layer < 3; layer++) {
+            ctx.save();
+            ctx.rotate(layer * (Math.PI / 6) + (layer % 2 === 0 ? e.angle : -e.angle));
+            ctx.strokeStyle = layer === 0 ? "#00f3ff" : layer === 1 ? "#ff007f" : "#fcee09";
+            ctx.lineWidth = 3.2 - layer * 0.6;
+            const s = (r * (1.15 - layer * 0.22)) * corePulse;
+            ctx.beginPath();
+            ctx.moveTo(0, -s); ctx.lineTo(s, 0); ctx.lineTo(0, s); ctx.lineTo(-s, 0);
+            ctx.closePath();
+            ctx.stroke();
+            ctx.restore();
+          }
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath();
+          ctx.arc(0, 0, 9 * corePulse, 0, Math.PI * 2);
+          ctx.fill();
+
+        } else if (e.subtype === "TITAN") {
+          // 8. GRAVITY TITAN: Dvojitá singularita se dvěma obíhajícími měsíci
+          ctx.strokeStyle = "#a855f7";
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.arc(0, 0, r * 0.75, 0, Math.PI * 2);
+          ctx.stroke();
+          for (let m = 0; m < 2; m++) {
+            const ma = e.angle * 1.5 + m * Math.PI;
+            const mx = Math.cos(ma) * (r * 1.25);
+            const my = Math.sin(ma) * (r * 1.25);
+            ctx.strokeStyle = "#fcee09";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, 0); ctx.lineTo(mx, my);
+            ctx.stroke();
+            ctx.fillStyle = "#050012";
+            ctx.strokeStyle = "#00f3ff";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(mx, my, 14 * corePulse, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+          }
+
+        } else if (e.subtype === "ARACHNID") {
+          // 9. CYBER ARACHNID: Mechanická tarantule s 8 kloubovými končetinami
+          const legWave = Math.sin(performance.now() * 0.015) * 0.25;
+          ctx.strokeStyle = "#a3e635";
+          ctx.lineWidth = 3;
+          for (let side = -1; side <= 1; side += 2) {
+            for (let leg = 0; leg < 4; leg++) {
+              const baseA = side * (0.45 + leg * 0.38) + (leg % 2 === 0 ? legWave : -legWave);
+              const kneeX = Math.cos(baseA) * (r * 0.85);
+              const kneeY = Math.sin(baseA) * (r * 0.85);
+              const tipX = Math.cos(baseA - side * 0.3) * (r * 1.45);
+              const tipY = Math.sin(baseA - side * 0.3) * (r * 1.45);
+              ctx.beginPath();
+              ctx.moveTo(0, 0); ctx.lineTo(kneeX, kneeY); ctx.lineTo(tipX, tipY);
+              ctx.stroke();
+            }
+          }
+          ctx.fillStyle = "#0a1905";
+          ctx.strokeStyle = "#ffffff";
+          ctx.lineWidth = 2.8;
+          ctx.beginPath();
+          ctx.arc(0, 0, r * 0.55 * corePulse, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+        } else if (e.subtype === "VALKYRIE") {
+          // 10. OMEGA VALKYRIE: Bitevní křižník s roztaženými plazmovými křídly
+          ctx.strokeStyle = "#f43f5e";
+          ctx.lineWidth = 3.4;
+          ctx.beginPath();
+          ctx.moveTo(r * 1.4, 0);
+          ctx.lineTo(r * 0.2, -r * 0.5);
+          ctx.lineTo(-r * 0.4, -r * 1.45);
+          ctx.lineTo(-r * 0.9, -r * 0.8);
+          ctx.lineTo(-r * 0.5, 0);
+          ctx.lineTo(-r * 0.9, r * 0.8);
+          ctx.lineTo(-r * 0.4, r * 1.45);
+          ctx.lineTo(r * 0.2, r * 0.5);
+          ctx.closePath();
+          ctx.stroke();
+          ctx.strokeStyle = "#00f3ff";
+          ctx.lineWidth = 2.2;
+          ctx.strokeRect(-r * 0.3, -r * 0.3, r * 0.6, r * 0.6)
         } else {
           // 6. SOLARIS COLOSSUS: Hvězdná kovárna s ozubeným prstencem a korónou
           ctx.strokeStyle = "#fb923c";
@@ -1374,6 +1509,48 @@ function render() {
         ctx.beginPath();
         ctx.moveTo(9, 0); ctx.lineTo(-5, -6); ctx.lineTo(-2, 0); ctx.lineTo(-5, 6);
         ctx.closePath();
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    if (player.weapons.laserRingLvl > 0) {
+      const beamCount = 1 + player.weapons.laserRingLvl;
+      const ringR = 115 + (player.weapons.solarHaloLvl > 0 ? 35 : 0);
+      ctx.save();
+      ctx.strokeStyle = player.weapons.solarHaloLvl > 0 ? "#fcee09" : "#ff0055";
+      ctx.lineWidth = 2.8;
+      for (let i = 0; i < beamCount; i++) {
+        const ba = (player.laserRingAngle || 0) + (i * Math.PI * 2) / beamCount;
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, ringR, ba - 0.35, ba + 0.35);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    if (player.weapons.chainFlailLvl > 0) {
+      const flailCount = Math.min(3, player.weapons.chainFlailLvl);
+      const orbitR = 96;
+      for (let i = 0; i < flailCount; i++) {
+        const fa = (player.flailAngle || 0) + (i * Math.PI * 2) / flailCount;
+        const fx = player.x + Math.cos(fa) * orbitR;
+        const fy = player.y + Math.sin(fa) * orbitR;
+        ctx.save();
+        ctx.strokeStyle = "rgba(252, 238, 9, 0.45)";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(player.x, player.y);
+        ctx.lineTo(fx, fy);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = "#fcee09";
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(fx, fy, 11, 0, Math.PI * 2);
+        ctx.fill();
         ctx.stroke();
         ctx.restore();
       }
