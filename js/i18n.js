@@ -264,6 +264,15 @@ const EN_DICTIONARY = {
     "LASEROVÝ PRSTENEC": "LASER RING",
     "ŘETĚZOVÝ DRTIČ": "CHAIN FLAIL",
 
+    "TROFEJNÍ MILNÍKY // JEDNORÁZOVÉ ODMĚNY": "TROPHY MILESTONES // ONE-TIME REWARDS",
+    "LOVEC TROFEJÍ I": "TROPHY HUNTER I",
+    "LOVEC TROFEJÍ II": "TROPHY HUNTER II",
+    "ŠAMPION SÍNĚ SLÁVY": "HALL OF FAME CHAMPION",
+    "10 trofejí": "10 trophies",
+    "25 trofejí": "25 trophies",
+    "50 trofejí": "50 trophies",
+    "ODMĚNA VYZVEDNUTA": "REWARD COLLECTED",
+
     // 7. 32 Zbraní & Vylepšení (UPGRADE_POOL)
     "KVANTOVÁ EVOLUCE SYSTÉMU // KLIKNI, STISKNI [1, 2, 3] NEBO ŠIPKY NA OVLADAČI [⬅️ ⬆️ ➡️]": "QUANTUM SYSTEM EVOLUTION // CLICK, PRESS [1, 2, 3] OR D-PAD [⬅️ ⬆️ ➡️]",
     "VYLEPŠENÍ ARZENÁLU": "ARSENAL UPGRADE",
