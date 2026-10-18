@@ -288,6 +288,7 @@ function saveGameProgress(showNotification = false, slot = currentSaveSlot) {
         mutator: state.mutator,
         score: state.score, combo: state.combo, maxCombo: state.maxCombo,
         wave: state.wave, enemiesToSpawn: state.enemiesToSpawn,
+        runTimer: state.runTimer,
         bossActive: state.bossActive, overdrive: state.overdrive,
         overdriveTimer: state.overdriveTimer,
         runStats: state.runStats
@@ -301,9 +302,7 @@ function saveGameProgress(showNotification = false, slot = currentSaveSlot) {
         bombs: player.bombs, maxBombs: player.maxBombs,
         aegisReady: player.aegisReady, aegisCooldown: player.aegisCooldown,
         unlockedSynergies: { ...player.unlockedSynergies },
-        weapons: {
-          ...DEFAULT_WEAPONS_TEMPLATE
-        },
+        weapons: { ...player.weapons },
       },
       enemies: enemies.slice(0, 60),
       gems: gems.slice(0, 120),
@@ -374,6 +373,8 @@ function loadSavedGame(slot = currentSaveSlot) {
     decoys.length = 0;
 
     Object.assign(state, data.state);
+    // Backward compatibility with save slots created before runTimer was persisted.
+    state.runTimer = Number.isFinite(data.state.runTimer) ? data.state.runTimer : 0;
     state.difficulty = data.state.difficulty || "ARCADE";
     state.mutator = data.state.mutator || "NONE";
     state.runStats = data.state.runStats || { totalKills: 0, eliteKills: 0, bossKills: 0, blackHolesUsed: 0, gemsCollected: 0, weaponDmg: {} };
@@ -940,7 +941,7 @@ function update(dt) {
   if (player.xp >= player.xpNext) {
     player.xp -= player.xpNext;
     player.level++;
-    player.xpNext = Math.floor(player.xpNext * 1.28);
+    player.xpNext = Math.floor(player.xpNext * 1.32);
     triggerUpgradeSelection();
     updateHUD();
     return;
