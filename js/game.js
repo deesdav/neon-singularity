@@ -271,9 +271,10 @@ function checkWeaponSynergies() {
   if (installedCount >= 6) unlockAchievement("arsenal_expert");
 }
 
-// XP growth is centralized so normal level-ups and Overclock start XP use identical rules.
-function getNextXpThreshold(currentThreshold) {
-  return Math.max(1, Math.floor(currentThreshold * 1.32));
+// One formula for all level-ups: discount applies to each threshold without compounding.
+function getXpThresholdForLevel(level) {
+  const xpDiscount = 1 - Math.min(4, Math.max(0, meta.upgrades.rerollDiscountLvl || 0)) * 0.05;
+  return Math.max(1, Math.floor(95 * Math.pow(1.32, Math.max(0, level - 1)) * xpDiscount));
 }
 
 function saveGameProgress(showNotification = false, slot = currentSaveSlot) {
@@ -310,7 +311,13 @@ function saveGameProgress(showNotification = false, slot = currentSaveSlot) {
         weapons: { ...player.weapons }
       },
       // Do not silently discard enemies or XP gems when a save is made mid-wave.
-      enemies: enemies.map(e => ({ ...e })),
+      enemies: enemies.map(e => ({
+        ...e,
+        // performance.now() resets on page reload; persist elapsed boss time instead.
+        elapsedSinceSpawnMs: e.type === "BOSS" && Number.isFinite(e.spawnTime)
+          ? Math.max(0, performance.now() - e.spawnTime) : undefined,
+        spawnTime: e.type === "BOSS" ? undefined : e.spawnTime
+      })),
       gems: gems.map(g => ({ ...g })),
       supplyPods: supplyPods.map(pod => ({ ...pod }))
     };
@@ -403,7 +410,15 @@ function loadSavedGame(slot = currentSaveSlot) {
     player.y = Math.max(40, Math.min(H - 40, player.y || H / 2));
     player.invulnTimer = 1.5;
 
-    if (Array.isArray(data.enemies)) data.enemies.forEach(e => enemies.push(e));
+    if (Array.isArray(data.enemies)) data.enemies.forEach(savedEnemy => {
+      const enemy = { ...savedEnemy };
+      if (enemy.type === "BOSS") {
+        const elapsed = Number.isFinite(enemy.elapsedSinceSpawnMs) ? Math.max(0, enemy.elapsedSinceSpawnMs) : 0;
+        enemy.spawnTime = performance.now() - elapsed;
+        delete enemy.elapsedSinceSpawnMs;
+      }
+      enemies.push(enemy);
+    });
     if (Array.isArray(data.gems)) data.gems.forEach(g => gems.push(g));
     if (Array.isArray(data.supplyPods)) data.supplyPods.forEach(sp => supplyPods.push(sp));
 
@@ -537,8 +552,7 @@ function startNewGame() {
   player.hp = player.maxHp;
 
   const startXpBonus = (meta.overclock?.xpOc || 0) * 35;
-  const xpReqDiscount = 1 - (meta.upgrades.rerollDiscountLvl || 0) * 0.05;
-  player.xpNext = Math.round(95 * xpReqDiscount);
+  player.xpNext = getXpThresholdForLevel(player.level);
   player.level = 1;
   player.xp = startXpBonus;
 
@@ -958,7 +972,7 @@ function update(dt) {
   if (player.xp >= player.xpNext) {
     player.xp -= player.xpNext;
     player.level++;
-    player.xpNext = getNextXpThreshold(player.xpNext);
+    player.xpNext = getXpThresholdForLevel(player.level);
     triggerUpgradeSelection();
     updateHUD();
     return;
@@ -2037,7 +2051,7 @@ function update(dt) {
         player.level++;
         if (player.level >= 10) unlockAchievement("level_10");
         if (player.level >= 15) unlockAchievement("level_15");
-        player.xpNext = getNextXpThreshold(player.xpNext);
+        player.xpNext = getXpThresholdForLevel(player.level);
         triggerUpgradeSelection();
       }
       updateHUD();
