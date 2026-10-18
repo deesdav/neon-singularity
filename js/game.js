@@ -2001,8 +2001,10 @@ function update(dt) {
     eb.y += eb.vy * enemyDt;
 
     if (Math.hypot(eb.x - player.x, eb.y - player.y) < eb.radius + player.radius - 3) {
-      // Opravené ID "JUGGERNAUT_SHIP" pro odraz střel a trofej Železná zeď
-      if (player.shipClass === "JUGGERNAUT_SHIP" || (player.weapons.nanoShieldLvl > 0 && player.weapons.aegisLvl > 0)) {
+      // The Juggernaut and the Nano+Aegis fusion actually deflect the projectile instead of also taking its hit.
+      const canReflectProjectile = player.shipClass === "JUGGERNAUT_SHIP"
+        || (player.weapons.nanoShieldLvl > 0 && player.weapons.aegisLvl > 0);
+      if (canReflectProjectile) {
         bullets.push({
           x: eb.x, y: eb.y, px: eb.x, py: eb.y,
           vx: -eb.vx * 2.2, vy: -eb.vy * 2.2,
@@ -2013,8 +2015,9 @@ function update(dt) {
         });
         meta.stats.reflectedBullets = (meta.stats.reflectedBullets || 0) + 1;
         if (meta.stats.reflectedBullets >= 15) unlockAchievement("juggernaut_master");
+      } else {
+        damagePlayer(15);
       }
-      damagePlayer(15);
       fastRemove(enemyBullets, i);
       continue;
     }
