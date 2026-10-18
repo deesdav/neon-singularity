@@ -339,9 +339,38 @@ function renderCyberShop() {
   }
 }
 
+function renderTrophyRewardsPanel() {
+  const panel = document.getElementById("trophy-rewards-panel");
+  if (!panel) return;
+  const unlockedCount = getUnlockedAchievementCount();
+  const claimedMilestones = meta.trophyMilestones || {};
+
+  const milestoneCards = TROPHY_MILESTONES.map(milestone => {
+    const done = unlockedCount >= milestone.required && claimedMilestones[milestone.id] === true;
+    const progress = Math.min(100, Math.round((unlockedCount / milestone.required) * 100));
+    return `
+      <div class="border ${done ? "border-emerald-400/60 bg-emerald-500/10" : "border-slate-700 bg-slate-950/80"} p-2.5">
+        <div class="flex justify-between gap-2 items-center">
+          <span class="font-orbitron text-[10px] font-bold ${done ? "text-emerald-300" : "text-slate-200"}">${milestone.name}</span>
+          <span class="text-[10px] font-orbitron text-yellow-300">+${milestone.reward} ◈</span>
+        </div>
+        <div class="text-[10px] text-slate-400 mt-1">${milestone.required} trofejí</div>
+        <div class="h-1 bg-slate-800 mt-2 overflow-hidden"><div class="h-full bg-cyan-400" style="width:${progress}%"></div></div>
+        <div class="text-[9px] mt-1 ${done ? "text-emerald-300" : "text-slate-500"}">${done ? "ODMĚNA VYZVEDNUTA" : unlockedCount >= milestone.required ? "PŘIPRAVENO K ULOŽENÍ" : `${Math.min(unlockedCount, milestone.required)} / ${milestone.required}`}</div>
+      </div>`;
+  }).join("");
+
+  panel.innerHTML = `
+    <div class="mb-3">
+      <div class="font-orbitron text-xs font-black tracking-widest text-cyan-300 mb-2">⚡ TROFEJNÍ MILNÍKY // JEDNORÁZOVÉ ODMĚNY</div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">${milestoneCards}</div>
+    </div>`;
+}
+
 function renderAchievementsModal() {
-  const unlockedCount = Object.keys(meta.achievements).length;
+  const unlockedCount = getUnlockedAchievementCount();
   document.getElementById("modal-ach-progress").textContent = `${unlockedCount} / ${ACHIEVEMENTS_LIST.length}`;
+  renderTrophyRewardsPanel();
   const gridEl = document.getElementById("achievements-grid");
   gridEl.innerHTML = "";
 
@@ -693,8 +722,8 @@ function drawPlayerShipGeometry(ctx, shipClass, color) {
     ctx.arc(0, 0, 26, -0.85, 0.85);
     ctx.stroke();
   }
-}
 
+}
 function render() {
   ctx.globalCompositeOperation = "source-over";
   ctx.fillStyle = "rgba(2, 0, 8, 0.44)";
