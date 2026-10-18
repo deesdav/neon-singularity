@@ -799,7 +799,7 @@ function updateFlamethrower(dt) {
         const a = player.angle + (Math.random() - 0.5) * coneHalfAngle * 1.8;
         const spd = 280 + Math.random() * 240;
         const cols = ["#ff3300", "#ff8800", "#fcee09"];
-        if (particles.length < 1600) {
+        if (particles.length < MAX_PARTICLES) {
             particles.push({
                 x: player.x + Math.cos(player.angle) * 18,
                 y: player.y + Math.sin(player.angle) * 18,
