@@ -12,12 +12,12 @@ Hra běží v moderním prohlížeči a nevyžaduje instalaci. Při prvním otev
 
 ## ⚡ Hlavní funkce
 
-- **8 tříd vznášedel** – vyber si loď podle svého herního stylu a uprav její barvu.
+- **10 tříd vznášedel** – vyber si loď podle svého herního stylu a uprav její barvu.
 - **Arzenál a evoluce** – během mise získávej úrovně a vybírej si nová vylepšení.
-- **32 zbraní a 13 fúzních synergií** – kombinuj zbraně a vytvářej silnější efekty.
+- **36 zbraní a 15 fúzních synergií** – kombinuj zbraně a vytvářej silnější efekty.
 - **4 režimy obtížnosti** – Arcade, Hardcore, Ultra a Endless.
 - **Denní mutátory** – měň pravidla mise pomocí speciálních modifikátorů.
-- **Boss souboje** – sleduj zdraví bosse a připrav se na náročnější střety.
+- **10 variant bossů** – sleduj zdraví bosse a připrav se na náročnější střety.
 - **Cyber-shop a Quantum Overclock** – utrácej kvantové čipy za trvalá vylepšení.
 - **50 trofejí a výzev** – plň úkoly a sleduj svůj postup.
 - **3 paměťové sloty** – ukládej a obnovuj rozehrané mise.

@@ -420,7 +420,8 @@ function loadSavedGame(slot = currentSaveSlot) {
     state.runStats.weaponDmg = { ...(state.runStats.weaponDmg || {}) };
 
     Object.assign(player, data.player);
-    player.weapons = { ...player.weapons, ...(data.player.weapons || {}) };
+    // Merge defaults first so saves created before new weapons existed remain upgrade-safe.
+    player.weapons = { ...DEFAULT_WEAPONS_TEMPLATE, ...(data.player.weapons || {}) };
     player.unlockedSynergies = { ...(data.player.unlockedSynergies || {}) };
     player.afterimages = [];
     player.x = Math.max(40, Math.min(W - 40, player.x || W / 2));
@@ -1586,7 +1587,8 @@ function update(dt) {
     for (const e of enemies) {
       if (Math.hypot(e.x - pool.x, e.y - pool.y) < e.radius + pool.radius) {
         if (pool.isTrap) e.slowTimer = Math.max(e.slowTimer || 0, 0.8);
-        damageEnemy(e, pool.dmg * dt, pool.color || "#fb923c", false, false, pool.isTrap ? "BLESKOVÁ PAST" : "PLAZMOVÁ STOPA");
+        const weaponName = pool.weaponName || (pool.isTrap ? "BLESKOVÁ PAST" : "PLAZMOVÁ STOPA");
+        damageEnemy(e, pool.dmg * dt, pool.color || "#fb923c", false, false, weaponName);
       }
     }
     if (pool.life <= 0) fastRemove(plasmaPools, i);
@@ -2351,7 +2353,8 @@ window.addEventListener("keydown", (e) => {
     if (e.code === "Digit1" || e.code === "Numpad1") selectUpgradeCard(0);
     if (e.code === "Digit2" || e.code === "Numpad2") selectUpgradeCard(1);
     if (e.code === "Digit3" || e.code === "Numpad3") selectUpgradeCard(2);
-    if (e.code === "KeyR") {
+    // Ignore auto-repeat so holding R cannot spend multiple rerolls unintentionally.
+    if (e.code === "KeyR" && !e.repeat) {
       const rerollBtn = document.getElementById("btn-reroll-upgrades");
       if (rerollBtn) rerollBtn.click();
     }
