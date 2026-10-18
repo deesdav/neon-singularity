@@ -1127,7 +1127,7 @@ function damageEnemy(e, dmg, hitColor = "#00f3ff", shieldBonus = false, fromBoom
             gems.push({
                 x: e.x, y: e.y,
                 vx: Math.cos(ga) * gs, vy: Math.sin(ga) * gs,
-                val: Math.round((isBoss ? 20 : 13) * xpBonus),
+                val: Math.round((isBoss ? 16 : 13) * xpBonus),
                 angle: Math.random() * 6, magnetized: false
             });
         }
