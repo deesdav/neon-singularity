@@ -586,7 +586,7 @@ function startNewGame() {
     "aegisCooldown", "bladeAngle", "droneAngle"
   ].forEach(key => { player[key] = 0; });
   player.afterimages = [];
-  player.aegisReady = player.weapons.aegisLvl > 0 || player.weapons.nanoShieldLvl > 0;
+  player.aegisReady = player.weapons.aegisLvl > 0;
   player.aegisCooldown = 0;
 
   document.getElementById("ship-hud-name").textContent = chosenShip.name;
@@ -1071,7 +1071,7 @@ function update(dt) {
     }
   }
 
-  if ((player.weapons.aegisLvl > 0 || player.weapons.nanoShieldLvl > 0) && !player.aegisReady) {
+  if (player.weapons.aegisLvl > 0 && !player.aegisReady) {
     player.aegisCooldown -= dt;
     if (player.aegisCooldown <= 0) {
       player.aegisReady = true;
