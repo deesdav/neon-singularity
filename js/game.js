@@ -379,6 +379,21 @@ function clearSavedGame(slot = currentSaveSlot) {
   refreshMenuSaveUI();
 }
 
+// Reset only this game's progression keys; do not wipe unrelated localStorage data on the same origin.
+function resetAllProgress() {
+  const confirmed = window.confirm(
+    "OPRAVDU RESETOVAT HERNÍ POSTUP?\\n\\nBudou smazány čipy, odemčení, trofeje, nejlepší skóre a všechny 3 uložené mise. Tuto akci nelze vrátit."
+  );
+  if (!confirmed) return;
+
+  const keysToRemove = [META_KEY, BEST_KEY, LEGACY_SAVE_KEY];
+  for (let slot = 1; slot <= 3; slot++) {
+    keysToRemove.push(getSaveKey(slot), `neon_singularity_slot_name_${slot}`);
+  }
+  keysToRemove.forEach(key => localStorage.removeItem(key));
+  window.location.reload();
+}
+
 function hasSavedGame(slot = currentSaveSlot) {
   return !!localStorage.getItem(getSaveKey(slot));
 }
@@ -2599,6 +2614,9 @@ function setupProfileExportImport() {
 }
 
 function setupHangarInterface() {
+  const resetProgressBtn = document.getElementById("btn-reset-progress");
+  if (resetProgressBtn) resetProgressBtn.addEventListener("click", resetAllProgress);
+
   const tabs = [
     { btn: document.getElementById("tab-btn-ships"), panel: document.getElementById("menu-tab-ships") },
     { btn: document.getElementById("tab-btn-slots"), panel: document.getElementById("menu-tab-slots") },
