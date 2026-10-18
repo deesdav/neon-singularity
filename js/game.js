@@ -381,7 +381,7 @@ function clearSavedGame(slot = currentSaveSlot) {
   refreshMenuSaveUI();
 }
 
-// Reset only this game's progression keys; do not wipe unrelated localStorage data on the same origin.
+// Clear every localStorage entry for this origin, including progression, profiles, and settings.
 function resetAllProgress() {
   const confirmed = window.confirm(
     "OPRAVDU SMAZAT VEŠKERÁ DATA HRY?\n\nPoužije se localStorage.clear(), takže se smažou všechny položky localStorage pro tento web, včetně postupu, profilů a nastavení. Tuto akci nelze vrátit."
