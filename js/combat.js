@@ -37,8 +37,12 @@ const UPGRADE_POOL = [
     },
     {
         id: "nano_shield", name: "NANOBOTOVÝ ŠTÍT", subtitle: "PULZUJÍCÍ BARIÉRA & ODRAZ",
-        desc: "Snižuje přijaté poškození o 20 % a zrychluje obnovu Aegis štítu. (Synergie s Aegis -> Nesmrtelná Citadela!)",
-        color: "#38bdf8", apply: () => { player.weapons.nanoShieldLvl++; player.aegisReady = true; }
+        desc: "Snižuje přijaté poškození s klesajícím účinkem (max. 55 %) a zrychluje obnovu Aegis štítu. (Synergie s Aegis -> Nesmrtelná Citadela!)",
+        color: "#38bdf8", apply: () => {
+            if (player.weapons.nanoShieldLvl >= 4) return;
+            player.weapons.nanoShieldLvl++;
+            if (player.weapons.aegisLvl > 0) player.aegisReady = true;
+        }
     },
     {
         id: "holo_decoy", name: "HOLOGRAFICKÝ NÁVNADOVÝ DRON", subtitle: "VYBUCHUJÍCÍ KLON",
@@ -107,8 +111,13 @@ const UPGRADE_POOL = [
     },
     {
         id: "regen", name: "NANOBOTNÍ REGENERACE", subtitle: "AUTOMATICKÁ OPRAVA TRUPU V BOJI",
-        desc: "Nanoboty plynule opravují trup lodi (+3.5 HP/s za úroveň) a zvýší Max HP o +15.",
-        color: "#10b981", apply: () => { player.weapons.regenLvl++; player.maxHp += 15; player.hp = Math.min(player.maxHp, player.hp + 25); }
+        desc: "Nanoboty plynule opravují trup lodi (+3.5 HP/s za úroveň, max. 5) a zvýší Max HP o +15.",
+        color: "#10b981", apply: () => {
+            if (player.weapons.regenLvl >= 5) return;
+            player.weapons.regenLvl++;
+            player.maxHp += 15;
+            player.hp = Math.min(player.maxHp, player.hp + 25);
+        }
     },
     {
         id: "flamethrower", name: "PLAZMOVÝ PLAMENOMET", subtitle: "KUŽEL PLAZMATU & ZAPÁLENÍ",
@@ -175,8 +184,13 @@ const UPGRADE_POOL = [
     },
     {
         id: "aegis", name: "ENERGETICKÝ ŠTÍT AEGIS", subtitle: "AUTOMATICKÁ BARIÉRA",
-        desc: "Vytvoří dobíjecí silové pole, které plně pohltí zásah a vyvolá odrazovou vlnu.",
-        color: "#60a5fa", apply: () => { player.weapons.aegisLvl++; player.aegisReady = true; player.aegisCooldown = 0; }
+        desc: "Vytvoří dobíjecí silové pole, které plně pohltí zásah a vyvolá odrazovou vlnu (max. 4. úroveň).",
+        color: "#60a5fa", apply: () => {
+            if (player.weapons.aegisLvl >= 4) return;
+            player.weapons.aegisLvl++;
+            player.aegisReady = true;
+            player.aegisCooldown = 0;
+        }
     },
     {
         id: "crit", name: "KRITICKÝ PŘETAKTOVAČ", subtitle: "2.4x KRITICKÉ ZÁSAHY & OPRAVY",
@@ -213,7 +227,17 @@ function triggerUpgradeSelection() {
 
     const container = document.getElementById("upgrade-cards-container");
     container.innerHTML = "";
-    currentUpgradeChoices = [...UPGRADE_POOL].sort(() => Math.random() - 0.5).slice(0, 3);
+    const maxedUpgrade = (upg) => {
+        if (upg.id === "barrels") return player.weapons.barrels >= 7;
+        if (upg.id === "drones") return player.weapons.dronesLvl >= 4;
+        if (upg.id === "blades") return player.weapons.bladesLvl >= 6;
+        if (upg.id === "regen") return player.weapons.regenLvl >= 5;
+        if (upg.id === "nano_shield") return player.weapons.nanoShieldLvl >= 4;
+        if (upg.id === "aegis") return player.weapons.aegisLvl >= 4;
+        return false;
+    };
+    const availableUpgrades = UPGRADE_POOL.filter(upg => !maxedUpgrade(upg));
+    currentUpgradeChoices = availableUpgrades.sort(() => Math.random() - 0.5).slice(0, 3);
     const dpadHints = ["⬅️ D-PAD VLEVO", "⬆️ D-PAD NAHORU", "➡️ D-PAD VPRAVO"];
 
     currentUpgradeChoices.forEach((upg, idx) => {
@@ -1167,7 +1191,8 @@ function damagePlayer(amount) {
 
     let mult = (state.difficulty === "ULTRA" ? 1.5 : (state.difficulty === "HARDCORE" ? 1.25 : 1.0)) * (state.mutator === "GLASS_CANNON" ? 2.0 : 1.0);
     if (player.weapons.nanoShieldLvl > 0) {
-        mult *= Math.pow(0.82, player.weapons.nanoShieldLvl);
+        // Diminishing returns prevent shield stacking from making the player effectively invulnerable.
+        mult *= Math.max(0.45, Math.pow(0.82, player.weapons.nanoShieldLvl));
     }
 
     const finalAmount = Math.max(1, Math.ceil(amount * mult));

@@ -271,6 +271,12 @@ function checkWeaponSynergies() {
   if (installedCount >= 6) unlockAchievement("arsenal_expert");
 }
 
+// One formula for all level-ups: discount applies to each threshold without compounding.
+function getXpThresholdForLevel(level) {
+  const xpDiscount = 1 - Math.min(4, Math.max(0, meta.upgrades.rerollDiscountLvl || 0)) * 0.05;
+  return Math.max(1, Math.floor(95 * Math.pow(1.32, Math.max(0, level - 1)) * xpDiscount));
+}
+
 function saveGameProgress(showNotification = false, slot = currentSaveSlot) {
   if (state.mode === "GAMEOVER" || state.mode === "MENU" || player.hp <= 0) return;
   currentSaveSlot = slot;
@@ -288,25 +294,32 @@ function saveGameProgress(showNotification = false, slot = currentSaveSlot) {
         mutator: state.mutator,
         score: state.score, combo: state.combo, maxCombo: state.maxCombo,
         wave: state.wave, enemiesToSpawn: state.enemiesToSpawn,
+        spawnCooldown: state.spawnCooldown,
         runTimer: state.runTimer,
+        supplyTimer: state.supplyTimer, wormholeTimer: state.wormholeTimer,
+        comboTimer: state.comboTimer, overdriveUses: state.overdriveUses || 0,
+        firedAnyShot: state.firedAnyShot,
         bossActive: state.bossActive, overdrive: state.overdrive,
         overdriveTimer: state.overdriveTimer,
-        runStats: state.runStats
+        runStats: { ...state.runStats, weaponDmg: { ...(state.runStats.weaponDmg || {}) } }
       },
+      // Persist the complete player runtime state, including weapon cooldowns.
       player: {
-        shipClass: player.shipClass, color: player.color,
-        x: player.x, y: player.y, hp: player.hp, maxHp: player.maxHp,
-        xp: player.xp, xpNext: player.xpNext, level: player.level,
-        speed: player.speed, dmgMult: player.dmgMult,
-        dashMaxCooldown: player.dashMaxCooldown,
-        bombs: player.bombs, maxBombs: player.maxBombs,
-        aegisReady: player.aegisReady, aegisCooldown: player.aegisCooldown,
+        ...player,
+        afterimages: [],
         unlockedSynergies: { ...player.unlockedSynergies },
-        weapons: { ...player.weapons },
+        weapons: { ...player.weapons }
       },
-      enemies: enemies.slice(0, 60),
-      gems: gems.slice(0, 120),
-      supplyPods: supplyPods.slice(0, 10)
+      // Do not silently discard enemies or XP gems when a save is made mid-wave.
+      enemies: enemies.map(e => ({
+        ...e,
+        // performance.now() resets on page reload; persist elapsed boss time instead.
+        elapsedSinceSpawnMs: e.type === "BOSS" && Number.isFinite(e.spawnTime)
+          ? Math.max(0, performance.now() - e.spawnTime) : undefined,
+        spawnTime: e.type === "BOSS" ? undefined : e.spawnTime
+      })),
+      gems: gems.map(g => ({ ...g })),
+      supplyPods: supplyPods.map(pod => ({ ...pod }))
     };
     localStorage.setItem(getSaveKey(slot), JSON.stringify(payload));
     saveMetaProgression();
@@ -373,20 +386,39 @@ function loadSavedGame(slot = currentSaveSlot) {
     decoys.length = 0;
 
     Object.assign(state, data.state);
-    // Backward compatibility with save slots created before runTimer was persisted.
+    // Backward-compatible defaults for older save slots.
     state.runTimer = Number.isFinite(data.state.runTimer) ? data.state.runTimer : 0;
+    state.spawnCooldown = Number.isFinite(data.state.spawnCooldown) ? data.state.spawnCooldown : 0.5;
+    state.supplyTimer = Number.isFinite(data.state.supplyTimer) ? data.state.supplyTimer : 18;
+    state.wormholeTimer = Number.isFinite(data.state.wormholeTimer) ? data.state.wormholeTimer : 48;
+    state.comboTimer = Number.isFinite(data.state.comboTimer) ? data.state.comboTimer : 0;
+    state.overdriveUses = Number.isFinite(data.state.overdriveUses) ? data.state.overdriveUses : 0;
+    state.firedAnyShot = !!data.state.firedAnyShot;
     state.difficulty = data.state.difficulty || "ARCADE";
     state.mutator = data.state.mutator || "NONE";
-    state.runStats = data.state.runStats || { totalKills: 0, eliteKills: 0, bossKills: 0, blackHolesUsed: 0, gemsCollected: 0, weaponDmg: {} };
+    state.runStats = {
+      totalKills: 0, eliteKills: 0, bossKills: 0, blackHolesUsed: 0,
+      gemsCollected: 0, weaponDmg: {}, ...(data.state.runStats || {})
+    };
+    state.runStats.weaponDmg = { ...(state.runStats.weaponDmg || {}) };
 
     Object.assign(player, data.player);
     player.weapons = { ...player.weapons, ...(data.player.weapons || {}) };
     player.unlockedSynergies = { ...(data.player.unlockedSynergies || {}) };
+    player.afterimages = [];
     player.x = Math.max(40, Math.min(W - 40, player.x || W / 2));
     player.y = Math.max(40, Math.min(H - 40, player.y || H / 2));
     player.invulnTimer = 1.5;
 
-    if (Array.isArray(data.enemies)) data.enemies.forEach(e => enemies.push(e));
+    if (Array.isArray(data.enemies)) data.enemies.forEach(savedEnemy => {
+      const enemy = { ...savedEnemy };
+      if (enemy.type === "BOSS") {
+        const elapsed = Number.isFinite(enemy.elapsedSinceSpawnMs) ? Math.max(0, enemy.elapsedSinceSpawnMs) : 0;
+        enemy.spawnTime = performance.now() - elapsed;
+        delete enemy.elapsedSinceSpawnMs;
+      }
+      enemies.push(enemy);
+    });
     if (Array.isArray(data.gems)) data.gems.forEach(g => gems.push(g));
     if (Array.isArray(data.supplyPods)) data.supplyPods.forEach(sp => supplyPods.push(sp));
 
@@ -512,6 +544,7 @@ function startNewGame() {
   player.y = H / 2;
   player.vx = 0;
   player.vy = 0;
+  player.angle = 0;
 
   const ocHullBonus = (meta.overclock?.spdOc || 0) * 5;
   const baseHull = chosenShip.hp + (meta.upgrades.hullLvl || 0) * 25 + ocHullBonus;
@@ -520,9 +553,8 @@ function startNewGame() {
   player.hp = player.maxHp;
 
   const startXpBonus = (meta.overclock?.xpOc || 0) * 35;
-  const xpReqDiscount = 1 - (meta.upgrades.rerollDiscountLvl || 0) * 0.05;
-  player.xpNext = Math.round(95 * xpReqDiscount);
   player.level = 1;
+  player.xpNext = getXpThresholdForLevel(player.level);
   player.xp = startXpBonus;
 
   const overclockSpd = 1 + (meta.overclock?.spdOc || 0) * 0.01;
@@ -546,7 +578,16 @@ function startNewGame() {
     lightningTrapLvl: 0, riftSlicerLvl: 0, prismLaserLvl: 0, overchargeCoreLvl: 0,
     ...chosenShip.initWeapons
   };
-  player.aegisReady = player.weapons.aegisLvl > 0 || player.weapons.nanoShieldLvl > 0;
+  // Clear every run-specific weapon timer so a new run never inherits cooldowns or effects.
+  [
+    "fireTimer", "missileTimer", "teslaTimer", "railgunTimer", "droneTimer",
+    "trailTimer", "cryoTimer", "flameTickTimer", "satelliteTimer", "boomerangTimer",
+    "mineTimer", "shockwaveTimer", "solarHaloTimer", "swarmBotsTimer", "gravCannonTimer",
+    "whipTimer", "mortarTimer", "decoyTimer", "trapTimer", "slicerTimer",
+    "aegisCooldown", "bladeAngle", "droneAngle"
+  ].forEach(key => { player[key] = 0; });
+  player.afterimages = [];
+  player.aegisReady = player.weapons.aegisLvl > 0;
   player.aegisCooldown = 0;
 
   document.getElementById("ship-hud-name").textContent = chosenShip.name;
@@ -556,6 +597,10 @@ function startNewGame() {
   state.score = 0;
   state.combo = 1.0;
   state.maxCombo = 1.0;
+  state.comboTimer = 0;
+  state.overdriveUses = 0;
+  state.shake = 0;
+  state.chromatic = 0;
   state.wave = 1;
   state.firedAnyShot = false;
   state.enemiesToSpawn = state.mutator === "SWARM_CHAOS" ? 20 : 10;
@@ -941,7 +986,7 @@ function update(dt) {
   if (player.xp >= player.xpNext) {
     player.xp -= player.xpNext;
     player.level++;
-    player.xpNext = Math.floor(player.xpNext * 1.32);
+    player.xpNext = getXpThresholdForLevel(player.level);
     triggerUpgradeSelection();
     updateHUD();
     return;
@@ -1027,7 +1072,7 @@ function update(dt) {
     }
   }
 
-  if ((player.weapons.aegisLvl > 0 || player.weapons.nanoShieldLvl > 0) && !player.aegisReady) {
+  if (player.weapons.aegisLvl > 0 && !player.aegisReady) {
     player.aegisCooldown -= dt;
     if (player.aegisCooldown <= 0) {
       player.aegisReady = true;
@@ -1957,8 +2002,10 @@ function update(dt) {
     eb.y += eb.vy * enemyDt;
 
     if (Math.hypot(eb.x - player.x, eb.y - player.y) < eb.radius + player.radius - 3) {
-      // Opravené ID "JUGGERNAUT_SHIP" pro odraz střel a trofej Železná zeď
-      if (player.shipClass === "JUGGERNAUT_SHIP" || (player.weapons.nanoShieldLvl > 0 && player.weapons.aegisLvl > 0)) {
+      // The Juggernaut and the Nano+Aegis fusion actually deflect the projectile instead of also taking its hit.
+      const canReflectProjectile = player.shipClass === "JUGGERNAUT_SHIP"
+        || (player.weapons.nanoShieldLvl > 0 && player.weapons.aegisLvl > 0);
+      if (canReflectProjectile) {
         bullets.push({
           x: eb.x, y: eb.y, px: eb.x, py: eb.y,
           vx: -eb.vx * 2.2, vy: -eb.vy * 2.2,
@@ -1969,8 +2016,9 @@ function update(dt) {
         });
         meta.stats.reflectedBullets = (meta.stats.reflectedBullets || 0) + 1;
         if (meta.stats.reflectedBullets >= 15) unlockAchievement("juggernaut_master");
+      } else {
+        damagePlayer(15);
       }
-      damagePlayer(15);
       fastRemove(enemyBullets, i);
       continue;
     }
@@ -2020,8 +2068,7 @@ function update(dt) {
         player.level++;
         if (player.level >= 10) unlockAchievement("level_10");
         if (player.level >= 15) unlockAchievement("level_15");
-        const xpReqDiscount = 1 - (meta.upgrades.rerollDiscountLvl || 0) * 0.05;
-        player.xpNext = Math.floor(player.xpNext * 1.28 * xpReqDiscount);
+        player.xpNext = getXpThresholdForLevel(player.level);
         triggerUpgradeSelection();
       }
       updateHUD();
