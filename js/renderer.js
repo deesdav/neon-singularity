@@ -339,9 +339,79 @@ function renderCyberShop() {
   }
 }
 
+function renderTrophyRewardsPanel() {
+  const panel = document.getElementById("trophy-rewards-panel");
+  if (!panel) return;
+  const unlockedCount = getUnlockedAchievementCount();
+  const total = ACHIEVEMENTS_LIST.length;
+  const claimedMilestones = meta.trophyMilestones || {};
+
+  const milestoneCards = TROPHY_MILESTONES.map(milestone => {
+    const done = unlockedCount >= milestone.required && claimedMilestones[milestone.id] === true;
+    const progress = Math.min(100, Math.round((unlockedCount / milestone.required) * 100));
+    return `
+      <div class="border ${done ? "border-emerald-400/60 bg-emerald-500/10" : "border-slate-700 bg-slate-950/80"} p-2.5">
+        <div class="flex justify-between gap-2 items-center">
+          <span class="font-orbitron text-[10px] font-bold ${done ? "text-emerald-300" : "text-slate-200"}">${milestone.name}</span>
+          <span class="text-[10px] font-orbitron text-yellow-300">+${milestone.reward} ◈</span>
+        </div>
+        <div class="text-[10px] text-slate-400 mt-1">${milestone.required} trofejí</div>
+        <div class="h-1 bg-slate-800 mt-2 overflow-hidden"><div class="h-full bg-cyan-400" style="width:${progress}%"></div></div>
+        <div class="text-[9px] mt-1 ${done ? "text-emerald-300" : "text-slate-500"}">${done ? "ODMĚNA VYZVEDNUTA" : unlockedCount >= milestone.required ? "PŘIPRAVENO K ULOŽENÍ" : `${Math.min(unlockedCount, milestone.required)} / ${milestone.required}`}</div>
+      </div>`;
+  }).join("");
+
+  const skinCards = TROPHY_SKINS.map(skin => {
+    const required = getTrophySkinRequired(skin);
+    const unlocked = unlockedCount >= required;
+    const selected = meta.selectedTrophySkin === skin.id;
+    const progress = Math.min(100, Math.round((unlockedCount / required) * 100));
+    return `
+      <div class="border ${selected ? "border-cyan-300 bg-cyan-400/10" : unlocked ? "border-purple-400/60 bg-purple-500/10" : "border-slate-800 bg-slate-950/80"} p-3">
+        <div class="flex items-start gap-2">
+          <div class="w-10 h-10 shrink-0 border flex items-center justify-center" style="border-color:${skin.color};color:${skin.color};box-shadow:0 0 14px ${skin.color}55">
+            <span class="text-lg">✦</span>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="font-orbitron text-[11px] font-black" style="color:${unlocked ? skin.color : "#94a3b8"}">${unlocked ? skin.name : "??? // UZAMČENO"}</div>
+            <div class="text-[9px] uppercase tracking-wider mt-0.5 ${unlocked ? "text-slate-300" : "text-slate-500"}">${unlocked ? skin.rarity : "SKRYTÁ RARITA"}</div>
+            <div class="text-[10px] text-slate-400 mt-1">${unlocked ? skin.subtitle : `Odemkne se při ${required} / ${total} trofejích`}</div>
+          </div>
+        </div>
+        <div class="h-1 bg-slate-800 mt-3 overflow-hidden"><div class="h-full" style="width:${progress}%;background:${skin.color}"></div></div>
+        <button type="button" data-trophy-skin="${skin.id}" ${unlocked ? "" : "disabled"}
+          class="w-full mt-2 px-2 py-1.5 border font-orbitron text-[9px] font-bold transition ${unlocked ? "border-cyan-400/60 text-cyan-200 hover:bg-cyan-400/15" : "border-slate-800 text-slate-600 cursor-not-allowed"}">
+          ${selected ? "✓ AKTIVNÍ SKIN" : unlocked ? "VYBRAT SKIN" : "ZAMČENO"}
+        </button>
+      </div>`;
+  }).join("");
+
+  panel.innerHTML = `
+    <div class="mb-3">
+      <div class="font-orbitron text-xs font-black tracking-widest text-cyan-300 mb-2">⚡ TROFEJNÍ MILNÍKY // JEDNORÁZOVÉ ODMĚNY</div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">${milestoneCards}</div>
+    </div>
+    <div>
+      <div class="font-orbitron text-xs font-black tracking-widest text-purple-300 mb-2">✦ LEGENDÁRNÍ SKINY LODI // ${TROPHY_SKINS.filter(s => unlockedCount >= getTrophySkinRequired(s)).length} / ${TROPHY_SKINS.length} ODEMČENO</div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${skinCards}</div>
+    </div>`;
+
+  panel.querySelectorAll("[data-trophy-skin]").forEach(button => {
+    button.addEventListener("click", () => {
+      const skinId = button.getAttribute("data-trophy-skin");
+      const skin = TROPHY_SKINS.find(item => item.id === skinId);
+      if (!skin || unlockedCount < getTrophySkinRequired(skin)) return;
+      meta.selectedTrophySkin = meta.selectedTrophySkin === skinId ? null : skinId;
+      saveMetaProgression();
+      renderTrophyRewardsPanel();
+    });
+  });
+}
+
 function renderAchievementsModal() {
-  const unlockedCount = Object.keys(meta.achievements).length;
+  const unlockedCount = getUnlockedAchievementCount();
   document.getElementById("modal-ach-progress").textContent = `${unlockedCount} / ${ACHIEVEMENTS_LIST.length}`;
+  renderTrophyRewardsPanel();
   const gridEl = document.getElementById("achievements-grid");
   gridEl.innerHTML = "";
 
@@ -693,6 +763,94 @@ function drawPlayerShipGeometry(ctx, shipClass, color) {
     ctx.arc(0, 0, 26, -0.85, 0.85);
     ctx.stroke();
   }
+
+  const trophySkin = typeof TROPHY_SKINS !== "undefined"
+    ? TROPHY_SKINS.find(skin => skin.id === meta.selectedTrophySkin && getUnlockedAchievementCount() >= getTrophySkinRequired(skin))
+    : null;
+  if (trophySkin) drawTrophySkinOverlay(ctx, trophySkin.id, trophySkin.color, now, beat);
+}
+
+function drawTrophySkinOverlay(ctx, skinId, color, now, beat) {
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  ctx.lineWidth = 1.8;
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 12 + beat * 8;
+  const pulse = 1 + Math.sin(now * 2.3) * 0.05 + beat * 0.08;
+
+  if (skinId === "void_reaper") {
+    ctx.globalAlpha = 0.95;
+    ctx.beginPath();
+    ctx.moveTo(-12, -8); ctx.lineTo(-28, -20); ctx.lineTo(-23, -5);
+    ctx.moveTo(-12, 8); ctx.lineTo(-28, 20); ctx.lineTo(-23, 5);
+    ctx.stroke();
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.arc(0, 0, 32 * pulse, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillRect(-18, -2, 5, 4);
+    ctx.fillRect(13, -2, 5, 4);
+  } else if (skinId === "phantom_overdrive") {
+    ctx.globalAlpha = 0.9;
+    ctx.beginPath();
+    ctx.moveTo(-7, -12); ctx.lineTo(-23, -28); ctx.lineTo(-20, -12); ctx.lineTo(-31, -7);
+    ctx.moveTo(-7, 12); ctx.lineTo(-23, 28); ctx.lineTo(-20, 12); ctx.lineTo(-31, 7);
+    ctx.moveTo(8, -8); ctx.lineTo(18, -18); ctx.moveTo(8, 8); ctx.lineTo(18, 18);
+    ctx.stroke();
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.arc(0, 0, 36 * pulse, now * 2, now * 2 + Math.PI * 1.45);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0, 0, 29 * pulse, -now * 1.6, -now * 1.6 + Math.PI * 1.25);
+    ctx.stroke();
+  } else if (skinId === "celestial_anomaly") {
+    ctx.globalAlpha = 0.8;
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 43 * pulse, 18, now * 0.6, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 35, 13, -now * 0.8, 0, Math.PI * 2);
+    ctx.stroke();
+    for (let i = 0; i < 4; i++) {
+      const a = now * 0.8 + i * Math.PI / 2;
+      const x = Math.cos(a) * 37;
+      const y = Math.sin(a) * 23;
+      ctx.beginPath();
+      ctx.moveTo(x, y - 3); ctx.lineTo(x + 3, y); ctx.lineTo(x, y + 3); ctx.lineTo(x - 3, y); ctx.closePath();
+      ctx.fill();
+    }
+  } else if (skinId === "neon_god") {
+    ctx.globalAlpha = 0.95;
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 47 * pulse, 17, now * 0.7, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 39, 14, -now * 0.9, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.rotate(now * 0.7);
+    ctx.beginPath();
+    ctx.arc(0, 0, 34 * pulse, 0, Math.PI * 2);
+    ctx.stroke();
+    for (let i = 0; i < 8; i++) {
+      const a = i * Math.PI / 4;
+      const x = Math.cos(a) * 43;
+      const y = Math.sin(a) * 20;
+      ctx.beginPath();
+      ctx.moveTo(x, y - 4); ctx.lineTo(x + 4, y); ctx.lineTo(x, y + 4); ctx.lineTo(x - 4, y); ctx.closePath();
+      ctx.fill();
+    }
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(0, 0, 4 + beat * 2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
 }
 
 function render() {
