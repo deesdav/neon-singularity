@@ -420,7 +420,8 @@ function loadSavedGame(slot = currentSaveSlot) {
     state.runStats.weaponDmg = { ...(state.runStats.weaponDmg || {}) };
 
     Object.assign(player, data.player);
-    player.weapons = { ...player.weapons, ...(data.player.weapons || {}) };
+    // Merge defaults first so saves created before new weapons existed remain upgrade-safe.
+    player.weapons = { ...DEFAULT_WEAPONS_TEMPLATE, ...(data.player.weapons || {}) };
     player.unlockedSynergies = { ...(data.player.unlockedSynergies || {}) };
     player.afterimages = [];
     player.x = Math.max(40, Math.min(W - 40, player.x || W / 2));
