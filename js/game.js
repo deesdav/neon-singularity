@@ -384,26 +384,19 @@ function clearSavedGame(slot = currentSaveSlot) {
 // Reset only this game's progression keys; do not wipe unrelated localStorage data on the same origin.
 function resetAllProgress() {
   const confirmed = window.confirm(
-    "OPRAVDU RESETOVAT HERNÍ POSTUP?\n\nBudou smazány čipy, odemčení, trofeje, nejlepší skóre a všechny 3 uložené mise. Tuto akci nelze vrátit."
+    "OPRAVDU SMAZAT VEŠKERÁ DATA HRY?\n\nPoužije se localStorage.clear(), takže se smažou všechny položky localStorage pro tento web, včetně postupu, profilů a nastavení. Tuto akci nelze vrátit."
   );
   if (!confirmed) return;
 
   try {
-    const keysToRemove = [META_KEY, BEST_KEY, LEGACY_SAVE_KEY];
-    for (let slot = 1; slot <= 3; slot++) {
-      keysToRemove.push(getSaveKey(slot), `neon_singularity_slot_name_${slot}`);
-    }
-    keysToRemove.forEach(key => localStorage.removeItem(key));
-
-    // Verify the progression keys really were removed before reloading.
-    const remainingKeys = keysToRemove.filter(key => localStorage.getItem(key) !== null);
-    if (remainingKeys.length > 0) {
-      window.alert("Reset se nepodařilo dokončit. Prohlížeč nedovolil smazat některá uložená data.");
+    localStorage.clear();
+    if (localStorage.length !== 0) {
+      window.alert("Reset se nepodařilo dokončit: část dat v localStorage zůstala zachována.");
       return;
     }
     window.location.reload();
   } catch (error) {
-    window.alert("Reset se nepodařilo dokončit. Zkontroluj, zda prohlížeč povoluje ukládání dat pro tuto stránku.");
+    window.alert("Reset se nepodařilo dokončit. Prohlížeč nedovolil vymazat localStorage.");
   }
 }
 
