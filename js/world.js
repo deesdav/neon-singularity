@@ -316,7 +316,7 @@ const SHIP_CLASSES = [
   }
 ];
 
-// 13 WEAPON SYNERGIES (3 ORIGINAL + 10 NEW FUSIONS)
+// 15 WEAPON SYNERGIES (3 ORIGINAL + 12 NEW FUSIONS)
 const SYNERGIES_LIST = [
   { id: "solar_supernova", name: "🔥 SYNERGIE: SLUNEČNÍ SUPERNOVA", color: "#ff6600", check: (w) => w.flamethrowerLvl > 0 && w.boomerangLvl > 0 },
   { id: "storm_matrix", name: "⚡ SYNERGIE: BOUŘKOVÁ MATRICE", color: "#5ffbff", check: (w) => w.teslaLvl > 0 && w.dronesLvl > 0 },
