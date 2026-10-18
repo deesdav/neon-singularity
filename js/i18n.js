@@ -274,7 +274,7 @@ const EN_DICTIONARY = {
     "ODMĚNA VYZVEDNUTA": "REWARD COLLECTED",
 
     "⚠️ RESET POSTUPU": "⚠️ PROGRESS RESET",
-    "Smaže odemčené lodě a vylepšení, čipy, trofeje, nejlepší skóre i všechny tři uložené mise. Nastavení hlasitosti zůstane zachováno.": "It deletes unlocked ships and upgrades, chips, trophies, high scores, and all three saved missions. Volume settings will be preserved.",
+    "Smaže veškerá data uložená pro tento web: postup, profily, mise i nastavení (včetně hlasitosti a jazyka).": "Deletes all data stored for this website: progression, profiles, missions, and settings (including volume and language).",
     "🗑️ RESETOVAT VEŠKERÝ HERNÍ POSTUP": "🗑️ RESET ALL GAME PROGRESS",
 
     // 7. 32 Zbraní & Vylepšení (UPGRADE_POOL)
