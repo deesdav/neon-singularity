@@ -544,6 +544,7 @@ function startNewGame() {
   player.y = H / 2;
   player.vx = 0;
   player.vy = 0;
+  player.angle = 0;
 
   const ocHullBonus = (meta.overclock?.spdOc || 0) * 5;
   const baseHull = chosenShip.hp + (meta.upgrades.hullLvl || 0) * 25 + ocHullBonus;
