@@ -85,18 +85,39 @@ function getShipSVGPreview(shipId, color) {
   </svg>`;
 }
 
+const TROPHY_SKINS = [
+  { id: "SKIN_PLASMA", name: "⚡ PLAZMA (10🏆)", req: 10 },
+  { id: "SKIN_VOID", name: "🌌 PŘÍZRAK (25🏆)", req: 25 },
+  { id: "SKIN_OMEGA", name: "👑 OMEGA DUHA (50🏆)", req: 50 }
+];
+
+function getDynamicSkinColor(baseColor) {
+  const skin = typeof meta !== "undefined" ? meta.equippedSkin : null;
+  const now = performance.now() * 0.003;
+  if (skin === "SKIN_OMEGA") {
+    return `hsl(${Math.floor((now * 120) % 360)}, 100%, 60%)`;
+  } else if (skin === "SKIN_VOID") {
+    return Math.sin(now * 3) > 0 ? "#a855f7" : "#fcee09";
+  } else if (skin === "SKIN_PLASMA") {
+    return `hsl(${Math.floor(185 + Math.sin(now * 2.5) * 65)}, 100%, 58%)`;
+  }
+  return baseColor;
+}
+
 function renderColorPicker() {
   const wrap = document.getElementById("ship-color-picker");
   if (!wrap) return;
   wrap.innerHTML = "";
   const activeCol = (typeof meta !== "undefined" && meta.customColor) || (typeof player !== "undefined" && player.color) || "#00f3ff";
+  const unlockedCount = typeof getUnlockedAchievementCount === "function" ? getUnlockedAchievementCount() : Object.keys(meta.achievements || {}).length;
 
   const resetBtn = document.createElement("button");
   resetBtn.type = "button";
-  resetBtn.className = "px-1.5 py-0.5 text-[9px] font-orbitron border border-slate-600 text-slate-300 hover:text-white mr-1";
+  resetBtn.className = `px-1.5 py-0.5 text-[9px] font-orbitron border ${!meta.customColor && !meta.equippedSkin ? "border-cyan-400 text-white bg-cyan-500/20" : "border-slate-600 text-slate-300"} hover:text-white mr-1`;
   resetBtn.textContent = "VÝCHOZÍ";
   resetBtn.addEventListener("click", () => {
     meta.customColor = null;
+    meta.equippedSkin = null;
     saveMetaProgression();
     renderShipSelector();
   });
@@ -105,11 +126,12 @@ function renderColorPicker() {
   SHIP_COLOR_PALETTE.forEach((col) => {
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = `color-swatch ${activeCol.toLowerCase() === col.toLowerCase() ? "active" : ""}`;
+    btn.className = `color-swatch ${!meta.equippedSkin && activeCol.toLowerCase() === col.toLowerCase() ? "active" : ""}`;
     btn.style.backgroundColor = col;
     btn.style.color = col;
     btn.addEventListener("click", () => {
       meta.customColor = col;
+      meta.equippedSkin = null;
       player.color = col;
       unlockAchievement("custom_paint");
       saveMetaProgression();
@@ -117,6 +139,30 @@ function renderColorPicker() {
       renderShipSelector();
     });
     wrap.appendChild(btn);
+  });
+
+  // Exkluzivní Trofejní Skiny (10, 25, 50 trofejí)
+  TROPHY_SKINS.forEach((sk) => {
+    const unlocked = unlockedCount >= sk.req;
+    const isEquipped = meta.equippedSkin === sk.id;
+    const sBtn = document.createElement("button");
+    sBtn.type = "button";
+    sBtn.className = `px-1.5 py-0.5 text-[8px] font-orbitron font-bold border transition ml-0.5 ${isEquipped
+      ? "border-yellow-400 bg-yellow-400/25 text-yellow-200 shadow-[0_0_8px_#fcee09]"
+      : unlocked
+        ? "border-purple-400/70 bg-purple-950/50 text-purple-200 hover:border-yellow-300 hover:text-white"
+        : "border-slate-800 bg-slate-950 text-slate-600 cursor-not-allowed"
+      }`;
+    sBtn.textContent = unlocked ? sk.name : `🔒 ${sk.name}`;
+    if (unlocked) {
+      sBtn.addEventListener("click", () => {
+        meta.equippedSkin = isEquipped ? null : sk.id;
+        saveMetaProgression();
+        renderColorPicker();
+        renderShipSelector();
+      });
+    }
+    wrap.appendChild(sBtn);
   });
 }
 
@@ -594,7 +640,9 @@ function drawSonicEqualizerHalo(ctx, x, y, baseRadius, color) {
 }
 
 function drawPlayerShipGeometry(ctx, shipClass, color) {
-  const mainCol = player.invulnTimer > 0 || state.overdriveTimer > 0 ? "#fcee09" : color;
+  const skinCol = getDynamicSkinColor(color);
+  const mainCol = player.invulnTimer > 0 || state.overdriveTimer > 0 ? "#fcee09" : skinCol;
+  const activeSkin = typeof meta !== "undefined" ? meta.equippedSkin : null;
   const now = performance.now() * 0.008;
   const beat = sfx.beatPulse || 0;
   const thrust = 10 + Math.sin(now * 6) * 4 + (sfx.bassEnergy || 0) * 16 + Math.min(10, Math.hypot(player.vx, player.vy) * 0.025);
@@ -684,7 +732,41 @@ function drawPlayerShipGeometry(ctx, shipClass, color) {
       ctx.moveTo(26, 0); ctx.lineTo(-10, -16); ctx.lineTo(-5, -5); ctx.lineTo(-19, -9);
       ctx.lineTo(-13, 0); ctx.lineTo(-19, 9); ctx.lineTo(-5, 5); ctx.lineTo(-10, 16);
     }
+
     ctx.closePath();
+
+    // Vektorové vizuální rozšíření pro Trofejní Skiny (nulová zátěž na FPS)
+    if (activeSkin === "SKIN_PLASMA") {
+      ctx.save();
+      ctx.rotate(-now * 1.8);
+      ctx.strokeStyle = "#00f3ff";
+      ctx.lineWidth = 1.4;
+      ctx.strokeRect(-11, -11, 22, 22);
+      ctx.restore();
+    } else if (activeSkin === "SKIN_VOID") {
+      ctx.save();
+      ctx.strokeStyle = "#fcee09";
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(-8, -22); ctx.lineTo(14, 0); ctx.lineTo(-8, 22);
+      ctx.stroke();
+      ctx.restore();
+    } else if (activeSkin === "SKIN_OMEGA") {
+      ctx.save();
+      ctx.rotate(-now * 2.2);
+      ctx.strokeStyle = mainCol;
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      for (let k = 0; k < 8; k++) {
+        const a = (k * Math.PI) / 4;
+        const r = k % 2 === 0 ? 31 : 19;
+        if (k === 0) ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+        else ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+      }
+      ctx.closePath();
+      ctx.stroke();
+      ctx.restore();
+    }
   };
 
   ctx.strokeStyle = mainCol;
@@ -724,6 +806,7 @@ function drawPlayerShipGeometry(ctx, shipClass, color) {
   }
 
 }
+
 function render() {
   ctx.globalCompositeOperation = "source-over";
   ctx.fillStyle = "rgba(2, 0, 8, 0.44)";

@@ -1241,6 +1241,10 @@ function damageEnemy(e, dmg, hitColor = "#00f3ff", shieldBonus = false, fromBoom
             if (e.subtype === "SERAPH") unlockAchievement("boss_seraph");
             if (e.subtype === "HYDRA") unlockAchievement("boss_hydra");
             if (e.subtype === "LEVIATHAN") unlockAchievement("boss_leviathan");
+            if (e.subtype === "PRISM") unlockAchievement("boss_prism");
+            if (e.subtype === "TITAN") unlockAchievement("boss_titan");
+            if (e.subtype === "ARACHNID") unlockAchievement("boss_arachnid");
+            if (e.subtype === "VALKYRIE") unlockAchievement("boss_valkyrie");
             if (e.enrageTriggered) unlockAchievement("enrage_tamer");
 
             if (e.spawnTime && (performance.now() - e.spawnTime) <= 10000) {

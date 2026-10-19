@@ -26,6 +26,7 @@ const meta = {
   shards: 0,
   selectedShip: "INTERCEPTOR",
   customColor: null,
+  equippedSkin: null,
   upgrades: {
     hullLvl: 0, dmgLvl: 0, magnetLvl: 0, novaLvl: 0,
     overdriveLvl: 0, critShopLvl: 0, dashCdLvl: 0, shardHunterLvl: 0,
@@ -172,7 +173,7 @@ const shockwaves = [];
 const lightningArcs = [];
 const floatingTexts = [];
 
-const keys = { w: false, a: false, s: false, d: false };
+const keys = { w: false, a: false, s: false, d: false, space: false, dashBuffer: 0 };
 const mouse = { x: W / 2, y: H / 2, down: false };
 let currentUpgradeChoices = [];
 
@@ -191,6 +192,7 @@ function loadMetaProgression() {
       meta.shards = parsed.shards || 0;
       meta.selectedShip = parsed.selectedShip || "INTERCEPTOR";
       meta.customColor = parsed.customColor || null;
+      meta.equippedSkin = parsed.equippedSkin || null;
       meta.upgrades = { ...meta.upgrades, ...(parsed.upgrades || {}) };
       meta.overclock = { ...meta.overclock, ...(parsed.overclock || {}) };
       // Zpětná kompatibilita se staršími názvy klíčů Overclocku
@@ -213,9 +215,9 @@ function getUnlockedAchievementCount() {
 }
 
 const TROPHY_MILESTONES = [
-  { id: "trophy_milestone_10", required: 10, reward: 50, name: "LOVEC TROFEJÍ I" },
-  { id: "trophy_milestone_25", required: 25, reward: 100, name: "LOVEC TROFEJÍ II" },
-  { id: "trophy_milestone_50", required: 50, reward: 250, name: "MISTR SÍNĚ SLÁVY" }
+  { id: "trophy_milestone_10", required: 10, reward: 50, name: "LOVEC TROFEJÍ I (+SKIN PLAZMA)" },
+  { id: "trophy_milestone_25", required: 25, reward: 100, name: "LOVEC TROFEJÍ II (+SKIN PŘÍZRAK)" },
+  { id: "trophy_milestone_50", required: 50, reward: 250, name: "MISTR SÍNĚ SLÁVY (+SKIN OMEGA DUHA)" }
 ];
 
 function syncTrophyMilestones() {
@@ -767,7 +769,7 @@ function triggerGameOver(isVictory = false) {
   } else {
     // I při prohře dostane pilot čipy podle dosažené vlny a nasbíraného skóre
     const diffChipMult = state.difficulty === "ULTRA" ? 3 : (state.difficulty === "HARDCORE" ? 2 : 1);
-    constconsolationShards = Math.max(1, (state.wave - 1) * 2 + Math.floor(state.score / 25000)) * diffChipMult;
+    const consolationShards = Math.max(1, (state.wave - 1) * 2 + Math.floor(state.score / 25000)) * diffChipMult;
     meta.shards += consolationShards;
     saveMetaProgression();
 
@@ -1264,6 +1266,11 @@ function update(dt) {
   if (player.dashCooldown > 0) {
     player.dashCooldown = Math.max(0, player.dashCooldown - dt);
     document.getElementById("dash-bar").style.width = `${(1 - player.dashCooldown / player.dashMaxCooldown) * 100}%`;
+  }
+  if (keys.dashBuffer > 0) keys.dashBuffer = Math.max(0, keys.dashBuffer - dt);
+  if ((keys.space || keys.dashBuffer > 0) && player.dashCooldown <= 0 && state.mode === "PLAYING") {
+    keys.dashBuffer = 0;
+    triggerHyperDash();
   }
   if (player.invulnTimer > 0) player.invulnTimer -= dt;
 
@@ -2388,8 +2395,8 @@ window.addEventListener("contextmenu", (e) => e.preventDefault());
 
 window.addEventListener("keydown", (e) => {
   if (document.activeElement && document.activeElement.tagName === "INPUT") return;
-  // Prevent browser key-repeat from retriggering one-shot actions (dash, bombs, pause, etc.).
-  if (e.repeat) return;
+  // Hned na začátku keydown (řádek 1413) změň "if (e.repeat) return;" na:
+  if (e.repeat && e.code !== "Space") return;
 
   if (e.code === "KeyW" || e.code === "ArrowUp") keys.w = true;
   if (e.code === "KeyA" || e.code === "ArrowLeft") keys.a = true;
@@ -2423,15 +2430,18 @@ window.addEventListener("keydown", (e) => {
 
   if (e.code === "Space") {
     e.preventDefault();
-    if (state.mode === "MENU") {
+    keys.space = true;
+    if (state.mode === "MENU" && !e.repeat) {
       if (hasSavedGame(currentSaveSlot)) loadSavedGame(currentSaveSlot);
       else startNewGame();
-    } else if (state.mode === "GAMEOVER") {
+    } else if (state.mode === "GAMEOVER" && !e.repeat) {
       startNewGame();
     } else if (state.mode === "PLAYING") {
+      keys.dashBuffer = 0.18;
       triggerHyperDash();
     }
   }
+
   if (e.code === "Enter" && state.mode === "MENU") startNewGame();
   if (e.code === "KeyR" && state.mode === "GAMEOVER") startNewGame();
   if (e.code === "KeyQ" || e.code === "KeyE") deploySingularityBomb();
@@ -2450,8 +2460,11 @@ window.addEventListener("keydown", (e) => {
 });
 
 window.addEventListener("keyup", (e) => {
-  if (e.code === "Space" && document.activeElement && document.activeElement.tagName === "BUTTON") {
-    e.preventDefault();
+  if (e.code === "Space") {
+    keys.space = false;
+    if (document.activeElement && document.activeElement.tagName === "BUTTON") {
+      e.preventDefault();
+    }
   }
   if (e.code === "KeyW" || e.code === "ArrowUp") keys.w = false;
   if (e.code === "KeyA" || e.code === "ArrowLeft") keys.a = false;

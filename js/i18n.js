@@ -265,13 +265,17 @@ const EN_DICTIONARY = {
     "ŘETĚZOVÝ DRTIČ": "CHAIN FLAIL",
 
     "TROFEJNÍ MILNÍKY // JEDNORÁZOVÉ ODMĚNY": "TROPHY MILESTONES // ONE-TIME REWARDS",
-    "LOVEC TROFEJÍ I": "TROPHY HUNTER I",
-    "LOVEC TROFEJÍ II": "TROPHY HUNTER II",
-    "ŠAMPION SÍNĚ SLÁVY": "HALL OF FAME CHAMPION",
+    "LOVEC TROFEJÍ I (+SKIN PLAZMA)": "TROPHY HUNTER I (+PLASMA SKIN)",
+    "LOVEC TROFEJÍ II (+SKIN PŘÍZRAK)": "TROPHY HUNTER II (+SPECTER SKIN)",
+    "MISTR SÍNĚ SLÁVY (+SKIN OMEGA DUHA)": "HALL OF FAME CHAMPION (+OMEGA RAINBOW SKIN)",
     "10 trofejí": "10 trophies",
     "25 trofejí": "25 trophies",
     "50 trofejí": "50 trophies",
     "ODMĚNA VYZVEDNUTA": "REWARD COLLECTED",
+
+    "⚡ PLAZMA (10🏆)": "⚡ PLASMA (10🏆)",
+    "🌌 PŘÍZRAK (25🏆)": "🌌 PHANTOM (25🏆)",
+    "👑 OMEGA DUHA (50🏆)": "👑 OMEGA RAINBOW (50🏆)",
 
     "⚠️ RESET POSTUPU": "⚠️ PROGRESS RESET",
     "Smaže veškerá data uložená pro tento web: postup, profily, mise i nastavení (včetně hlasitosti a jazyka).": "Deletes all data stored for this website: progression, profiles, missions, and settings (including volume and language).",
@@ -519,6 +523,21 @@ const EN_DICTIONARY = {
     "Přepni v rádiu všech 9 originálních skladeb.": "Cycle through at least 9 original tracks on the radio.",
     "ČIPOVÝ MAGNET": "CHIP MAGNET",
     "Měj na účtu alespoň 150 Kvantových Čipů (◈) najednou.": "Hold at least 150 Quantum Chips (◈) in your bank at once.",
+    // 4 Nové trofeje pro nové Bosse
+    "TŘÍŠTIČ SPEKTRA": "SPECTRUM SHATTERER",
+    "Znič krystalického bosse QUANTUM PRISM.": "Destroy the crystalline boss QUANTUM PRISM.",
+    "PÁN GRAVITACE": "GRAVITY LORD",
+    "Znič dvojitou singularitu GRAVITY TITAN.": "Destroy the dual singularity GRAVITY TITAN.",
+    "VYHLAZOVAČ SÍTÍ": "WEB EXTERMINATOR",
+    "Znič mechanickou tarantuli CYBER ARACHNID.": "Destroy the mechanical tarantula CYBER ARACHNID.",
+    "ZRCADLOVÝ SOUD": "MIRROR JUDGMENT",
+    "Znič bitevní křižník OMEGA VALKYRIE.": "Destroy the battlecruiser OMEGA VALKYRIE.",
+
+    // Upravený popis Chrono-stázové bomby (z combat.js) a Game Over zisk čipů
+    "Vypouští za loď modré stázové pole, které výrazně zpomaluje nepřátele a postupně je poškozuje.": "Deploys a blue stasis field behind the ship that heavily slows enemies and damages them over time.",
+    "KOLAPS JÁDRA // ZISK Z MISE:": "CORE COLLAPSE // MISSION YIELD:",
+    "PŘIPRAVENO K ULOŽENÍ": "READY TO CLAIM",
+
 
     // 10. Pauza & Game Over (Kill Screen)
     "TAKTICKÁ HIBERNACE // AKTIVNÍ SLOT": "TACTICAL HIBERNATION // ACTIVE SLOT",

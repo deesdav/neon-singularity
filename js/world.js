@@ -335,7 +335,7 @@ const SYNERGIES_LIST = [
   { id: "stellar_corona", name: "🔆 SYNERGIE: HVĚZDNÁ KORÓNA", color: "#fcee09", check: (w) => w.laserRingLvl > 0 && w.solarHaloLvl > 0 }
 ];
 
-// 50 ACHIEVEMENTS / TROPHIES
+// 50 ACHIEVEMENTS / TROPHIES (VČETNĚ VŠECH 10 BOSSŮ)
 const ACHIEVEMENTS_LIST = [
   { id: "first_blood", name: "PRVNÍ KREV", desc: "Znič svého prvního geometrického nepřítele v aréně.", reward: 3 },
   { id: "combo_10", name: "MISTR SYNCHRONIZACE", desc: "Dosáhni násobiče komba alespoň x10.0.", reward: 6 },
@@ -351,17 +351,14 @@ const ACHIEVEMENTS_LIST = [
   { id: "wave_20", name: "BOŽSTVO GALAXIE (VLNA 20)", desc: "Přežij až do legendární 20. vlny!", reward: 45 },
   { id: "overdrive_use", name: "PÁN ČASOPROSTORU", desc: "Aktivuj Kvantový Přetlak [F] pro zpomalení času.", reward: 5 },
   { id: "score_100k", name: "KYBERNETICKÁ LEGENDA", desc: "Překonej hranici 100 000 bodů v jedné hře.", reward: 12 },
-  { id: "score_500k", name: "PŮLMILIONOVÝ IMPERÁTOR", desc: "Překonej hranici 500 000 bodů v jedné hře!", reward: 25 },
   { id: "score_1m", name: "MILIONOVÝ TRANSCENDENT", desc: "Překonej magickou hranici 1 000 000 bodů!", reward: 50 },
   { id: "black_hole_5", name: "ARCHITEKT HORIZONTU", desc: "Vypusť celkem 5 Kvantových černých děr.", reward: 6 },
-  { id: "level_10", name: "PLNOHODNOTNÝ ARZENÁL", desc: "Dosáhni 10. úrovně lodi v jedné hře.", reward: 10 },
   { id: "level_15", name: "OMEGA KONSTRUKT LV15", desc: "Dosáhni 15. úrovně lodi v jedné hře.", reward: 20 },
   { id: "max_barrels", name: "ROJ PLAZMOVÝCH HLAVNÍ", desc: "Vylepši primární kanón na 6 nebo 7 hlavní.", reward: 12 },
   { id: "rich_cyber", name: "BANKÉŘ SINGULARITY", desc: "Měj na účtu alespoň 50 Kvantových Čipů (◈) najednou.", reward: 15 },
   { id: "synergy_unlock", name: "ALCHYMISTA FÚZE", desc: "Aktivuj v boji svou první Zbraňovou Synergii.", reward: 15 },
   { id: "wormhole_jump", name: "CESTOVATEL ČERVÍ DÍROU", desc: "Proleť vzácnou prostorovou anomálií (červí dírou).", reward: 12 },
   { id: "all_synergies", name: "TROJITÁ KONVERGENCE", desc: "Měj aktivní alespoň 3 Fúzní Synergie v jedné hře!", reward: 35 },
-  { id: "combo_5", name: "KOMBO VIRTUÓZ", desc: "Dosáhni v boji kombo násobitele alespoň x5.0.", reward: 10 },
   { id: "overclock_1", name: "PRVNÍ PŘETAKTOVÁNÍ", desc: "Investuj přebytečné čipy do Kvantového Overclocku v Shopu.", reward: 15 },
   { id: "overclock_1000", name: "KVANTOVÝ MAGNÁT", desc: "Utrať celkem 500 ◈ Čipů v sekci Kvantový Overclock.", reward: 40 },
   { id: "speed_boss", name: "BLESKOVÁ EXEKUCE", desc: "Znič libovolného Bosse do 10 sekund od jeho příletu!", reward: 25 },
@@ -373,12 +370,15 @@ const ACHIEVEMENTS_LIST = [
   { id: "whip_master", name: "KROTITEL PLAZMATU", desc: "Odemkni Plazmový Bič nebo Kvantový Minomet v boji.", reward: 10 },
   { id: "synergy_5", name: "PĚTICE ELEMENTŮ", desc: "Aktivuj 5 různých Fúzních Synergií v jediném průchodu!", reward: 50 },
   { id: "hardcore_victor", name: "DOBYVATEL HARDCORE", desc: "Dokonči 12. vlnu na obtížnost HARDCORE!", reward: 60 },
-  // 14 NOVÝCH PRO PLNÝCH 50 TROFEJÍ
   { id: "boss_nemesis", name: "LOVEC PŘÍZRAKŮ", desc: "Znič fázového bosse AETHER NEMESIS.", reward: 30 },
   { id: "boss_colossus", name: "SOLÁRNÍ KOLAPS", desc: "Znič slunečního reaktorového bosse SOLARIS COLOSSUS.", reward: 30 },
   { id: "boss_seraph", name: "PÁD VALKÝRY", desc: "Znič bleskového bosse CHRONO SERAPH.", reward: 25 },
   { id: "boss_hydra", name: "TRI-CORE ROZPAD", desc: "Znič trojitého bosse NEXUS HYDRA.", reward: 25 },
   { id: "boss_leviathan", name: "DRAČÍ ZKÁZA", desc: "Znič masivního kyber-hada VOID LEVIATHAN.", reward: 30 },
+  { id: "boss_prism", name: "TŘÍŠTIČ SPEKTRA", desc: "Znič krystalického bosse QUANTUM PRISM.", reward: 30 },
+  { id: "boss_titan", name: "PÁN GRAVITACE", desc: "Znič dvojitou singularitu GRAVITY TITAN.", reward: 35 },
+  { id: "boss_arachnid", name: "VYHLAZOVAČ SÍTÍ", desc: "Znič mechanickou tarantuli CYBER ARACHNID.", reward: 30 },
+  { id: "boss_valkyrie", name: "ZRCADLOVÝ SOUD", desc: "Znič bitevní křižník OMEGA VALKYRIE.", reward: 35 },
   { id: "enrage_tamer", name: "ZKROCENÍ BĚSU", desc: "Znič libovolného Bosse v jeho rozzuřené Enrage fázi.", reward: 20 },
   { id: "endless_30", name: "DOBYVATEL ENDLESSU", desc: "Přežij až do 30. vlny v Endless režimu.", reward: 35 },
   { id: "endless_50", name: "TITÁN ENDLESSU", desc: "Dosáhni legendární 50. vlny v Endless režimu!", reward: 60 },
@@ -386,8 +386,7 @@ const ACHIEVEMENTS_LIST = [
   { id: "clutch_dash", name: "HYPER-REFLEX", desc: "Proveď Hyper-skok s trupem poškozeným pod 20 % HP.", reward: 15 },
   { id: "arsenal_expert", name: "KVANTOVÝ PROFESOR", desc: "Měj současně vylepšeno alespoň 6 různých zbraní a modulů.", reward: 25 },
   { id: "ultra_survivor", name: "EXTRÉMNÍ PŘEŽIVŠÍ", desc: "Přežij do 6. vlny na brutální obtížnost ULTRA!", reward: 40 },
-  { id: "audiophile", name: "DODÁVKA ZVUKU", desc: "Přepni v rádiu všech 9 originálních skladeb.", reward: 15 },
-  { id: "chip_hoarder", name: "ČIPOVÝ MAGNET", desc: "Měj na účtu alespoň 150 Kvantových Čipů (◈) najednou.", reward: 30 }
+  { id: "audiophile", name: "DODÁVKA ZVUKU", desc: "Přepni v rádiu všech 9 originálních skladeb.", reward: 15 }
 ];
 
 // 12 PERMANENT CYBER-SHOP UPGRADES
