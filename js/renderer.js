@@ -1,5 +1,5 @@
 /*************************************************************************
- * RENDERER.JS - SCI-FI VECTOR MODELS (8 SHIPS), OVERCLOCK & COLOR PICKER
+ * RENDERER.JS - SCI-FI VECTOR MODELS (10 SHIPS), OVERCLOCK & COLOR PICKER
  *************************************************************************/
 const SHIP_COLOR_PALETTE = [
   "#00f3ff", "#ff0055", "#fcee09", "#00ffaa", "#bc13fe", "#ff6600", "#38bdf8", "#a3e635"
@@ -735,38 +735,7 @@ function drawPlayerShipGeometry(ctx, shipClass, color) {
 
     ctx.closePath();
 
-    // Vektorové vizuální rozšíření pro Trofejní Skiny (nulová zátěž na FPS)
-    if (activeSkin === "SKIN_PLASMA") {
-      ctx.save();
-      ctx.rotate(-now * 1.8);
-      ctx.strokeStyle = "#00f3ff";
-      ctx.lineWidth = 1.4;
-      ctx.strokeRect(-11, -11, 22, 22);
-      ctx.restore();
-    } else if (activeSkin === "SKIN_VOID") {
-      ctx.save();
-      ctx.strokeStyle = "#fcee09";
-      ctx.lineWidth = 1.6;
-      ctx.beginPath();
-      ctx.moveTo(-8, -22); ctx.lineTo(14, 0); ctx.lineTo(-8, 22);
-      ctx.stroke();
-      ctx.restore();
-    } else if (activeSkin === "SKIN_OMEGA") {
-      ctx.save();
-      ctx.rotate(-now * 2.2);
-      ctx.strokeStyle = mainCol;
-      ctx.lineWidth = 2.0;
-      ctx.beginPath();
-      for (let k = 0; k < 8; k++) {
-        const a = (k * Math.PI) / 4;
-        const r = k % 2 === 0 ? 31 : 19;
-        if (k === 0) ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
-        else ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
-      }
-      ctx.closePath();
-      ctx.stroke();
-      ctx.restore();
-    }
+    // Trofejní symboly se kreslí až po obrysu trupu, aby neresetovaly jeho Canvas path.
   };
 
   ctx.strokeStyle = mainCol;
@@ -785,12 +754,48 @@ function drawPlayerShipGeometry(ctx, shipClass, color) {
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
-  ctx.save();
-  ctx.rotate(now * 1.4);
-  ctx.strokeStyle = "#fcee09";
-  ctx.lineWidth = 1.5;
-  ctx.strokeRect(-4.5, -4.5, 9, 9);
-  ctx.restore();
+  // Aktivní trofejní skin nahradí výchozí čtverec malým symbolem v jádru lodi.
+  // Symboly zůstávají uvnitř jádra (poloměr 12 px), takže nekolidují s obrysem trupu.
+  if (activeSkin === "SKIN_PLASMA") {
+    ctx.save();
+    ctx.rotate(-now * 1.8);
+    ctx.strokeStyle = "#00f3ff";
+    ctx.lineWidth = 1.4;
+    ctx.strokeRect(-7.5, -7.5, 15, 15);
+    ctx.restore();
+  } else if (activeSkin === "SKIN_VOID") {
+    ctx.save();
+    ctx.strokeStyle = "#fcee09";
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(-6, -8);
+    ctx.lineTo(7, 0);
+    ctx.lineTo(-6, 8);
+    ctx.stroke();
+    ctx.restore();
+  } else if (activeSkin === "SKIN_OMEGA") {
+    ctx.save();
+    ctx.rotate(-now * 2.2);
+    ctx.strokeStyle = mainCol;
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    for (let k = 0; k < 8; k++) {
+      const a = (k * Math.PI) / 4;
+      const r = k % 2 === 0 ? 11.5 : 7;
+      if (k === 0) ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+      else ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+    }
+    ctx.closePath();
+    ctx.stroke();
+    ctx.restore();
+  } else {
+    ctx.save();
+    ctx.rotate(now * 1.4);
+    ctx.strokeStyle = "#fcee09";
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(-4.5, -4.5, 9, 9);
+    ctx.restore();
+  }
 
   ctx.fillStyle = "#ffffff";
   ctx.beginPath();
