@@ -110,15 +110,23 @@ class DarksynthSoundtrackEngine {
   setBgmVolume(val) {
     this.bgmVolume = Math.max(0, Math.min(1, val));
     if (this.bgm) {
-      this.bgm.volume = (this.muted || this.bgmVolume <= 0.001) ? 0 : this.bgmVolume;
+      this.bgm.volume =
+        this.muted || this.bgmVolume <= 0.001 ? 0 : this.bgmVolume;
       if (this.bgmVolume <= 0.001 && !this.bgm.paused) {
         this.bgm.pause();
-      } else if (this.bgmVolume > 0.001 && !this.muted && typeof state !== "undefined" && state.mode === "PLAYING" && this.bgm.paused) {
-        this.bgm.play().catch(() => { });
+      } else if (
+        this.bgmVolume > 0.001 &&
+        !this.muted &&
+        typeof state !== "undefined" &&
+        state.mode === "PLAYING" &&
+        this.bgm.paused
+      ) {
+        this.bgm.play().catch(() => {});
       }
     }
     if (this.menuMaster && this.ctx) {
-      const targetGain = (this.muted || this.bgmVolume <= 0.001) ? 0 : this.bgmVolume * 0.85;
+      const targetGain =
+        this.muted || this.bgmVolume <= 0.001 ? 0 : this.bgmVolume * 0.85;
       this.menuMaster.gain.setValueAtTime(targetGain, this.ctx.currentTime);
     }
     localStorage.setItem("neon_bgm_vol", String(this.bgmVolume));
@@ -149,7 +157,7 @@ class DarksynthSoundtrackEngine {
       gain.connect(this.master);
       osc.start(now);
       osc.stop(now + 0.055);
-    } catch (e) { }
+    } catch (e) {}
   }
 
   startMenuAmbient() {
@@ -167,12 +175,18 @@ class DarksynthSoundtrackEngine {
       this.menuMaster = this.ctx.createGain();
       this.menuMaster.connect(this.ctx.destination);
     }
-    const initGain = (this.muted || this.bgmVolume <= 0.001) ? 0 : this.bgmVolume * 0.85;
+    const initGain =
+      this.muted || this.bgmVolume <= 0.001 ? 0 : this.bgmVolume * 0.85;
     this.menuMaster.gain.setValueAtTime(initGain, this.ctx.currentTime);
 
     const stepSeq = () => {
       if (!this.menuBgmActive || state.mode !== "MENU") return;
-      if (!this.muted && this.bgmVolume > 0.001 && this.ctx && this.ctx.state === "running") {
+      if (
+        !this.muted &&
+        this.bgmVolume > 0.001 &&
+        this.ctx &&
+        this.ctx.state === "running"
+      ) {
         const now = this.ctx.currentTime;
         const osc1 = this.ctx.createOscillator();
         const osc2 = this.ctx.createOscillator();
@@ -277,7 +291,10 @@ class DarksynthSoundtrackEngine {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       this.ctx = new AudioCtx();
       this.master = this.ctx.createGain();
-      this.master.gain.setValueAtTime(this.sfxVolume !== undefined ? this.sfxVolume : 0.8, this.ctx.currentTime);
+      this.master.gain.setValueAtTime(
+        this.sfxVolume !== undefined ? this.sfxVolume : 0.8,
+        this.ctx.currentTime,
+      );
       this.master.connect(this.ctx.destination);
     }
     if (this.ctx.state === "suspended") {
@@ -329,7 +346,7 @@ class DarksynthSoundtrackEngine {
     }
 
     if (this.bgm.paused) {
-      this.bgm.play().catch(() => { });
+      this.bgm.play().catch(() => {});
     }
 
     // BPM synchronizátor běží vždy na pozadí jako garant rytmu
@@ -414,20 +431,23 @@ class DarksynthSoundtrackEngine {
       this.bgm.src = track.url;
     }
     this.bgm.volume = this.bgmVolume;
-    this.bgm.play().catch(() => { });
+    this.bgm.play().catch(() => {});
   }
 
   cycleStyle() {
     this.styleIndex = (this.styleIndex + 1) % this.tracks.length;
     this.listenedTracks.add(this.styleIndex);
-    if (this.listenedTracks.size >= 9 && typeof unlockAchievement === "function") {
+    if (
+      this.listenedTracks.size >= 9 &&
+      typeof unlockAchievement === "function"
+    ) {
       unlockAchievement("audiophile");
     }
     const track = this.tracks[this.styleIndex];
     this.bgm.src = track.url;
     this.bgm.volume = this.bgmVolume;
     if (!this.muted && state.mode === "PLAYING") {
-      this.bgm.play().catch(() => { });
+      this.bgm.play().catch(() => {});
     }
     if (typeof showSaveToast === "function") {
       showSaveToast(`🎵 ${track.name} (STISKNI [O] PRO VLASTNÍ MP3)`);
@@ -444,7 +464,10 @@ class DarksynthSoundtrackEngine {
     }
     this.styleIndex = nextIndex;
     this.listenedTracks.add(this.styleIndex);
-    if (this.listenedTracks.size >= 9 && typeof unlockAchievement === "function") {
+    if (
+      this.listenedTracks.size >= 9 &&
+      typeof unlockAchievement === "function"
+    ) {
       unlockAchievement("audiophile");
     }
 
@@ -453,7 +476,7 @@ class DarksynthSoundtrackEngine {
     this.bgm.volume = this.bgmVolume;
 
     if (!this.muted && state.mode === "PLAYING") {
-      this.bgm.play().catch(() => { });
+      this.bgm.play().catch(() => {});
     }
 
     // Aktualizace popisků v HUDu
@@ -588,6 +611,104 @@ class DarksynthSoundtrackEngine {
       gain.connect(this.master);
       osc.start(now + idx * 0.06);
       osc.stop(now + idx * 0.06 + 0.36);
+    });
+  }
+
+  playVoidLance() {
+    if (!this.ctx || this.muted) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const filter = this.ctx.createBiquadFilter();
+    const gain = this.ctx.createGain();
+
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(1150, now);
+    osc.frequency.exponentialRampToValueAtTime(180, now + 0.18);
+
+    filter.type = "bandpass";
+    filter.Q.setValueAtTime(6.0, now);
+    filter.frequency.setValueAtTime(1600, now);
+    filter.frequency.exponentialRampToValueAtTime(320, now + 0.18);
+
+    gain.gain.setValueAtTime(0.09, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.19);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.master);
+    osc.start(now);
+    osc.stop(now + 0.2);
+  }
+
+  playFlailHit() {
+    if (!this.ctx || this.muted) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(190, now);
+    osc.frequency.exponentialRampToValueAtTime(45, now + 0.16);
+
+    gain.gain.setValueAtTime(0.16, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.17);
+
+    osc.connect(gain);
+    gain.connect(this.master);
+    osc.start(now);
+    osc.stop(now + 0.18);
+  }
+
+  playStasisDeploy() {
+    if (!this.ctx || this.muted) return;
+    const now = this.ctx.currentTime;
+    const dur = 0.38;
+    const bufferSize = Math.floor(this.ctx.sampleRate * dur);
+    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.sin((i / bufferSize) * Math.PI);
+    }
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.Q.setValueAtTime(8, now);
+    filter.frequency.setValueAtTime(820, now);
+    filter.frequency.exponentialRampToValueAtTime(240, now + dur);
+
+    const gain = this.ctx.createGain();
+    gain.gain.setValueAtTime(0.12, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.master);
+    noise.start(now);
+  }
+
+  playBossAlarm() {
+    if (!this.ctx || this.muted) return;
+    const now = this.ctx.currentTime;
+    [0, 0.28].forEach((offset, idx) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = "sawtooth";
+      const freq = idx === 0 ? 370 : 440;
+      osc.frequency.setValueAtTime(freq, now + offset);
+      osc.frequency.exponentialRampToValueAtTime(
+        freq * 1.35,
+        now + offset + 0.22,
+      );
+
+      gain.gain.setValueAtTime(0.14, now + offset);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.24);
+
+      osc.connect(gain);
+      gain.connect(this.master);
+      osc.start(now + offset);
+      osc.stop(now + offset + 0.25);
     });
   }
 }

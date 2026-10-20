@@ -2,7 +2,14 @@
  * RENDERER.JS - SCI-FI VECTOR MODELS (10 SHIPS), OVERCLOCK & COLOR PICKER
  *************************************************************************/
 const SHIP_COLOR_PALETTE = [
-  "#00f3ff", "#ff0055", "#fcee09", "#00ffaa", "#bc13fe", "#ff6600", "#38bdf8", "#a3e635"
+  "#00f3ff",
+  "#ff0055",
+  "#fcee09",
+  "#00ffaa",
+  "#bc13fe",
+  "#ff6600",
+  "#38bdf8",
+  "#a3e635",
 ];
 
 const CUSTOM_SHIP_COLORS = [
@@ -13,7 +20,7 @@ const CUSTOM_SHIP_COLORS = [
   { name: "Void Violet", hex: "#bc13fe" },
   { name: "Solar Orange", hex: "#ff6600" },
   { name: "Sky Blue", hex: "#38bdf8" },
-  { name: "Lime Acid", hex: "#a3e635" }
+  { name: "Lime Acid", hex: "#a3e635" },
 ];
 
 function getShipSVGPreview(shipId, color) {
@@ -88,7 +95,7 @@ function getShipSVGPreview(shipId, color) {
 const TROPHY_SKINS = [
   { id: "SKIN_PLASMA", name: "⚡ PLAZMA (10🏆)", req: 10 },
   { id: "SKIN_VOID", name: "🌌 PŘÍZRAK (25🏆)", req: 25 },
-  { id: "SKIN_OMEGA", name: "👑 OMEGA DUHA (50🏆)", req: 50 }
+  { id: "SKIN_OMEGA", name: "👑 OMEGA DUHA (50🏆)", req: 50 },
 ];
 
 function getDynamicSkinColor(baseColor) {
@@ -108,8 +115,14 @@ function renderColorPicker() {
   const wrap = document.getElementById("ship-color-picker");
   if (!wrap) return;
   wrap.innerHTML = "";
-  const activeCol = (typeof meta !== "undefined" && meta.customColor) || (typeof player !== "undefined" && player.color) || "#00f3ff";
-  const unlockedCount = typeof getUnlockedAchievementCount === "function" ? getUnlockedAchievementCount() : Object.keys(meta.achievements || {}).length;
+  const activeCol =
+    (typeof meta !== "undefined" && meta.customColor) ||
+    (typeof player !== "undefined" && player.color) ||
+    "#00f3ff";
+  const unlockedCount =
+    typeof getUnlockedAchievementCount === "function"
+      ? getUnlockedAchievementCount()
+      : Object.keys(meta.achievements || {}).length;
 
   const resetBtn = document.createElement("button");
   resetBtn.type = "button";
@@ -147,12 +160,13 @@ function renderColorPicker() {
     const isEquipped = meta.equippedSkin === sk.id;
     const sBtn = document.createElement("button");
     sBtn.type = "button";
-    sBtn.className = `px-1.5 py-0.5 text-[8px] font-orbitron font-bold border transition ml-0.5 ${isEquipped
-      ? "border-yellow-400 bg-yellow-400/25 text-yellow-200 shadow-[0_0_8px_#fcee09]"
-      : unlocked
-        ? "border-purple-400/70 bg-purple-950/50 text-purple-200 hover:border-yellow-300 hover:text-white"
-        : "border-slate-800 bg-slate-950 text-slate-600 cursor-not-allowed"
-      }`;
+    sBtn.className = `px-1.5 py-0.5 text-[8px] font-orbitron font-bold border transition ml-0.5 ${
+      isEquipped
+        ? "border-yellow-400 bg-yellow-400/25 text-yellow-200 shadow-[0_0_8px_#fcee09]"
+        : unlocked
+          ? "border-purple-400/70 bg-purple-950/50 text-purple-200 hover:border-yellow-300 hover:text-white"
+          : "border-slate-800 bg-slate-950 text-slate-600 cursor-not-allowed"
+    }`;
     sBtn.textContent = unlocked ? sk.name : `🔒 ${sk.name}`;
     if (unlocked) {
       sBtn.addEventListener("click", () => {
@@ -170,7 +184,8 @@ function renderShipSelector() {
   const container = document.getElementById("ship-selector-grid");
   if (!container) return;
   container.innerHTML = "";
-  const ocSpdLvl = (meta.overclock && (meta.overclock.spdOc || meta.overclock.spdPct)) || 0;
+  const ocSpdLvl =
+    (meta.overclock && (meta.overclock.spdOc || meta.overclock.spdPct)) || 0;
   const hullBonus = (meta.upgrades.hullLvl || 0) * 25 + ocSpdLvl * 5;
   const spdMult = 1 + ocSpdLvl * 0.01;
 
@@ -215,7 +230,9 @@ function renderSaveSlotsUI() {
   for (let slot = 1; slot <= 3; slot++) {
     const isSel = currentSaveSlot === slot;
     const raw = localStorage.getItem(getSaveKey(slot));
-    const savedCustomName = localStorage.getItem(`neon_singularity_slot_name_${slot}`);
+    const savedCustomName = localStorage.getItem(
+      `neon_singularity_slot_name_${slot}`,
+    );
     let customName = savedCustomName || `Profil #${slot}`;
     let slotInfoHtml = "";
 
@@ -275,7 +292,7 @@ function renderSaveSlotsUI() {
           const parsed = JSON.parse(slotRaw);
           parsed.customName = newName;
           localStorage.setItem(getSaveKey(slot), JSON.stringify(parsed));
-        } catch (err) { }
+        } catch (err) {}
       }
     });
 
@@ -307,7 +324,8 @@ function renderCyberShop() {
     const canAfford = meta.shards >= cost && !isMax;
 
     const box = document.createElement("div");
-    box.className = "bg-slate-950/90 border border-cyan-500/35 p-3 flex flex-col justify-between";
+    box.className =
+      "bg-slate-950/90 border border-cyan-500/35 p-3 flex flex-col justify-between";
     box.innerHTML = `
       <div>
         <div class="flex justify-between items-center mb-1">
@@ -316,11 +334,12 @@ function renderCyberShop() {
         </div>
         <p class="text-[11px] text-slate-300 mb-2.5">${item.desc}</p>
       </div>
-      <button class="w-full py-1.5 font-orbitron text-[11px] font-black uppercase transition ${isMax
-        ? "bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 cursor-default"
-        : canAfford
-          ? "cyber-btn-gold"
-          : "bg-slate-900 border border-slate-700 text-slate-500 cursor-not-allowed"
+      <button class="w-full py-1.5 font-orbitron text-[11px] font-black uppercase transition ${
+        isMax
+          ? "bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 cursor-default"
+          : canAfford
+            ? "cyber-btn-gold"
+            : "bg-slate-900 border border-slate-700 text-slate-500 cursor-not-allowed"
       }">
         ${isMax ? "✓ MAXIMÁLNÍ ÚROVEŇ" : `VYLEPŠIT (◈ ${cost} ČIPŮ)`}
       </button>
@@ -343,8 +362,16 @@ function renderCyberShop() {
   const ocGrid = document.getElementById("overclock-grid");
   if (ocGrid) {
     ocGrid.innerHTML = "";
-    meta.overclock = meta.overclock || { dmgOc: 0, spdOc: 0, xpOc: 0, spent: 0 };
-    const totalOc = (meta.overclock.dmgOc || 0) + (meta.overclock.spdOc || 0) + (meta.overclock.xpOc || 0);
+    meta.overclock = meta.overclock || {
+      dmgOc: 0,
+      spdOc: 0,
+      xpOc: 0,
+      spent: 0,
+    };
+    const totalOc =
+      (meta.overclock.dmgOc || 0) +
+      (meta.overclock.spdOc || 0) +
+      (meta.overclock.xpOc || 0);
     const badge = document.getElementById("overclock-total-badge");
     if (badge) badge.textContent = `CELKEM OVERCLOCK: LV ${totalOc}`;
 
@@ -353,7 +380,8 @@ function renderCyberShop() {
       const dynamicCost = oc.cost + lvl * 10;
       const canAfford = meta.shards >= dynamicCost;
       const card = document.createElement("div");
-      card.className = "bg-black/75 border border-yellow-400/40 p-2.5 flex flex-col justify-between";
+      card.className =
+        "bg-black/75 border border-yellow-400/40 p-2.5 flex flex-col justify-between";
       card.innerHTML = `
         <div>
           <div class="flex justify-between items-center mb-1">
@@ -362,7 +390,10 @@ function renderCyberShop() {
           </div>
           <p class="text-[10px] text-slate-300 mb-2">${oc.desc}</p>
         </div>
-        <button class="w-full py-1.5 font-orbitron text-[10px] font-black uppercase transition ${canAfford ? "cyber-btn-gold" : "bg-slate-900 border border-slate-700 text-slate-500 cursor-not-allowed"
+        <button class="w-full py-1.5 font-orbitron text-[10px] font-black uppercase transition ${
+          canAfford
+            ? "cyber-btn-gold"
+            : "bg-slate-900 border border-slate-700 text-slate-500 cursor-not-allowed"
         }">
           PŘETAKTOVAT (◈ ${dynamicCost} ČIPŮ)
         </button>
@@ -391,9 +422,14 @@ function renderTrophyRewardsPanel() {
   const unlockedCount = getUnlockedAchievementCount();
   const claimedMilestones = meta.trophyMilestones || {};
 
-  const milestoneCards = TROPHY_MILESTONES.map(milestone => {
-    const done = unlockedCount >= milestone.required && claimedMilestones[milestone.id] === true;
-    const progress = Math.min(100, Math.round((unlockedCount / milestone.required) * 100));
+  const milestoneCards = TROPHY_MILESTONES.map((milestone) => {
+    const done =
+      unlockedCount >= milestone.required &&
+      claimedMilestones[milestone.id] === true;
+    const progress = Math.min(
+      100,
+      Math.round((unlockedCount / milestone.required) * 100),
+    );
     return `
       <div class="border ${done ? "border-emerald-400/60 bg-emerald-500/10" : "border-slate-700 bg-slate-950/80"} p-2.5">
         <div class="flex justify-between gap-2 items-center">
@@ -415,7 +451,8 @@ function renderTrophyRewardsPanel() {
 
 function renderAchievementsModal() {
   const unlockedCount = getUnlockedAchievementCount();
-  document.getElementById("modal-ach-progress").textContent = `${unlockedCount} / ${ACHIEVEMENTS_LIST.length}`;
+  document.getElementById("modal-ach-progress").textContent =
+    `${unlockedCount} / ${ACHIEVEMENTS_LIST.length}`;
   renderTrophyRewardsPanel();
   const gridEl = document.getElementById("achievements-grid");
   gridEl.innerHTML = "";
@@ -423,15 +460,21 @@ function renderAchievementsModal() {
   ACHIEVEMENTS_LIST.forEach((ach) => {
     const done = !!meta.achievements[ach.id];
     const card = document.createElement("div");
-    card.className = `p-3 border flex items-start gap-3 text-left ${done ? "bg-yellow-500/10 border-yellow-400/70" : "bg-slate-950/85 border-slate-800 opacity-70"
-      }`;
+    card.className = `p-3 border flex items-start gap-3 text-left ${
+      done
+        ? "bg-yellow-500/10 border-yellow-400/70"
+        : "bg-slate-950/85 border-slate-800 opacity-70"
+    }`;
     card.innerHTML = `
       <div class="text-xl mt-0.5">${done ? "🏆" : "🔒"}</div>
       <div class="flex-1">
         <div class="flex justify-between items-center">
           <span class="font-orbitron text-xs font-black ${done ? "text-yellow-300" : "text-slate-300"}">${ach.name}</span>
-          <span class="font-orbitron text-[10px] font-bold px-2 py-0.5 ${done ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" : "bg-slate-900 text-yellow-400"
-      }">
+          <span class="font-orbitron text-[10px] font-bold px-2 py-0.5 ${
+            done
+              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+              : "bg-slate-900 text-yellow-400"
+          }">
             ${done ? "SPLNĚNO" : `+${ach.reward} ◈`}
           </span>
         </div>
@@ -457,13 +500,18 @@ function syncHudVisibilityDOM() {
     ghostEl.style.opacity = "0";
     hintEl.style.opacity = "0";
   }
-  if (btnEl) btnEl.textContent = `👁 HUD: ${state.hudVisible ? "PLNÝ" : "MINIMAL"} [H]`;
+  if (btnEl)
+    btnEl.textContent = `👁 HUD: ${state.hudVisible ? "PLNÝ" : "MINIMAL"} [H]`;
 }
 
 function toggleHudVisibility() {
   state.hudVisible = !state.hudVisible;
   syncHudVisibilityDOM();
-  showSaveToast(state.hudVisible ? "👁 PLNÝ TAKTICKÝ HUD ZAPNUT" : "👁 MINIMALISTICKÝ GHOST HUD AKTIVNÍ");
+  showSaveToast(
+    state.hudVisible
+      ? "👁 PLNÝ TAKTICKÝ HUD ZAPNUT"
+      : "👁 MINIMALISTICKÝ GHOST HUD AKTIVNÍ",
+  );
 }
 
 let toastTimeout = null;
@@ -491,10 +539,14 @@ function updateHUD() {
   const hpStr = `${Math.max(0, Math.ceil(player.hp))} / ${player.maxHp}`;
 
   document.getElementById("hp-text").textContent = hpStr;
-  document.getElementById("hp-bar").style.width = `${Math.max(0, (player.hp / player.maxHp) * 100)}%`;
-  document.getElementById("level-text").textContent = `ÚROVEŇ ${String(player.level).padStart(2, "0")}`;
-  document.getElementById("wave-text").textContent = `VLNA ${state.wave} // TIER ${tierRoman}`;
-  document.getElementById("xp-bar").style.width = `${Math.min(100, (player.xp / player.xpNext) * 100)}%`;
+  document.getElementById("hp-bar").style.width =
+    `${Math.max(0, (player.hp / player.maxHp) * 100)}%`;
+  document.getElementById("level-text").textContent =
+    `ÚROVEŇ ${String(player.level).padStart(2, "0")}`;
+  document.getElementById("wave-text").textContent =
+    `VLNA ${state.wave} // TIER ${tierRoman}`;
+  document.getElementById("xp-bar").style.width =
+    `${Math.min(100, (player.xp / player.xpNext) * 100)}%`;
   document.getElementById("hud-shards").textContent = meta.shards;
 
   const slotHud = document.getElementById("hud-active-slot");
@@ -502,43 +554,72 @@ function updateHUD() {
 
   document.getElementById("ghost-hp").textContent = hpStr;
   document.getElementById("ghost-score").textContent = scoreStr;
-  document.getElementById("ghost-combo").textContent = `x${state.combo.toFixed(1)}`;
-  document.getElementById("ghost-wave").textContent = `${state.wave} (${tierRoman})`;
-  document.getElementById("ghost-level").textContent = String(player.level).padStart(2, "0");
+  document.getElementById("ghost-combo").textContent =
+    `x${state.combo.toFixed(1)}`;
+  document.getElementById("ghost-wave").textContent =
+    `${state.wave} (${tierRoman})`;
+  document.getElementById("ghost-level").textContent = String(
+    player.level,
+  ).padStart(2, "0");
 
   // Spočítání všech úrovní zbraní a aktivních synergií pro Ghost HUD
-  const totalUpgradesCount = Object.values(player.weapons).reduce((acc, val) => acc + (val || 0), 0);
-  const activeSynCount = SYNERGIES_LIST.filter(s => s.check(player.weapons)).length;
+  const totalUpgradesCount = Object.values(player.weapons).reduce(
+    (acc, val) => acc + (val || 0),
+    0,
+  );
+  const activeSynCount = SYNERGIES_LIST.filter((s) =>
+    s.check(player.weapons),
+  ).length;
   const ghostUpgEl = document.getElementById("ghost-upgrades");
   if (ghostUpgEl) {
-    ghostUpgEl.textContent = activeSynCount > 0 ? `${totalUpgradesCount} (+${activeSynCount}★)` : `${totalUpgradesCount}`;
+    ghostUpgEl.textContent =
+      activeSynCount > 0
+        ? `${totalUpgradesCount} (+${activeSynCount}★)`
+        : `${totalUpgradesCount}`;
   }
 
   // Zobrazení aktuálně hrající skladby v Ghost HUDu
   const ghostTrackEl = document.getElementById("ghost-track");
-  if (ghostTrackEl && typeof sfx !== "undefined" && sfx.tracks && sfx.tracks[sfx.styleIndex]) {
+  if (
+    ghostTrackEl &&
+    typeof sfx !== "undefined" &&
+    sfx.tracks &&
+    sfx.tracks[sfx.styleIndex]
+  ) {
     ghostTrackEl.textContent = sfx.tracks[sfx.styleIndex].label;
   }
   const ghostOd = document.getElementById("ghost-overdrive");
   if (state.overdrive >= 100 || state.overdriveTimer > 0) {
     ghostOd.classList.remove("hidden");
-    ghostOd.textContent = state.overdriveTimer > 0 ? "⚡ PŘETLAK AKTIVNÍ!" : "⚡ PŘETLAK PŘIPRAVEN [F]";
+    ghostOd.textContent =
+      state.overdriveTimer > 0
+        ? "⚡ PŘETLAK AKTIVNÍ!"
+        : "⚡ PŘETLAK PŘIPRAVEN [F]";
   } else {
     ghostOd.classList.add("hidden");
   }
 
-  const odPct = state.overdriveTimer > 0 ? Math.ceil((state.overdriveTimer / 5.5) * 100) : Math.floor(state.overdrive);
-  document.getElementById("overdrive-pct").textContent = state.overdriveTimer > 0 ? "AKTIVNÍ!" : `${odPct}%`;
-  document.getElementById("overdrive-bar").style.width = `${Math.min(100, odPct)}%`;
-  document.getElementById("overdrive-label").textContent = state.overdrive >= 100 ? "⚡ PŘETLAK PŘIPRAVEN [F]!" : "PŘETLAK [F]";
+  const odPct =
+    state.overdriveTimer > 0
+      ? Math.ceil((state.overdriveTimer / 5.5) * 100)
+      : Math.floor(state.overdrive);
+  document.getElementById("overdrive-pct").textContent =
+    state.overdriveTimer > 0 ? "AKTIVNÍ!" : `${odPct}%`;
+  document.getElementById("overdrive-bar").style.width =
+    `${Math.min(100, odPct)}%`;
+  document.getElementById("overdrive-label").textContent =
+    state.overdrive >= 100 ? "⚡ PŘETLAK PŘIPRAVEN [F]!" : "PŘETLAK [F]";
 
   const aegisRow = document.getElementById("aegis-row");
   if (player.weapons.aegisLvl > 0 || player.weapons.nanoShieldLvl > 0) {
     aegisRow.classList.remove("hidden");
     aegisRow.classList.add("flex");
-    document.getElementById("aegis-status").textContent = player.weapons.aegisLvl <= 0
-      ? "NANOBOTOVÝ ŠTÍT AKTIVNÍ"
-      : (player.aegisReady ? "AKTIVNÍ (100%)" : `DOBÍJENÍ (${player.aegisCooldown.toFixed(1)}s)`);
+    document.getElementById("aegis-status").textContent =
+      player.weapons.aegisLvl <= 0
+        ? "NANOBOTOVÝ ŠTÍT AKTIVNÍ"
+        : player.aegisReady
+          ? "AKTIVNÍ (100%)"
+          : `DOBÍJENÍ (${player.aegisCooldown.toFixed(1)}s)`;
   } else {
     aegisRow.classList.add("hidden");
   }
@@ -548,15 +629,21 @@ function updateHUD() {
     state.bestScore = Math.floor(state.score);
     localStorage.setItem(BEST_KEY, String(state.bestScore));
   }
-  document.getElementById("best-score-display").textContent = String(state.bestScore).padStart(7, "0");
-  document.getElementById("combo-badge").textContent = `x${state.combo.toFixed(1)}`;
+  document.getElementById("best-score-display").textContent = String(
+    state.bestScore,
+  ).padStart(7, "0");
+  document.getElementById("combo-badge").textContent =
+    `x${state.combo.toFixed(1)}`;
 
   const bombContainer = document.getElementById("bomb-slots");
   bombContainer.innerHTML = "";
   for (let i = 0; i < player.maxBombs; i++) {
     const slot = document.createElement("div");
-    slot.className = `w-5 h-2.5 border ${i < player.bombs ? "bg-pink-500 border-pink-300 shadow-[0_0_8px_#ff007f]" : "bg-slate-900 border-slate-700"
-      }`;
+    slot.className = `w-5 h-2.5 border ${
+      i < player.bombs
+        ? "bg-pink-500 border-pink-300 shadow-[0_0_8px_#ff007f]"
+        : "bg-slate-900 border-slate-700"
+    }`;
     bombContainer.appendChild(slot);
   }
 
@@ -564,8 +651,9 @@ function updateHUD() {
   badges.innerHTML = "";
   const addBadge = (label, col, isSynergy = false) => {
     const b = document.createElement("span");
-    b.className = `px-2 py-0.5 border text-[10px] font-bold ${isSynergy ? "bg-yellow-500/20 animate-pulse" : "bg-slate-900/90"
-      }`;
+    b.className = `px-2 py-0.5 border text-[10px] font-bold ${
+      isSynergy ? "bg-yellow-500/20 animate-pulse" : "bg-slate-900/90"
+    }`;
     b.style.borderColor = col;
     b.style.color = col;
     b.textContent = label;
@@ -577,26 +665,46 @@ function updateHUD() {
   });
 
   addBadge(`HLAVNĚ x${player.weapons.barrels}`, "#00f3ff");
-  if (player.weapons.whipLvl > 0) addBadge(`BIČ LV${player.weapons.whipLvl}`, "#00ffaa");
-  if (player.weapons.mortarLvl > 0) addBadge(`MINOMET LV${player.weapons.mortarLvl}`, "#fcee09");
-  if (player.weapons.nanoShieldLvl > 0) addBadge(`NANO-ŠTÍT LV${player.weapons.nanoShieldLvl}`, "#38bdf8");
-  if (player.weapons.decoyLvl > 0) addBadge(`KLONY LV${player.weapons.decoyLvl}`, "#a855f7");
-  if (player.weapons.lightningTrapLvl > 0) addBadge(`PAST LV${player.weapons.lightningTrapLvl}`, "#67e8f9");
-  if (player.weapons.riftSlicerLvl > 0) addBadge(`TRHAČ LV${player.weapons.riftSlicerLvl}`, "#f43f5e");
-  if (player.weapons.prismLaserLvl > 0) addBadge(`HRANOL LV${player.weapons.prismLaserLvl}`, "#ff0055");
-  if (player.weapons.overchargeCoreLvl > 0) addBadge(`REAKTOR LV${player.weapons.overchargeCoreLvl}`, "#fb923c");
-  if (player.weapons.boomerangLvl > 0) addBadge(`BUMERANG x${player.weapons.boomerangLvl}`, "#00ffaa");
-  if (player.weapons.minesLvl > 0) addBadge(`MINY LV${player.weapons.minesLvl}`, "#fcee09");
-  if (player.weapons.flamethrowerLvl > 0) addBadge(`PLAMENOMET LV${player.weapons.flamethrowerLvl}`, "#ff5500");
-  if (player.weapons.satelliteLvl > 0) addBadge(`SATELIT LV${player.weapons.satelliteLvl}`, "#ff0055");
-  if (player.weapons.railgunLvl > 0) addBadge(`RAILGUN LV${player.weapons.railgunLvl}`, "#ff0055");
-  if (player.weapons.dronesLvl > 0) addBadge(`DRONY x${player.weapons.dronesLvl}`, "#38bdf8");
-  if (player.weapons.bladesLvl > 0) addBadge(`ČEPELE x${player.weapons.bladesLvl}`, "#bc13fe");
-  if (player.weapons.teslaLvl > 0) addBadge(`TESLA LV${player.weapons.teslaLvl}`, "#5ffbff");
-  if (player.weapons.voidLanceLvl > 0) addBadge(`KOPÍ LV${player.weapons.voidLanceLvl}`, "#c084fc");
-  if (player.weapons.laserRingLvl > 0) addBadge(`PRSTENEC LV${player.weapons.laserRingLvl}`, "#ff0055");
-  if (player.weapons.chainFlailLvl > 0) addBadge(`DRTIČ LV${player.weapons.chainFlailLvl}`, "#fcee09");
-  if (player.weapons.stasisFieldLvl > 0) addBadge(`STÁZE LV${player.weapons.stasisFieldLvl}`, "#38bdf8");
+  if (player.weapons.whipLvl > 0)
+    addBadge(`BIČ LV${player.weapons.whipLvl}`, "#00ffaa");
+  if (player.weapons.mortarLvl > 0)
+    addBadge(`MINOMET LV${player.weapons.mortarLvl}`, "#fcee09");
+  if (player.weapons.nanoShieldLvl > 0)
+    addBadge(`NANO-ŠTÍT LV${player.weapons.nanoShieldLvl}`, "#38bdf8");
+  if (player.weapons.decoyLvl > 0)
+    addBadge(`KLONY LV${player.weapons.decoyLvl}`, "#a855f7");
+  if (player.weapons.lightningTrapLvl > 0)
+    addBadge(`PAST LV${player.weapons.lightningTrapLvl}`, "#67e8f9");
+  if (player.weapons.riftSlicerLvl > 0)
+    addBadge(`TRHAČ LV${player.weapons.riftSlicerLvl}`, "#f43f5e");
+  if (player.weapons.prismLaserLvl > 0)
+    addBadge(`HRANOL LV${player.weapons.prismLaserLvl}`, "#ff0055");
+  if (player.weapons.overchargeCoreLvl > 0)
+    addBadge(`REAKTOR LV${player.weapons.overchargeCoreLvl}`, "#fb923c");
+  if (player.weapons.boomerangLvl > 0)
+    addBadge(`BUMERANG x${player.weapons.boomerangLvl}`, "#00ffaa");
+  if (player.weapons.minesLvl > 0)
+    addBadge(`MINY LV${player.weapons.minesLvl}`, "#fcee09");
+  if (player.weapons.flamethrowerLvl > 0)
+    addBadge(`PLAMENOMET LV${player.weapons.flamethrowerLvl}`, "#ff5500");
+  if (player.weapons.satelliteLvl > 0)
+    addBadge(`SATELIT LV${player.weapons.satelliteLvl}`, "#ff0055");
+  if (player.weapons.railgunLvl > 0)
+    addBadge(`RAILGUN LV${player.weapons.railgunLvl}`, "#ff0055");
+  if (player.weapons.dronesLvl > 0)
+    addBadge(`DRONY x${player.weapons.dronesLvl}`, "#38bdf8");
+  if (player.weapons.bladesLvl > 0)
+    addBadge(`ČEPELE x${player.weapons.bladesLvl}`, "#bc13fe");
+  if (player.weapons.teslaLvl > 0)
+    addBadge(`TESLA LV${player.weapons.teslaLvl}`, "#5ffbff");
+  if (player.weapons.voidLanceLvl > 0)
+    addBadge(`KOPÍ LV${player.weapons.voidLanceLvl}`, "#c084fc");
+  if (player.weapons.laserRingLvl > 0)
+    addBadge(`PRSTENEC LV${player.weapons.laserRingLvl}`, "#ff0055");
+  if (player.weapons.chainFlailLvl > 0)
+    addBadge(`DRTIČ LV${player.weapons.chainFlailLvl}`, "#fcee09");
+  if (player.weapons.stasisFieldLvl > 0)
+    addBadge(`STÁZE LV${player.weapons.stasisFieldLvl}`, "#38bdf8");
 
   // Aktualizace reálného času a data v HUDech
   const now = new Date();
@@ -632,7 +740,10 @@ function drawSonicEqualizerHalo(ctx, x, y, baseRadius, color) {
     ctx.lineWidth = 2.2;
     ctx.beginPath();
     ctx.moveTo(Math.cos(a) * innerR, Math.sin(a) * innerR);
-    ctx.lineTo(Math.cos(a) * (innerR + barLen), Math.sin(a) * (innerR + barLen));
+    ctx.lineTo(
+      Math.cos(a) * (innerR + barLen),
+      Math.sin(a) * (innerR + barLen),
+    );
     ctx.stroke();
   }
   ctx.restore();
@@ -641,11 +752,16 @@ function drawSonicEqualizerHalo(ctx, x, y, baseRadius, color) {
 
 function drawPlayerShipGeometry(ctx, shipClass, color) {
   const skinCol = getDynamicSkinColor(color);
-  const mainCol = player.invulnTimer > 0 || state.overdriveTimer > 0 ? "#fcee09" : skinCol;
+  const mainCol =
+    player.invulnTimer > 0 || state.overdriveTimer > 0 ? "#fcee09" : skinCol;
   const activeSkin = typeof meta !== "undefined" ? meta.equippedSkin : null;
   const now = performance.now() * 0.008;
   const beat = sfx.beatPulse || 0;
-  const thrust = 10 + Math.sin(now * 6) * 4 + (sfx.bassEnergy || 0) * 16 + Math.min(10, Math.hypot(player.vx, player.vy) * 0.025);
+  const thrust =
+    10 +
+    Math.sin(now * 6) * 4 +
+    (sfx.bassEnergy || 0) * 16 +
+    Math.min(10, Math.hypot(player.vx, player.vy) * 0.025);
 
   ctx.save();
   ctx.strokeStyle = mainCol;
@@ -663,7 +779,8 @@ function drawPlayerShipGeometry(ctx, shipClass, color) {
   ctx.restore();
 
   ctx.save();
-  const flameCol = state.overdriveTimer > 0 ? "#fcee09" : beat > 0.5 ? "#ff007f" : mainCol;
+  const flameCol =
+    state.overdriveTimer > 0 ? "#fcee09" : beat > 0.5 ? "#ff007f" : mainCol;
   ctx.strokeStyle = flameCol;
   ctx.fillStyle = "rgba(0, 243, 255, 0.35)";
   ctx.lineWidth = 2;
@@ -704,33 +821,96 @@ function drawPlayerShipGeometry(ctx, shipClass, color) {
   const traceMainHull = () => {
     ctx.beginPath();
     if (shipClass === "BASTION") {
-      ctx.moveTo(24, -8); ctx.lineTo(24, 8); ctx.lineTo(8, 20); ctx.lineTo(-17, 20);
-      ctx.lineTo(-23, 10); ctx.lineTo(-15, 0); ctx.lineTo(-23, -10); ctx.lineTo(-17, -20); ctx.lineTo(8, -20);
+      ctx.moveTo(24, -8);
+      ctx.lineTo(24, 8);
+      ctx.lineTo(8, 20);
+      ctx.lineTo(-17, 20);
+      ctx.lineTo(-23, 10);
+      ctx.lineTo(-15, 0);
+      ctx.lineTo(-23, -10);
+      ctx.lineTo(-17, -20);
+      ctx.lineTo(8, -20);
     } else if (shipClass === "TECHNOMANCER") {
-      ctx.moveTo(26, 0); ctx.lineTo(5, -16); ctx.lineTo(-19, -12); ctx.lineTo(-10, 0); ctx.lineTo(-19, 12); ctx.lineTo(5, 16);
+      ctx.moveTo(26, 0);
+      ctx.lineTo(5, -16);
+      ctx.lineTo(-19, -12);
+      ctx.lineTo(-10, 0);
+      ctx.lineTo(-19, 12);
+      ctx.lineTo(5, 16);
     } else if (shipClass === "WRAITH") {
-      ctx.moveTo(28, 0); ctx.lineTo(-5, -20); ctx.lineTo(-1, -7); ctx.lineTo(-23, -15);
-      ctx.lineTo(-13, 0); ctx.lineTo(-23, 15); ctx.lineTo(-1, 7); ctx.lineTo(-5, 20);
+      ctx.moveTo(28, 0);
+      ctx.lineTo(-5, -20);
+      ctx.lineTo(-1, -7);
+      ctx.lineTo(-23, -15);
+      ctx.lineTo(-13, 0);
+      ctx.lineTo(-23, 15);
+      ctx.lineTo(-1, 7);
+      ctx.lineTo(-5, 20);
     } else if (shipClass === "SERAPH") {
-      ctx.moveTo(26, 0); ctx.lineTo(3, -21); ctx.lineTo(-16, -17); ctx.lineTo(-6, -5);
-      ctx.lineTo(-21, 0); ctx.lineTo(-6, 5); ctx.lineTo(-16, 17); ctx.lineTo(3, 21);
+      ctx.moveTo(26, 0);
+      ctx.lineTo(3, -21);
+      ctx.lineTo(-16, -17);
+      ctx.lineTo(-6, -5);
+      ctx.lineTo(-21, 0);
+      ctx.lineTo(-6, 5);
+      ctx.lineTo(-16, 17);
+      ctx.lineTo(3, 21);
     } else if (shipClass === "ARCHITECT") {
-      ctx.moveTo(21, -11); ctx.lineTo(21, 11); ctx.lineTo(0, 21); ctx.lineTo(-21, 11); ctx.lineTo(-21, -11); ctx.lineTo(0, -21);
+      ctx.moveTo(21, -11);
+      ctx.lineTo(21, 11);
+      ctx.lineTo(0, 21);
+      ctx.lineTo(-21, 11);
+      ctx.lineTo(-21, -11);
+      ctx.lineTo(0, -21);
     } else if (shipClass === "STALKER") {
-      ctx.moveTo(29, 0); ctx.lineTo(4, -8); ctx.lineTo(-12, -21); ctx.lineTo(-6, -5);
-      ctx.lineTo(-24, -9); ctx.lineTo(-14, 0); ctx.lineTo(-24, 9); ctx.lineTo(-6, 5); ctx.lineTo(-12, 21); ctx.lineTo(4, 8);
+      ctx.moveTo(29, 0);
+      ctx.lineTo(4, -8);
+      ctx.lineTo(-12, -21);
+      ctx.lineTo(-6, -5);
+      ctx.lineTo(-24, -9);
+      ctx.lineTo(-14, 0);
+      ctx.lineTo(-24, 9);
+      ctx.lineTo(-6, 5);
+      ctx.lineTo(-12, 21);
+      ctx.lineTo(4, 8);
     } else if (shipClass === "JUGGERNAUT_SHIP") {
-      ctx.moveTo(22, -14); ctx.lineTo(26, -6); ctx.lineTo(26, 6); ctx.lineTo(22, 14);
-      ctx.lineTo(4, 22); ctx.lineTo(-20, 20); ctx.lineTo(-25, 10); ctx.lineTo(-25, -10); ctx.lineTo(-20, -20); ctx.lineTo(4, -22);
+      ctx.moveTo(22, -14);
+      ctx.lineTo(26, -6);
+      ctx.lineTo(26, 6);
+      ctx.lineTo(22, 14);
+      ctx.lineTo(4, 22);
+      ctx.lineTo(-20, 20);
+      ctx.lineTo(-25, 10);
+      ctx.lineTo(-25, -10);
+      ctx.lineTo(-20, -20);
+      ctx.lineTo(4, -22);
     } else if (shipClass === "CHRONO_SHIP") {
-      ctx.moveTo(27, 0); ctx.lineTo(6, -19); ctx.lineTo(-8, -6); ctx.lineTo(-22, -18);
-      ctx.lineTo(-14, 0); ctx.lineTo(-22, 18); ctx.lineTo(-8, 6); ctx.lineTo(6, 19);
+      ctx.moveTo(27, 0);
+      ctx.lineTo(6, -19);
+      ctx.lineTo(-8, -6);
+      ctx.lineTo(-22, -18);
+      ctx.lineTo(-14, 0);
+      ctx.lineTo(-22, 18);
+      ctx.lineTo(-8, 6);
+      ctx.lineTo(6, 19);
     } else if (shipClass === "HIVE_SHIP") {
-      ctx.moveTo(20, -12); ctx.lineTo(26, 0); ctx.lineTo(20, 12); ctx.lineTo(-6, 22);
-      ctx.lineTo(-24, 14); ctx.lineTo(-18, 0); ctx.lineTo(-24, -14); ctx.lineTo(-6, -22)
+      ctx.moveTo(20, -12);
+      ctx.lineTo(26, 0);
+      ctx.lineTo(20, 12);
+      ctx.lineTo(-6, 22);
+      ctx.lineTo(-24, 14);
+      ctx.lineTo(-18, 0);
+      ctx.lineTo(-24, -14);
+      ctx.lineTo(-6, -22);
     } else {
-      ctx.moveTo(26, 0); ctx.lineTo(-10, -16); ctx.lineTo(-5, -5); ctx.lineTo(-19, -9);
-      ctx.lineTo(-13, 0); ctx.lineTo(-19, 9); ctx.lineTo(-5, 5); ctx.lineTo(-10, 16);
+      ctx.moveTo(26, 0);
+      ctx.lineTo(-10, -16);
+      ctx.lineTo(-5, -5);
+      ctx.lineTo(-19, -9);
+      ctx.lineTo(-13, 0);
+      ctx.lineTo(-19, 9);
+      ctx.lineTo(-5, 5);
+      ctx.lineTo(-10, 16);
     }
 
     ctx.closePath();
@@ -809,7 +989,6 @@ function drawPlayerShipGeometry(ctx, shipClass, color) {
     ctx.arc(0, 0, 26, -0.85, 0.85);
     ctx.stroke();
   }
-
 }
 
 function render() {
@@ -819,7 +998,10 @@ function render() {
 
   ctx.save();
   if (state.shake > 0) {
-    ctx.translate((Math.random() - 0.5) * state.shake * 2, (Math.random() - 0.5) * state.shake * 2);
+    ctx.translate(
+      (Math.random() - 0.5) * state.shake * 2,
+      (Math.random() - 0.5) * state.shake * 2,
+    );
   }
 
   ctx.globalCompositeOperation = "lighter";
@@ -844,7 +1026,13 @@ function render() {
         ctx.strokeStyle = r % 2 === 0 ? col1 : col2;
         ctx.lineWidth = 2.4;
         ctx.beginPath();
-        ctx.arc(0, 0, wh.radius - r * 7 + (sfx.beatPulse || 0) * 4, r, r + Math.PI * 1.4);
+        ctx.arc(
+          0,
+          0,
+          wh.radius - r * 7 + (sfx.beatPulse || 0) * 4,
+          r,
+          r + Math.PI * 1.4,
+        );
         ctx.stroke();
       }
       ctx.restore();
@@ -859,8 +1047,18 @@ function render() {
 
   if (state.mode !== "GAMEOVER") {
     const auraR = 140 + (sfx.bassEnergy || 0) * 75;
-    const pLight = ctx.createRadialGradient(player.x, player.y, 4, player.x, player.y, auraR);
-    pLight.addColorStop(0, `rgba(0, 243, 255, ${0.14 + (sfx.beatPulse || 0) * 0.14})`);
+    const pLight = ctx.createRadialGradient(
+      player.x,
+      player.y,
+      4,
+      player.x,
+      player.y,
+      auraR,
+    );
+    pLight.addColorStop(
+      0,
+      `rgba(0, 243, 255, ${0.14 + (sfx.beatPulse || 0) * 0.14})`,
+    );
     pLight.addColorStop(1, "rgba(0, 0, 0, 0)");
     ctx.fillStyle = pLight;
     ctx.beginPath();
@@ -868,20 +1066,29 @@ function render() {
     ctx.fill();
 
     if (player.weapons.solarHaloLvl > 0) {
-      const haloR = 115 + player.weapons.solarHaloLvl * 28 + (sfx.beatPulse || 0) * 12;
+      const haloR =
+        115 + player.weapons.solarHaloLvl * 28 + (sfx.beatPulse || 0) * 12;
       ctx.strokeStyle = "rgba(251, 146, 60, 0.45)";
       ctx.lineWidth = 2.5;
       ctx.beginPath();
       ctx.arc(player.x, player.y, haloR, 0, Math.PI * 2);
       ctx.stroke();
     }
-    drawSonicEqualizerHalo(ctx, player.x, player.y, player.radius + 14, player.color);
+    drawSonicEqualizerHalo(
+      ctx,
+      player.x,
+      player.y,
+      player.radius + 14,
+      player.color,
+    );
   }
 
   for (const pool of plasmaPools) {
     const alpha = (pool.life / pool.maxLife) * 0.55;
     ctx.strokeStyle = pool.color || "#fb923c";
-    ctx.fillStyle = pool.isTrap ? "rgba(103, 232, 249, 0.22)" : "rgba(251, 146, 60, 0.18)";
+    ctx.fillStyle = pool.isTrap
+      ? "rgba(103, 232, 249, 0.22)"
+      : "rgba(251, 146, 60, 0.18)";
     ctx.globalAlpha = alpha;
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -928,14 +1135,21 @@ function render() {
       ctx.lineWidth = 2.2;
       ctx.beginPath();
       ctx.arc(0, 0, st.radius * (1.2 - p * 0.2), 0, Math.PI * 2);
-      ctx.moveTo(-st.radius, 0); ctx.lineTo(st.radius, 0);
-      ctx.moveTo(0, -st.radius); ctx.lineTo(0, st.radius);
+      ctx.moveTo(-st.radius, 0);
+      ctx.lineTo(st.radius, 0);
+      ctx.moveTo(0, -st.radius);
+      ctx.lineTo(0, st.radius);
       ctx.stroke();
       ctx.restore();
     } else {
       const alpha = st.beamLife / 0.45;
       ctx.globalAlpha = alpha;
-      const grad = ctx.createLinearGradient(st.x - st.radius * 0.5, 0, st.x + st.radius * 0.5, 0);
+      const grad = ctx.createLinearGradient(
+        st.x - st.radius * 0.5,
+        0,
+        st.x + st.radius * 0.5,
+        0,
+      );
       grad.addColorStop(0, "rgba(255, 0, 85, 0)");
       grad.addColorStop(0.5, "rgba(255, 255, 255, 0.95)");
       grad.addColorStop(1, "rgba(255, 0, 85, 0)");
@@ -976,7 +1190,14 @@ function render() {
   ctx.globalAlpha = 1.0;
 
   for (const s of singularities) {
-    const grad = ctx.createRadialGradient(s.x, s.y, s.radius * 0.5, s.x, s.y, s.radius * 3.2);
+    const grad = ctx.createRadialGradient(
+      s.x,
+      s.y,
+      s.radius * 0.5,
+      s.x,
+      s.y,
+      s.radius * 3.2,
+    );
     grad.addColorStop(0, "rgba(255, 0, 127, 0.45)");
     grad.addColorStop(0.5, "rgba(0, 243, 255, 0.2)");
     grad.addColorStop(1, "rgba(0, 0, 0, 0)");
@@ -1030,7 +1251,10 @@ function render() {
     ctx.strokeStyle = g.magnetized ? "#fcee09" : "#00ffaa";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(0, -7); ctx.lineTo(6, 0); ctx.lineTo(0, 7); ctx.lineTo(-6, 0);
+    ctx.moveTo(0, -7);
+    ctx.lineTo(6, 0);
+    ctx.lineTo(0, 7);
+    ctx.lineTo(-6, 0);
     ctx.closePath();
     ctx.stroke();
     ctx.restore();
@@ -1106,7 +1330,9 @@ function render() {
     ctx.strokeStyle = m.color || "#ff007f";
     ctx.lineWidth = 2.5;
     ctx.beginPath();
-    ctx.moveTo(9, 0); ctx.lineTo(-6, -5); ctx.lineTo(-6, 5);
+    ctx.moveTo(9, 0);
+    ctx.lineTo(-6, -5);
+    ctx.lineTo(-6, 5);
     ctx.closePath();
     ctx.stroke();
     ctx.restore();
@@ -1121,7 +1347,10 @@ function render() {
     const segs = 5;
     for (let s = 1; s < segs; s++) {
       const t = s / segs;
-      ctx.lineTo(arc.x1 + (arc.x2 - arc.x1) * t + (Math.random() - 0.5) * 22, arc.y1 + (arc.y2 - arc.y1) * t + (Math.random() - 0.5) * 22);
+      ctx.lineTo(
+        arc.x1 + (arc.x2 - arc.x1) * t + (Math.random() - 0.5) * 22,
+        arc.y1 + (arc.y2 - arc.y1) * t + (Math.random() - 0.5) * 22,
+      );
     }
     ctx.lineTo(arc.x2, arc.y2);
     ctx.stroke();
@@ -1131,7 +1360,13 @@ function render() {
   for (const eb of enemyBullets) {
     ctx.fillStyle = eb.color;
     ctx.beginPath();
-    ctx.arc(eb.x, eb.y, eb.radius * (1 + (sfx.beatPulse || 0) * 0.25), 0, Math.PI * 2);
+    ctx.arc(
+      eb.x,
+      eb.y,
+      eb.radius * (1 + (sfx.beatPulse || 0) * 0.25),
+      0,
+      Math.PI * 2,
+    );
     ctx.fill();
     ctx.fillStyle = "#ffffff";
     ctx.beginPath();
@@ -1140,7 +1375,11 @@ function render() {
   }
 
   for (const e of enemies) {
-    if (e.type === "BOSS" && e.subtype === "LEVIATHAN" && Array.isArray(e.segments)) {
+    if (
+      e.type === "BOSS" &&
+      e.subtype === "LEVIATHAN" &&
+      Array.isArray(e.segments)
+    ) {
       for (let idx = e.segments.length - 1; idx >= 0; idx--) {
         const seg = e.segments[idx];
         const sr = (29 - idx * 2.1) * (1 + (sfx.beatPulse || 0) * 0.12);
@@ -1150,8 +1389,12 @@ function render() {
         ctx.strokeStyle = idx % 2 === 0 ? "#bc13fe" : "#00f3ff";
         ctx.lineWidth = 2.6;
         ctx.beginPath();
-        ctx.moveTo(sr, 0); ctx.lineTo(0, -sr * 0.9); ctx.lineTo(-sr, -sr * 0.5);
-        ctx.lineTo(-sr * 0.6, 0); ctx.lineTo(-sr, sr * 0.5); ctx.lineTo(0, sr * 0.9);
+        ctx.moveTo(sr, 0);
+        ctx.lineTo(0, -sr * 0.9);
+        ctx.lineTo(-sr, -sr * 0.5);
+        ctx.lineTo(-sr * 0.6, 0);
+        ctx.lineTo(-sr, sr * 0.5);
+        ctx.lineTo(0, sr * 0.9);
         ctx.closePath();
         ctx.stroke();
         ctx.restore();
@@ -1159,7 +1402,10 @@ function render() {
     }
 
     if ((e.type === "PHANTOM" || e.type === "SNIPER") && e.aiming) {
-      ctx.strokeStyle = e.type === "SNIPER" ? "rgba(255, 0, 51, 0.75)" : "rgba(255, 42, 133, 0.55)";
+      ctx.strokeStyle =
+        e.type === "SNIPER"
+          ? "rgba(255, 0, 51, 0.75)"
+          : "rgba(255, 42, 133, 0.55)";
       ctx.lineWidth = e.type === "SNIPER" ? 2.2 : 1.5;
       ctx.beginPath();
       ctx.moveTo(e.x, e.y);
@@ -1172,7 +1418,8 @@ function render() {
       ctx.lineWidth = 2.5 + (sfx.beatPulse || 0) * 1.4;
       const r = e.radius;
       if (e.type === "KAMIKAZE") {
-        const blink = Math.sin(performance.now() * 0.035) > 0 ? "#ffffff" : "#ff0033";
+        const blink =
+          Math.sin(performance.now() * 0.035) > 0 ? "#ffffff" : "#ff0033";
         ctx.strokeStyle = blink;
         ctx.beginPath();
         ctx.moveTo(r * 1.45, 0);
@@ -1202,7 +1449,10 @@ function render() {
           const a = (k * Math.PI) / 2;
           ctx.moveTo(0, 0);
           ctx.lineTo(Math.cos(a) * r * 1.3, Math.sin(a) * r * 1.3);
-          ctx.lineTo(Math.cos(a + 0.45) * r * 0.65, Math.sin(a + 0.45) * r * 0.65);
+          ctx.lineTo(
+            Math.cos(a + 0.45) * r * 0.65,
+            Math.sin(a + 0.45) * r * 0.65,
+          );
           ctx.closePath();
         }
         ctx.stroke();
@@ -1210,8 +1460,10 @@ function render() {
         for (let k = 0; k < 4; k++) {
           ctx.rotate(Math.PI / 2);
           ctx.beginPath();
-          ctx.moveTo(r * 0.25, 0); ctx.lineTo(r * 1.15, r * 0.35);
-          ctx.lineTo(r * 0.75, r * 0.95); ctx.lineTo(0, r * 0.45);
+          ctx.moveTo(r * 0.25, 0);
+          ctx.lineTo(r * 1.15, r * 0.35);
+          ctx.lineTo(r * 0.75, r * 0.95);
+          ctx.lineTo(0, r * 0.45);
           ctx.closePath();
           ctx.stroke();
         }
@@ -1225,19 +1477,27 @@ function render() {
         ctx.restore();
       } else if (e.type === "PHANTOM") {
         ctx.beginPath();
-        ctx.moveTo(r * 1.4, -3); ctx.lineTo(r * 0.3, -r * 0.35); ctx.lineTo(-r * 0.9, -r * 1.05);
-        ctx.lineTo(-r * 0.45, 0); ctx.lineTo(-r * 0.9, r * 1.05); ctx.lineTo(r * 0.3, r * 0.35); ctx.lineTo(r * 1.4, 3);
+        ctx.moveTo(r * 1.4, -3);
+        ctx.lineTo(r * 0.3, -r * 0.35);
+        ctx.lineTo(-r * 0.9, -r * 1.05);
+        ctx.lineTo(-r * 0.45, 0);
+        ctx.lineTo(-r * 0.9, r * 1.05);
+        ctx.lineTo(r * 0.3, r * 0.35);
+        ctx.lineTo(r * 1.4, 3);
         ctx.closePath();
         ctx.stroke();
       } else if (e.type === "SNIPER") {
         ctx.beginPath();
-        ctx.moveTo(r * 1.6, 0); ctx.lineTo(-r * 0.8, -r * 0.9);
-        ctx.lineTo(-r * 0.4, 0); ctx.lineTo(-r * 0.8, r * 0.9);
+        ctx.moveTo(r * 1.6, 0);
+        ctx.lineTo(-r * 0.8, -r * 0.9);
+        ctx.lineTo(-r * 0.4, 0);
+        ctx.lineTo(-r * 0.8, r * 0.9);
         ctx.closePath();
         ctx.stroke();
         ctx.strokeStyle = "#ffffff";
         ctx.beginPath();
-        ctx.moveTo(-r * 0.4, 0); ctx.lineTo(r * 1.9, 0);
+        ctx.moveTo(-r * 0.4, 0);
+        ctx.lineTo(r * 1.9, 0);
         ctx.stroke();
       } else if (e.type === "WARP_MINER") {
         ctx.beginPath();
@@ -1252,12 +1512,12 @@ function render() {
         ctx.beginPath();
         ctx.arc(0, 0, r * 0.45, 0, Math.PI * 2);
         ctx.stroke();
-      }
-      else if (e.type === "GUARDIAN" || e.type === "JUGGERNAUT") {
+      } else if (e.type === "GUARDIAN" || e.type === "JUGGERNAUT") {
         ctx.beginPath();
         for (let k = 0; k < 8; k++) {
           const a = (k * Math.PI) / 4;
-          if (k === 0) ctx.moveTo(Math.cos(a) * r * 0.85, Math.sin(a) * r * 0.85);
+          if (k === 0)
+            ctx.moveTo(Math.cos(a) * r * 0.85, Math.sin(a) * r * 0.85);
           else ctx.lineTo(Math.cos(a) * r * 0.85, Math.sin(a) * r * 0.85);
         }
         ctx.closePath();
@@ -1271,7 +1531,8 @@ function render() {
         }
       } else if (e.type === "BOSS") {
         const isEnraged = e.hp < e.maxHp * 0.5;
-        const corePulse = 1 + (sfx.beatPulse || 0) * 0.25 + (isEnraged ? 0.15 : 0);
+        const corePulse =
+          1 + (sfx.beatPulse || 0) * 0.25 + (isEnraged ? 0.15 : 0);
 
         // Enrage varovná aura pod 50 % HP
         if (isEnraged) {
@@ -1292,7 +1553,8 @@ function render() {
             ctx.save();
             ctx.rotate(layer % 2 === 0 ? e.angle : -e.angle * 1.4);
             const lr = r - layer * 11;
-            ctx.strokeStyle = layer === 0 ? strokeCol : layer === 1 ? "#fcee09" : "#00f3ff";
+            ctx.strokeStyle =
+              layer === 0 ? strokeCol : layer === 1 ? "#fcee09" : "#00f3ff";
             ctx.lineWidth = 3.2;
             ctx.beginPath();
             for (let k = 0; k < 16; k++) {
@@ -1312,7 +1574,6 @@ function render() {
           ctx.strokeStyle = "#ffffff";
           ctx.lineWidth = 2;
           ctx.stroke();
-
         } else if (e.subtype === "SERAPH") {
           // 2. CHRONO SERAPH: Zlatá mechanická křídla Valkýry
           ctx.save();
@@ -1349,7 +1610,6 @@ function render() {
           ctx.arc(-8, 0, r * 0.55, 0, Math.PI * 2);
           ctx.stroke();
           ctx.restore();
-
         } else if (e.subtype === "HYDRA") {
           // 3. NEXUS HYDRA: Centrální šestiúhelník + 3 obíhající reaktorové uzly
           ctx.strokeStyle = strokeCol;
@@ -1357,7 +1617,8 @@ function render() {
           ctx.beginPath();
           for (let k = 0; k < 6; k++) {
             const a = (k * Math.PI) / 3;
-            if (k === 0) ctx.moveTo(Math.cos(a) * r * 0.65, Math.sin(a) * r * 0.65);
+            if (k === 0)
+              ctx.moveTo(Math.cos(a) * r * 0.65, Math.sin(a) * r * 0.65);
             else ctx.lineTo(Math.cos(a) * r * 0.65, Math.sin(a) * r * 0.65);
           }
           ctx.closePath();
@@ -1383,7 +1644,6 @@ function render() {
             ctx.fill();
             ctx.stroke();
           }
-
         } else if (e.subtype === "LEVIATHAN") {
           // 4. VOID LEVIATHAN: Dračí kyber-hlava s kusadly
           ctx.strokeStyle = strokeCol;
@@ -1406,7 +1666,6 @@ function render() {
           ctx.moveTo(r * 0.6, r * 0.5);
           ctx.lineTo(r * 1.35, r * 0.25);
           ctx.stroke();
-
         } else if (e.subtype === "NEMESIS") {
           // 5. AETHER NEMESIS: Čtyřcípá fázová hvězdice (Shuriken)
           for (let layer = 0; layer < 2; layer++) {
@@ -1427,17 +1686,22 @@ function render() {
           }
           ctx.strokeStyle = "#ffffff";
           ctx.strokeRect(-10, -10, 20, 20);
-
         } else if (e.subtype === "PRISM") {
           // 7. QUANTUM PRISM: Krystalický osmistěn se spektrálním jádrem
           for (let layer = 0; layer < 3; layer++) {
             ctx.save();
-            ctx.rotate(layer * (Math.PI / 6) + (layer % 2 === 0 ? e.angle : -e.angle));
-            ctx.strokeStyle = layer === 0 ? "#00f3ff" : layer === 1 ? "#ff007f" : "#fcee09";
+            ctx.rotate(
+              layer * (Math.PI / 6) + (layer % 2 === 0 ? e.angle : -e.angle),
+            );
+            ctx.strokeStyle =
+              layer === 0 ? "#00f3ff" : layer === 1 ? "#ff007f" : "#fcee09";
             ctx.lineWidth = 3.2 - layer * 0.6;
-            const s = (r * (1.15 - layer * 0.22)) * corePulse;
+            const s = r * (1.15 - layer * 0.22) * corePulse;
             ctx.beginPath();
-            ctx.moveTo(0, -s); ctx.lineTo(s, 0); ctx.lineTo(0, s); ctx.lineTo(-s, 0);
+            ctx.moveTo(0, -s);
+            ctx.lineTo(s, 0);
+            ctx.lineTo(0, s);
+            ctx.lineTo(-s, 0);
             ctx.closePath();
             ctx.stroke();
             ctx.restore();
@@ -1446,7 +1710,6 @@ function render() {
           ctx.beginPath();
           ctx.arc(0, 0, 9 * corePulse, 0, Math.PI * 2);
           ctx.fill();
-
         } else if (e.subtype === "TITAN") {
           // 8. GRAVITY TITAN: Dvojitá singularita se dvěma obíhajícími měsíci
           ctx.strokeStyle = "#a855f7";
@@ -1461,7 +1724,8 @@ function render() {
             ctx.strokeStyle = "#fcee09";
             ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(0, 0); ctx.lineTo(mx, my);
+            ctx.moveTo(0, 0);
+            ctx.lineTo(mx, my);
             ctx.stroke();
             ctx.fillStyle = "#050012";
             ctx.strokeStyle = "#00f3ff";
@@ -1471,7 +1735,6 @@ function render() {
             ctx.fill();
             ctx.stroke();
           }
-
         } else if (e.subtype === "ARACHNID") {
           // 9. CYBER ARACHNID: Mechanická tarantule s 8 kloubovými končetinami
           const legWave = Math.sin(performance.now() * 0.015) * 0.25;
@@ -1479,13 +1742,17 @@ function render() {
           ctx.lineWidth = 3;
           for (let side = -1; side <= 1; side += 2) {
             for (let leg = 0; leg < 4; leg++) {
-              const baseA = side * (0.45 + leg * 0.38) + (leg % 2 === 0 ? legWave : -legWave);
+              const baseA =
+                side * (0.45 + leg * 0.38) +
+                (leg % 2 === 0 ? legWave : -legWave);
               const kneeX = Math.cos(baseA) * (r * 0.85);
               const kneeY = Math.sin(baseA) * (r * 0.85);
               const tipX = Math.cos(baseA - side * 0.3) * (r * 1.45);
               const tipY = Math.sin(baseA - side * 0.3) * (r * 1.45);
               ctx.beginPath();
-              ctx.moveTo(0, 0); ctx.lineTo(kneeX, kneeY); ctx.lineTo(tipX, tipY);
+              ctx.moveTo(0, 0);
+              ctx.lineTo(kneeX, kneeY);
+              ctx.lineTo(tipX, tipY);
               ctx.stroke();
             }
           }
@@ -1496,7 +1763,6 @@ function render() {
           ctx.arc(0, 0, r * 0.55 * corePulse, 0, Math.PI * 2);
           ctx.fill();
           ctx.stroke();
-
         } else if (e.subtype === "VALKYRIE") {
           // 10. OMEGA VALKYRIE: Bitevní křižník s roztaženými plazmovými křídly
           ctx.strokeStyle = "#f43f5e";
@@ -1514,7 +1780,7 @@ function render() {
           ctx.stroke();
           ctx.strokeStyle = "#00f3ff";
           ctx.lineWidth = 2.2;
-          ctx.strokeRect(-r * 0.3, -r * 0.3, r * 0.6, r * 0.6)
+          ctx.strokeRect(-r * 0.3, -r * 0.3, r * 0.6, r * 0.6);
         } else {
           // 6. SOLARIS COLOSSUS: Hvězdná kovárna s ozubeným prstencem a korónou
           ctx.strokeStyle = "#fb923c";
@@ -1544,9 +1810,15 @@ function render() {
     ctx.save();
     ctx.translate(e.x, e.y);
     ctx.rotate(e.angle);
-    const beatScale = 1 + (sfx.beatPulse || 0) * (e.type === "BOSS" ? 0.14 : 0.24);
+    const beatScale =
+      1 + (sfx.beatPulse || 0) * (e.type === "BOSS" ? 0.14 : 0.24);
     ctx.scale(beatScale, beatScale);
-    const stateCol = e.burnTimer && e.burnTimer > 0 ? "#ff5500" : e.slowTimer > 0 ? "#67e8f9" : e.color;
+    const stateCol =
+      e.burnTimer && e.burnTimer > 0
+        ? "#ff5500"
+        : e.slowTimer > 0
+          ? "#67e8f9"
+          : e.color;
     drawEnemyShape(stateCol);
     ctx.restore();
 
@@ -1554,7 +1826,13 @@ function render() {
       ctx.strokeStyle = "#38bdf8";
       ctx.lineWidth = 2.2;
       ctx.beginPath();
-      ctx.arc(e.x, e.y, e.radius + 6, 0, Math.PI * 2 * (e.shield / e.maxShield));
+      ctx.arc(
+        e.x,
+        e.y,
+        e.radius + 6,
+        0,
+        Math.PI * 2 * (e.shield / e.maxShield),
+      );
       ctx.stroke();
     }
 
@@ -1563,7 +1841,12 @@ function render() {
       ctx.fillStyle = "rgba(0, 0, 0, 0.65)";
       ctx.fillRect(e.x - bw / 2, e.y - e.radius - 12, bw, 3.5);
       ctx.fillStyle = e.color;
-      ctx.fillRect(e.x - bw / 2, e.y - e.radius - 12, bw * Math.max(0, e.hp / e.maxHp), 3.5);
+      ctx.fillRect(
+        e.x - bw / 2,
+        e.y - e.radius - 12,
+        bw * Math.max(0, e.hp / e.maxHp),
+        3.5,
+      );
     }
   }
 
@@ -1578,11 +1861,20 @@ function render() {
   ctx.globalAlpha = 1.0;
 
   if (state.mode !== "GAMEOVER") {
-    if ((player.weapons.aegisLvl > 0 || player.weapons.nanoShieldLvl > 0) && player.aegisReady) {
+    if (
+      (player.weapons.aegisLvl > 0 || player.weapons.nanoShieldLvl > 0) &&
+      player.aegisReady
+    ) {
       ctx.strokeStyle = "#60a5fa";
       ctx.lineWidth = 2.5;
       ctx.beginPath();
-      ctx.arc(player.x, player.y, player.radius + 13 + (sfx.beatPulse || 0) * 4, 0, Math.PI * 2);
+      ctx.arc(
+        player.x,
+        player.y,
+        player.radius + 13 + (sfx.beatPulse || 0) * 4,
+        0,
+        Math.PI * 2,
+      );
       ctx.stroke();
     }
 
@@ -1624,7 +1916,10 @@ function render() {
         ctx.strokeStyle = "#38bdf8";
         ctx.lineWidth = 2.2;
         ctx.beginPath();
-        ctx.moveTo(9, 0); ctx.lineTo(-5, -6); ctx.lineTo(-2, 0); ctx.lineTo(-5, 6);
+        ctx.moveTo(9, 0);
+        ctx.lineTo(-5, -6);
+        ctx.lineTo(-2, 0);
+        ctx.lineTo(-5, 6);
         ctx.closePath();
         ctx.stroke();
         ctx.restore();
@@ -1691,7 +1986,12 @@ function render() {
     const pulse = Math.max(sfx.beatPulse || 0, (sfx.bassEnergy || 0) * 0.85);
     if (pulse > 0.12) {
       ctx.save();
-      const borderCol = state.overdriveTimer > 0 ? "#fcee09" : (sfx.justBarDrop ? "#ff007f" : player.color);
+      const borderCol =
+        state.overdriveTimer > 0
+          ? "#fcee09"
+          : sfx.justBarDrop
+            ? "#ff007f"
+            : player.color;
       ctx.strokeStyle = borderCol;
       ctx.shadowColor = borderCol;
       ctx.shadowBlur = 18 * pulse;
@@ -1720,10 +2020,14 @@ function render() {
     ctx.lineWidth = 5;
     ctx.beginPath();
     ctx.arc(0, 0, r, 0, Math.PI * 2);
-    ctx.moveTo(-22 - pulse, 0); ctx.lineTo(-6, 0);
-    ctx.moveTo(6, 0); ctx.lineTo(22 + pulse, 0);
-    ctx.moveTo(0, -22 - pulse); ctx.lineTo(0, -6);
-    ctx.moveTo(0, 6); ctx.lineTo(0, 22 + pulse);
+    ctx.moveTo(-22 - pulse, 0);
+    ctx.lineTo(-6, 0);
+    ctx.moveTo(6, 0);
+    ctx.lineTo(22 + pulse, 0);
+    ctx.moveTo(0, -22 - pulse);
+    ctx.lineTo(0, -6);
+    ctx.moveTo(0, 6);
+    ctx.lineTo(0, 22 + pulse);
     ctx.stroke();
 
     // 2. Hlavní neonový svítící kroužek a kříž
@@ -1733,10 +2037,14 @@ function render() {
     ctx.lineWidth = 2.4;
     ctx.beginPath();
     ctx.arc(0, 0, r, 0, Math.PI * 2);
-    ctx.moveTo(-20 - pulse, 0); ctx.lineTo(-6, 0);
-    ctx.moveTo(6, 0); ctx.lineTo(20 + pulse, 0);
-    ctx.moveTo(0, -20 - pulse); ctx.lineTo(0, -6);
-    ctx.moveTo(0, 6); ctx.lineTo(0, 20 + pulse);
+    ctx.moveTo(-20 - pulse, 0);
+    ctx.lineTo(-6, 0);
+    ctx.moveTo(6, 0);
+    ctx.lineTo(20 + pulse, 0);
+    ctx.moveTo(0, -20 - pulse);
+    ctx.lineTo(0, -6);
+    ctx.moveTo(0, 6);
+    ctx.lineTo(0, 20 + pulse);
     ctx.stroke();
 
     // 3. Svítící červeno-bílý středový zaměřovací bod (přesné míření)
@@ -1749,6 +2057,49 @@ function render() {
 
     ctx.restore();
   }
+  // ⚠️ BOSS APPROACHING // ČISTÉ SCI-FI VAROVÁNÍ BEZ SPODNÍHO PRUHU
+  if (state.bossWarningTimer && state.bossWarningTimer > 0) {
+    const warnAlpha = Math.min(0.55, state.bossWarningTimer * 0.35);
+    ctx.save();
+    ctx.globalCompositeOperation = "source-over";
 
+    // 1. Jemné dramatické ztmavení arény
+    ctx.fillStyle = `rgba(10, 0, 8, ${warnAlpha})`;
+    ctx.fillRect(0, 0, W, H);
+
+    // 2. Pulzující varovný sci-fi banner přesně uprostřed obrazovky
+    const pulse = 1 + Math.sin(performance.now() * 0.018) * 0.05;
+    ctx.translate(W / 2, H / 2 - 25);
+    ctx.scale(pulse, pulse);
+    ctx.textAlign = "center";
+
+    // Pozadí a tenký rámeček pro varovný nápis
+    ctx.fillStyle = "rgba(15, 2, 12, 0.75)";
+    ctx.strokeStyle = "rgba(255, 0, 85, 0.85)";
+    ctx.lineWidth = 1.8;
+    ctx.strokeRect(-240, -42, 480, 84);
+    ctx.fillRect(-240, -42, 480, 84);
+
+    // Texty
+    ctx.font = "900 11px Orbitron, sans-serif";
+    ctx.fillStyle = "#fcee09";
+    ctx.shadowColor = "#fcee09";
+    ctx.shadowBlur = 10;
+    ctx.fillText("⚠️ VAROVÁNÍ: DETEKOVÁNA ANOMÁLIE TŘÍDY OMEGA", 0, -18);
+
+    ctx.font = "900 26px Orbitron, sans-serif";
+    ctx.fillStyle = "#ff0055";
+    ctx.shadowColor = "#ff0055";
+    ctx.shadowBlur = 18;
+    ctx.fillText("BOSS APPROACHING", 0, 12);
+
+    ctx.font = "700 10px Orbitron, sans-serif";
+    ctx.fillStyle = "#00f3ff";
+    ctx.shadowColor = "#00f3ff";
+    ctx.shadowBlur = 6;
+    ctx.fillText("// PŘIPRAVTE SE NA STŘET //", 0, 30);
+
+    ctx.restore();
+  }
   ctx.restore();
 }

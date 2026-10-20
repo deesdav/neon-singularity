@@ -97,6 +97,7 @@ const state = {
   mutator: "NONE",
   firedAnyShot: false,
   score: 0,
+  bossWarningTimer: 0,
   bestScore: parseInt(localStorage.getItem(BEST_KEY) || "0", 10),
   combo: 1.0,
   maxCombo: 1.0,
@@ -1418,6 +1419,21 @@ function update(dt) {
   if (state.mode !== "PLAYING") return;
 
   state.runTimer += dt;
+  if (state.bossWarningTimer > 0) {
+    const prevWarn = state.bossWarningTimer;
+    state.bossWarningTimer -= dt;
+    if (
+      prevWarn > 1.1 &&
+      state.bossWarningTimer <= 1.1 &&
+      typeof sfx.playBossAlarm === "function"
+    ) {
+      sfx.playBossAlarm();
+    }
+    if (state.bossWarningTimer <= 0) {
+      state.bossWarningTimer = 0;
+      spawnEnemy("BOSS");
+    }
+  }
   const mins = String(Math.floor(state.runTimer / 60)).padStart(2, "0");
   const secs = String(Math.floor(state.runTimer % 60)).padStart(2, "0");
   const timeStr = `${mins}:${secs}`;
@@ -1623,7 +1639,12 @@ function update(dt) {
     );
     spawnShockwave(player.x, player.y, 320, "#fcee09", 3, 480);
 
-    if (state.wave % 3 === 0) spawnEnemy("BOSS");
+    if (state.wave % 3 === 0) {
+      state.bossWarningTimer = 2.2;
+      state.chromatic = Math.max(state.chromatic, 0.85);
+      state.shake = Math.max(state.shake, 14);
+      if (typeof sfx.playBossAlarm === "function") sfx.playBossAlarm();
+    }
     updateHUD();
     saveGameProgress(false, currentSaveSlot);
   }
@@ -2118,6 +2139,9 @@ function update(dt) {
             false,
             "ŘETĚZOVÝ DRTIČ",
           );
+          if (Math.random() < 0.22 && typeof sfx.playFlailHit === "function") {
+            sfx.playFlailHit();
+          }
           if (e.type !== "BOSS") {
             e.x += Math.cos(fa) * 140 * dt;
             e.y += Math.sin(fa) * 140 * dt;
@@ -3503,6 +3527,10 @@ function setupHangarInterface() {
       panel: document.getElementById("menu-tab-ships"),
     },
     {
+      btn: document.getElementById("tab-btn-mission"),
+      panel: document.getElementById("menu-tab-mission"),
+    },
+    {
       btn: document.getElementById("tab-btn-slots"),
       panel: document.getElementById("menu-tab-slots"),
     },
@@ -3516,23 +3544,26 @@ function setupHangarInterface() {
     },
   ];
 
+  const activateTab = (idx) => {
+    tabs.forEach((other, oIdx) => {
+      if (!other.btn || !other.panel) return;
+      other.panel.classList.toggle("hidden", oIdx !== idx);
+      other.btn.classList.toggle("active", oIdx === idx);
+    });
+    if (idx === 2) renderSaveSlotsUI();
+    if (idx === 3 && typeof renderHallOfFame === "function") renderHallOfFame();
+  };
+
   tabs.forEach((t, idx) => {
     if (!t.btn || !t.panel) return;
-    t.btn.addEventListener("click", () => {
-      tabs.forEach((other) => {
-        if (!other.btn || !other.panel) return;
-        other.panel.classList.add("hidden");
-        other.btn.className =
-          "px-3.5 py-1.5 font-orbitron text-xs font-bold bg-slate-950/60 border-t border-x border-slate-800 text-slate-400 hover:text-white";
-      });
-      t.panel.classList.remove("hidden");
-      t.btn.className =
-        "px-3.5 py-1.5 font-orbitron text-xs font-black bg-cyan-500/20 border-t border-x border-cyan-400 text-white";
-      if (idx === 1) renderSaveSlotsUI();
-      if (idx === 2 && typeof renderHallOfFame === "function")
-        renderHallOfFame();
-    });
+    t.btn.addEventListener("click", () => activateTab(idx));
   });
+
+  // Kliknutí na rychlý přehled režimu vpravo nahoře přepne rovnou na záložku 2 (Mise & Výzvy)
+  const quickMissionPill = document.getElementById("quick-mission-pill");
+  if (quickMissionPill) {
+    quickMissionPill.addEventListener("click", () => activateTab(1));
+  }
 
   // POSUVNÍKY HLASITOSTI - PŘÍMÉ NAPOJENÍ NA AUDIO.JS
   const sliderBgm = document.getElementById("slider-bgm-vol");
@@ -3574,7 +3605,6 @@ function setupHangarInterface() {
 
   const descElInit = document.getElementById("difficulty-desc-text");
   if (descElInit) {
-    descElInit.classList.remove("truncate", "max-w-[240px]", "max-w-xs");
     descElInit.textContent =
       diffDescriptions[state.difficulty] || diffDescriptions.ARCADE;
   }
@@ -3587,21 +3617,58 @@ function setupHangarInterface() {
           .querySelectorAll("#difficulty-selector-grid button")
           .forEach((b) => {
             b.className =
-              "cyber-btn-outline py-1.5 text-[10px] font-bold text-slate-400 border-slate-700";
+              "cyber-btn-outline py-2.5 text-xs font-bold text-slate-400 border-slate-700";
           });
         const chosenDiff = e.currentTarget.getAttribute("data-diff");
         state.difficulty = chosenDiff;
         e.currentTarget.className =
-          "cyber-btn-outline py-1.5 text-[10px] font-bold border-cyan-400 bg-cyan-500/20 text-white";
+          "cyber-btn-outline py-2.5 text-xs font-bold border-cyan-400 bg-cyan-500/20 text-white";
 
         const descEl = document.getElementById("difficulty-desc-text");
         if (descEl && diffDescriptions[chosenDiff]) {
           descEl.textContent = diffDescriptions[chosenDiff];
         }
+        const qDiff = document.getElementById("quick-diff-badge");
+        if (qDiff) qDiff.textContent = chosenDiff;
       });
     });
 }
 
+/*************************************************************************
+ * KOMPLETNÍ OBSLUHA MUTÁTORŮ
+ *************************************************************************/
+if (typeof window.DAILY_MUTATORS === "undefined") {
+  window.DAILY_MUTATORS = [
+    {
+      id: "NONE",
+      label: "STANDARD",
+      shortDesc: "STANDARD: Běžná pravidla bez mutace",
+      color: "#00f3ff",
+      bonusChips: 0,
+    },
+    {
+      id: "GLASS_CANNON",
+      label: "SKLENĚNÁ DĚLA",
+      shortDesc: "SKLENĚNÁ DĚLA: 2x poškození pro tebe i nepřátele (+30 ◈)",
+      color: "#ff0055",
+      bonusChips: 30,
+    },
+    {
+      id: "INFINITE_DASH",
+      label: "NEKONEČNÝ SKOK",
+      shortDesc: "NEKONEČNÝ SKOK: Cooldown skoku jen 0.18s (+25 ◈)",
+      color: "#fcee09",
+      bonusChips: 25,
+    },
+    {
+      id: "SWARM_CHAOS",
+      label: "ROJE CHAOSU",
+      shortDesc: "ROJE CHAOSU: 2x více nepřátel s nižším HP (+35 ◈)",
+      color: "#00ffaa",
+      bonusChips: 35,
+    },
+  ];
+}
 /*************************************************************************
  * KOMPLETNÍ OBSLUHA MUTÁTORŮ (SPODNÍ TLAČÍTKA I HORNÍ KARTY)
  *************************************************************************/
@@ -3656,44 +3723,37 @@ function selectMutatorMode(mutId) {
 
   const mutDescEl = document.getElementById("mutator-desc-text");
   if (mutDescEl) {
-    mutDescEl.classList.remove("truncate");
     mutDescEl.textContent = mutObj.shortDesc;
     mutDescEl.style.color = mutObj.color;
   }
 
-  const allBtns = Array.from(
-    document.querySelectorAll("#mutator-selector-grid button"),
-  );
-  allBtns.forEach((btn) => {
-    const cleanTxt = btn.textContent.replace(/\s+/g, " ").trim().toUpperCase();
-    let btnMutId = null;
+  const qMut = document.getElementById("quick-mut-badge");
+  if (qMut) {
+    qMut.textContent = mutObj.label || mutId;
+    qMut.style.color = mutObj.color;
+  }
 
-    if (cleanTxt === "STANDARD" || cleanTxt === "STANDARDNÍ") btnMutId = "NONE";
-    else if (cleanTxt.includes("SKLENĚNÁ") || cleanTxt.includes("GLASS"))
-      btnMutId = "GLASS_CANNON";
-    else if (
-      (cleanTxt.includes("NEKONEČNÝ") || cleanTxt.includes("INFINITE")) &&
-      !cleanTxt.includes("ENDLESS")
-    )
-      btnMutId = "INFINITE_DASH";
-    else if (
-      cleanTxt.includes("ROJE") ||
-      cleanTxt.includes("ROJOVÝ") ||
-      cleanTxt.includes("SWARM")
-    )
-      btnMutId = "SWARM_CHAOS";
-
-    if (btnMutId) {
-      if (btnMutId === mutId) {
-        btn.className =
-          "cyber-btn-outline py-1.5 text-[10px] font-bold border-cyan-400 bg-cyan-500/20 text-white";
-      } else {
-        btn.className =
-          "cyber-btn-outline py-1.5 text-[10px] font-bold text-slate-400 border-slate-700";
-      }
+  document.querySelectorAll("#mutator-selector-grid button").forEach((btn) => {
+    const btnMutId = btn.getAttribute("data-mut");
+    if (btnMutId === mutId) {
+      btn.className =
+        "cyber-btn-outline py-2.5 text-xs font-bold border-cyan-400 bg-cyan-500/20 text-white";
+    } else {
+      btn.className =
+        "cyber-btn-outline py-2.5 text-xs font-bold text-slate-400 border-slate-700";
     }
   });
 }
+
+window.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("#mutator-selector-grid button").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const targetId = btn.getAttribute("data-mut");
+      if (targetId) selectMutatorMode(targetId);
+    });
+  });
+});
 
 window.addEventListener("DOMContentLoaded", () => {
   const allBtns = Array.from(

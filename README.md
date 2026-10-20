@@ -2,58 +2,62 @@
 
 > **[▶ Hrát online](https://deesdav.github.io/neon-singularity/)** · [Zdrojový kód](https://github.com/deesdav/neon-singularity)
 
-**Neon Singularity** je arkádová sci-fi survival střílečka pro webový prohlížeč. V neonové aréně ovládáš vlastní vznášedlo, bojuješ s vlnami nepřátel, sbíráš kvantové čipy, vylepšuješ arzenál a snažíš se přežít až do střetu se silnými bossy. Hra staví na rychlém pohybu, kombinování zbraní a postupném budování stále silnější sestavy.
+**Neon Singularity // Omega Edition** je arkádová sci-fi survival bullet-hell střílečka pro moderní webové prohlížeče. V neonové aréně ovládáš pokročilé vznášedlo, proplétáš se hustým deštěm projektilů, sbíráš kvantové čipy, rozvíjíš technologický strom a čelíš eskalujícím vlnám nepřátel až po střety s obřími geometrickými bossy. Hra staví na maximální plynulosti (stabilních 60 FPS), precizním ovládání a kombinování zbraní do zničujících fúzí.
 
 ## 🎮 Zahraj si
 
 **[▶ Spustit NEON SINGULARITY na GitHub Pages](https://deesdav.github.io/neon-singularity/)**
 
-Hra běží v moderním prohlížeči a nevyžaduje instalaci. Při prvním otevření se načítá herní kód a podle použití také hudba a externí fonty/styly.
+Hra běží přímo v prohlížeči bez nutnosti instalace.
 
-## ⚡ Hlavní funkce
+---
 
-- **10 tříd vznášedel** – vyber si loď podle svého herního stylu a uprav její barvu.
-- **Arzenál a evoluce** – během mise získávej úrovně a vybírej si nová vylepšení.
-- **36 zbraní a 15 fúzních synergií** – kombinuj zbraně a vytvářej silnější efekty.
-- **4 režimy obtížnosti** – Arcade, Hardcore, Ultra a Endless.
-- **Denní mutátory** – měň pravidla mise pomocí speciálních modifikátorů.
-- **10 variant bossů** – sleduj zdraví bosse a připrav se na náročnější střety.
-- **Cyber-shop a Quantum Overclock** – utrácej kvantové čipy za trvalá vylepšení.
-- **50 trofejí a výzev** – plň úkoly a sleduj svůj postup.
-- **3 paměťové sloty** – ukládej a obnovuj rozehrané mise.
-- **Komba a rekordy** – řetěz eliminace, zvyšuj skóre a překonávej vlastní nejlepší výsledek.
-- **Hudební rádio** – devět vestavěných skladeb, zvukové efekty a možnost načíst vlastní MP3.
-- **Audio-reaktivní vizuály** – efekty reagují na rytmus a frekvence hudby.
-- **Čeština a angličtina** – jazyk lze přepnout přímo v menu.
-- **Klávesnice i gamepad** – hra obsahuje podporu ovládání ovladačem.
-- **Neonový CRT vzhled** – futuristický HUD, částicové efekty a cyberpunková estetika.
+## ⚡ Klíčové prvky hry
 
-## 🕹️ Základní ovládání
+- **10 unikátních tříd lodí** – od bleskové stíhačky Interceptor po časoprostorový Chrono Weaver nebo mateřskou loď Hive Carrier.
+- **3 trofejní skiny** – odemykatelné vizuální modely za milníky trofejí (Plazmový pulz za 10 🏆, Fázový přízrak za 25 🏆 a duhová Božská singularita za 50 🏆).
+- **36 zbraňových modulů & 15 fúzních synergií** – kombinuj základní zbraně do super-systémů (např. _Sluneční Supernova_, _Rozparovač Horizontu_, _Hvězdná Koróna_ nebo _Bouřková Matrice_).
+- **🎲 Reroll karet** – možnost přelosovat nabídku vylepšení při postupu na novou úroveň (1× zdarma za level, další za kvantové čipy).
+- **10 unikátních Bossů** – Archon, Seraph, Hydra, Leviathan, Nemesis, Colossus, Quantum Prism, Gravity Titan, Cyber Arachnid a Omega Valkyrie. Každý s vlastními útočnými vzorci a zuřivou Enrage fází pod 50 % HP.
+- **Kampaň na 30 vln & Endless režim** – v plné kampani (Arcade, Hardcore, Ultra) potkáš každé 3 vlny jednoho z 10 bossů. V Endless režimu čelíš nekonečné eskalaci.
+- **Přehledné 5záložkové Menu** – čistě rozdělené na Hangár lodí s paletou lakování, Výběr misí a výzev, Paměťové sloty, Síň slávy a Nastavení zvuku.
+- **Trvalá progrese (Cyber-Shop & Overclock)** – 12 permanentních vylepšení jádra a nekonečný Kvantový Overclock pro přebytečné čipy.
+- **Přesně 50 trofejí & výzev** – sleduj svůj celoživotní postup a získávej štědré odměny v čipech.
+- **3 paměťové sloty** – automatické i manuální ukládání a obnova rozjetých misí včetně exportu a importu profilu do souboru `.json`.
+- **Darksynth audio & reaktivní vizuály** – 9 skladeb s FFT frekvenční analýzou, pulzující ekvalizér kolem lodi a možnost načíst vlastní MP3 klávesou `[O]`.
+- **Kompletní dvojjazyčnost** – plynulé přepínání mezi češtinou a angličtinou přímo za běhu (`[L]`).
+- **Optimalizace pro klávesnici i gamepad** – podpora DualShocku / standardních ovladačů a dotykového ovládání na mobilních zařízeních.
 
-| Akce                                  | Klávesnice                                |
-| ------------------------------------- | ----------------------------------------- |
-| Pohyb                                 | WASD                                      |
-| Míření                                | Myš                                       |
-| Hyper-skok                            | Mezerník                                  |
-| Černá díra                            | Q / E                                     |
-| Přetlak                               | F                                         |
-| Výběr vylepšení                       | 1, 2, 3 nebo šipky                        |
-| Pauza                                 | Esc                                       |
-| Přepnutí plného/minimalistického HUDu | H                                         |
-| Přepnutí hudební skladby              | N                                         |
-| Nahrání vlastní MP3                   | O                                         |
-| Přepnutí jazyka CZ/EN                 | L                                         |
+---
 
-Hra zobrazuje další nápovědu přímo v menu. Ovládání gamepadem je vysvětlené v záložce paměťových slotů a ovládání.
+## 🕹️ Ovládání
 
-## 🚀 Spuštění lokálně
+| Akce                               | Klávesnice                      | Gamepad / DualShock                 |
+| :--------------------------------- | :------------------------------ | :---------------------------------- |
+| **Pohyb**                          | `W`, `A`, `S`, `D` / Šipky      | Levá páčka                          |
+| **Míření**                         | Pohyb myši                      | Pravá páčka                         |
+| **Palba**                          | Automatická / Levé tlačítko     | Automatická                         |
+| **Hyper-skok**                     | `Mezerník` / Pravé tlačítko     | `Křížek` / `R1`                     |
+| **Kvantová černá díra**            | `Q` / `E` / Prostřední tlačítko | `Čtverec` / `L1`                    |
+| **Kvantový přetlak**               | `F`                             | `Trojúhelník`                       |
+| **Výběr vylepšení**                | `1`, `2`, `3`                   | D-Pad (`Vlevo`, `Nahoru`, `Vpravo`) |
+| **Přelosovat karty (Reroll)**      | `R`                             | Tlačítko na obrazovce               |
+| **Pauza hry**                      | `Esc` / `P`                     | `Options` / `Start`                 |
+| **Přepnutí HUDu (Plný / Minimal)** | `H`                             | Tlačítko v HUDu                     |
+| **Přepnutí skladby rádia**         | `N`                             | Tlačítko v HUDu                     |
+| **Nahrát vlastní MP3**             | `O`                             | —                                   |
+| **Přepnout jazyk (CZ / EN)**       | `L`                             | Tlačítko v Menu                     |
 
-Projekt používá HTML, CSS a JavaScript bez nutnosti instalovat balíčky.
+---
+
+## 🚀 Lokální spuštění
+
+Projekt nevyžaduje žádné závislosti ani instalaci balíčků přes npm.
 
 1. Naklonuj repozitář:
    ```bash
-   git clone https://github.com/deesdav/neon-singularity.git
-   cd neon-singularity
+   git clone [https://github.com/deesdav/neon-singularity.git](https://github.com/deesdav/neon-singularity.git)
+   cd neon-
    ```
 2. Otevři `index.html` v moderním prohlížeči, nebo spusť lokální HTTP server:
 
@@ -69,41 +73,32 @@ Projekt používá HTML, CSS a JavaScript bez nutnosti instalovat balíčky.
 
 3. Otevři [http://localhost:8000](http://localhost:8000).
 
-**Poznámka:** Tailwind CSS a fonty Orbitron/Rajdhani se načítají z externích CDN, takže jejich načtení vyžaduje internetové připojení. Hra je publikovaná přes GitHub Pages a nasazení zajišťuje GitHub Actions.
-
 ## 🗂️ Struktura projektu
 
 ```text
 neon-singularity/
 ├── .github/workflows/
 │   └── deploy-pages.yml  # Automatické nasazení na GitHub Pages
-├── audio/                # Vestavěné MP3 soundtracky
+├── audio/                # Soundtracky ve formátu MP3
 ├── js/
-│   ├── audio.js          # Hudba, zvukové efekty a audio analýza
-│   ├── combat.js         # Boj a herní mechaniky
-│   ├── game.js           # Hlavní logika, menu a postup hrou
-│   ├── i18n.js            # Jazykové texty CZ/EN
-│   ├── renderer.js       # Vykreslování arény a efektů
-│   └── world.js           # Herní svět a entity
+│   ├── audio.js          # Zvukový engine, adaptivní FFT analýza a hudba
+│   ├── combat.js         # Arzenál (36 zbraní), synergie, bojová mechanika a nepřátelé
+│   ├── game.js           # Herní smyčka, stav hry, správa slotů a vstupů
+│   ├── i18n.js           # Kompletní lokalizace CZ <-> EN a virtuální dotykové ovládání
+│   ├── renderer.js       # Vektorové modely lodí/bossů, částicové efekty a HUD
+│   └── world.js          # Pozadí, pružinová mřížka (grid), lodě a katalog 50 trofejí
 ├── style/
-│   └── style.css         # Vlastní vzhled a CRT/neon efekty
-├── index.html            # Herní stránka a rozhraní
+│   └── style.css         # Sci-fi CSS fazety, neonové záře a CRT overlay
+├── index.html            # Hlavní herní rozhraní a struktura aplikace
 └── README.md
 ```
 
 ## 🛠️ Technologie
 
-- HTML5 Canvas
-- CSS
-- JavaScript
-- Tailwind CSS přes CDN
-- Google Fonts: Orbitron a Rajdhani
-- GitHub Actions a GitHub Pages
+- HTML5 Canvas & 2D Context – 60 FPS vektorový rendering bez externích knihoven
 
-## 📦 Načítání a výkon
+- Web Audio API – FFT spektrální analýza a syntéza zvuků v reálném čase
 
-Herní soundtrack obsahuje devět MP3 souborů o velikosti přibližně 5 MB každý. To neznamená, že se všechny musí stáhnout při otevření stránky. Pokud se hra načítá pomalu nebo se některé prvky nezobrazují, zkontroluj konzoli a síťové požadavky prohlížeče a také [stav nasazení GitHub Actions](https://github.com/deesdav/neon-singularity/actions).
+- CSS3 / Tailwind CSS (CDN) – responzivní kybernetické rozhraní a animace
 
-## 📄 Licence
-
-V repozitáři zatím není uvedena licence. Před dalším šířením nebo použitím kódu a audio souborů je potřeba ověřit příslušná práva.
+- Vanilla JavaScript (ES6+) – čistá herní logika bez frameworků

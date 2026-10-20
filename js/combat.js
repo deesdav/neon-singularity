@@ -1207,7 +1207,8 @@ function fireVoidLance() {
     life: 0.22,
     maxLife: 0.22,
   });
-  sfx.playLaser(0.55);
+  if (typeof sfx.playVoidLance === "function") sfx.playVoidLance();
+  else sfx.playLaser(0.55);
 
   const dx = Math.cos(a);
   const dy = Math.sin(a);
@@ -1253,6 +1254,7 @@ function dropStasisField() {
     life: 5.0,
     maxLife: 5.0,
   });
+  if (typeof sfx.playStasisDeploy === "function") sfx.playStasisDeploy();
 }
 
 function firePrismFan() {

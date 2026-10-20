@@ -21,15 +21,24 @@ const EN_DICTIONARY = {
   "8 LODÍ // 32 ZBRANÍ + 13 SYNERGIÍ // DENNÍ MUTÁTORY // KVANTOVÝ OVERCLOCK":
     "10 SHIPS // 36 WEAPONS + 15 SYNERGIES // DAILY MUTATORS // QUANTUM OVERCLOCK",
   "🚀 1. LODĚ (8)": "🚀 1. SHIPS (8)",
-  "💾 2. SLOTY & ZÁLOHY": "💾 2. SLOTS & BACKUPS",
-  "🏛️ 3. SÍŇ SLÁVY": "🏛️ 3. HALL OF FAME",
-  "⚙️ 4. AUDIO & ZVUK": "⚙️ 4. AUDIO & SOUND",
-  "1. LODĚ (8)": "1. SHIPS (8)",
-  "2. SLOTY & ZÁLOHY": "2. SLOTS & BACKUPS",
-  "3. SÍŇ SLÁVY": "3. HALL OF FAME",
-  "4. AUDIO & ZVUK": "4. AUDIO & SOUND",
-  "🎨 BARVA LODI:": "🎨 SHIP COLOR:",
+  "⚔️ 2. MISE & VÝZVY": "⚔️ 2. MISSION & CHALLENGES",
+  "💾 3. SLOTY & ZÁLOHY": "💾 3. SLOTS & BACKUPS",
+  "🏛️ 4. SÍŇ SLÁVY": "🏛️ 4. HALL OF FAME",
+  "⚙️ 5. AUDIO & ZVUK": "⚙️ 5. AUDIO & SOUND",
+  "AKTIVNÍ REŽIM:": "ACTIVE MODE:",
+  "10 BOSSŮ (30 VLN)": "10 BOSSES (30 WAVES)",
+  "EXTRA ČIPY ◈": "EXTRA CHIPS ◈",
+  "🏆 Trofejní skiny se odemykají za 10, 25 a 50 trofejí":
+    "🏆 Trophy skins unlock at 10, 25, and 50 trophies",
+  "⚡ 15 FÚZNÍCH SYNERGIÍ ZBRANÍ (AUTOMATICKÉ):":
+    "⚡ 15 WEAPON FUSION SYNERGIES (AUTOMATIC):",
+  "Rozparovač Horizontu & 9 dalších fúzí v aréně!":
+    "Horizon Ripper & 9 more fusions in the arena!",
   VÝCHOZÍ: "DEFAULT",
+
+  "⚠️ VAROVÁNÍ: DETEKOVÁNA ANOMÁLIE TŘÍDY OMEGA":
+    "⚠️ WARNING: OMEGA CLASS ANOMALY DETECTED",
+  "// PŘIPRAVTE SE NA STŘET //": "// PREPARE FOR ENGAGEMENT //",
 
   // 2. Sloty, Zálohy, Nápověda v menu & Síň slávy
   "VYBER AKTIVNÍ SLOT PRO UKLÁDÁNÍ NEBO PŘEJMENOVÁNÍ ROZEHRANÉ MISE:":

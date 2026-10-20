@@ -554,3 +554,72 @@ input[type="text"]:focus {
   gap: 8px;
   pointer-events: auto;
 }
+
+/* SCI-FI NAVIGATION TABS & HOLOGRAPHIC PANEL POLISH */
+.cyber-tab {
+  padding: 0.42rem 0.9rem;
+  font-family: "Orbitron", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  background: rgba(8, 6, 22, 0.75);
+  border-top: 1px solid rgba(51, 65, 85, 0.8);
+  border-left: 1px solid rgba(51, 65, 85, 0.8);
+  border-right: 1px solid rgba(51, 65, 85, 0.8);
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+  transition: all 0.18s ease;
+  cursor: pointer;
+}
+
+.cyber-tab:hover {
+  color: #ffffff;
+  border-color: rgba(0, 243, 255, 0.6);
+  background: rgba(0, 243, 255, 0.1);
+}
+
+.cyber-tab.active {
+  color: #ffffff;
+  font-weight: 900;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 243, 255, 0.28) 0%,
+    rgba(0, 243, 255, 0.08) 100%
+  );
+  border-top: 2px solid #00f3ff;
+  border-left: 1px solid #00f3ff;
+  border-right: 1px solid #00f3ff;
+  box-shadow: 0 -4px 16px rgba(0, 243, 255, 0.25);
+  text-shadow: 0 0 8px rgba(0, 243, 255, 0.7);
+}
+
+.cyber-box::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(
+    rgba(0, 243, 255, 0.07) 1px,
+    transparent 1px
+  );
+  background-size: 18px 18px;
+  opacity: 0.45;
+  z-index: -1;
+}
+
+.ship-card.selected {
+  animation: selectedShipPulse 2.6s infinite ease-in-out;
+}
+
+@keyframes selectedShipPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 22px rgba(0, 243, 255, 0.38),
+      inset 0 0 14px rgba(0, 243, 255, 0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 32px rgba(252, 238, 9, 0.48),
+      inset 0 0 20px rgba(0, 243, 255, 0.25);
+  }
+}
