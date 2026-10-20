@@ -3503,10 +3503,6 @@ function setupHangarInterface() {
       panel: document.getElementById("menu-tab-ships"),
     },
     {
-      btn: document.getElementById("tab-btn-mission"),
-      panel: document.getElementById("menu-tab-mission"),
-    },
-    {
       btn: document.getElementById("tab-btn-slots"),
       panel: document.getElementById("menu-tab-slots"),
     },
@@ -3527,16 +3523,83 @@ function setupHangarInterface() {
         if (!other.btn || !other.panel) return;
         other.panel.classList.add("hidden");
         other.btn.className =
-          "px-3 py-1 font-orbitron text-xs font-bold bg-slate-950/60 border-t border-x border-slate-800 text-slate-400 hover:text-white";
+          "px-3.5 py-1.5 font-orbitron text-xs font-bold bg-slate-950/60 border-t border-x border-slate-800 text-slate-400 hover:text-white";
       });
       t.panel.classList.remove("hidden");
       t.btn.className =
-        "px-3 py-1 font-orbitron text-xs font-black bg-cyan-500/20 border-t border-x border-cyan-400 text-white";
-      if (idx === 2) renderSaveSlotsUI();
-      if (idx === 3 && typeof renderHallOfFame === "function")
+        "px-3.5 py-1.5 font-orbitron text-xs font-black bg-cyan-500/20 border-t border-x border-cyan-400 text-white";
+      if (idx === 1) renderSaveSlotsUI();
+      if (idx === 2 && typeof renderHallOfFame === "function")
         renderHallOfFame();
     });
   });
+
+  // POSUVNÍKY HLASITOSTI - PŘÍMÉ NAPOJENÍ NA AUDIO.JS
+  const sliderBgm = document.getElementById("slider-bgm-vol");
+  const labelBgm = document.getElementById("label-bgm-vol");
+  const sliderSfx = document.getElementById("slider-sfx-vol");
+  const labelSfx = document.getElementById("label-sfx-vol");
+
+  if (sliderBgm && labelBgm) {
+    sliderBgm.value = sfx.bgmVolume !== undefined ? sfx.bgmVolume : 0.55;
+    labelBgm.textContent = `${Math.round(sliderBgm.value * 100)}%`;
+    sliderBgm.addEventListener("input", (e) => {
+      const val = parseFloat(e.target.value);
+      sfx.setBgmVolume(val);
+      labelBgm.textContent = `${Math.round(val * 100)}%`;
+    });
+  }
+
+  if (sliderSfx && labelSfx) {
+    sliderSfx.value = sfx.sfxVolume !== undefined ? sfx.sfxVolume : 0.8;
+    labelSfx.textContent = `${Math.round(sliderSfx.value * 100)}%`;
+    sliderSfx.addEventListener("input", (e) => {
+      const val = parseFloat(e.target.value);
+      sfx.setSfxVolume(val);
+      labelSfx.textContent = `${Math.round(val * 100)}%`;
+    });
+  }
+
+  if (typeof setupProfileExportImport === "function") {
+    setupProfileExportImport();
+  }
+
+  // OBTÍŽNOST SIMULACE - CÍL 30. VLNA (VŠECH 10 BOSSŮ)
+  const diffDescriptions = {
+    ARCADE: "100 % HP // Běžné čipy // Cíl: 30. vlna (10 Bossů)",
+    HARDCORE: "70 % HP // Silnější AI // 2x Čipy ◈ // Cíl: 30. vlna",
+    ULTRA: "35 % HP // Extrémní AI // 3x Čipy ◈ // Cíl: 30. vlna",
+    ENDLESS: "Nekonečné vlny // Stupňující se Bossové",
+  };
+
+  const descElInit = document.getElementById("difficulty-desc-text");
+  if (descElInit) {
+    descElInit.classList.remove("truncate", "max-w-[240px]", "max-w-xs");
+    descElInit.textContent =
+      diffDescriptions[state.difficulty] || diffDescriptions.ARCADE;
+  }
+
+  document
+    .querySelectorAll("#difficulty-selector-grid button")
+    .forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        document
+          .querySelectorAll("#difficulty-selector-grid button")
+          .forEach((b) => {
+            b.className =
+              "cyber-btn-outline py-1.5 text-[10px] font-bold text-slate-400 border-slate-700";
+          });
+        const chosenDiff = e.currentTarget.getAttribute("data-diff");
+        state.difficulty = chosenDiff;
+        e.currentTarget.className =
+          "cyber-btn-outline py-1.5 text-[10px] font-bold border-cyan-400 bg-cyan-500/20 text-white";
+
+        const descEl = document.getElementById("difficulty-desc-text");
+        if (descEl && diffDescriptions[chosenDiff]) {
+          descEl.textContent = diffDescriptions[chosenDiff];
+        }
+      });
+    });
 }
 
 /*************************************************************************

@@ -2067,7 +2067,7 @@ function damageEnemy(
       );
       saveGameProgress(false, currentSaveSlot);
 
-      if (state.difficulty !== "ENDLESS" && state.wave >= 12) {
+      if (state.difficulty !== "ENDLESS" && state.wave >= 30) {
         if (state.difficulty === "HARDCORE" || state.difficulty === "ULTRA")
           unlockAchievement("hardcore_victor");
         triggerGameOver(true);
