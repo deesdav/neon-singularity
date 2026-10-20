@@ -4,273 +4,475 @@
 const decoys = [];
 
 function recordWeaponDmg(weaponName, amount) {
-    if (!state.runStats) return;
-    state.runStats.weaponDmg[weaponName] = (state.runStats.weaponDmg[weaponName] || 0) + amount;
+  if (!state.runStats) return;
+  state.runStats.weaponDmg[weaponName] =
+    (state.runStats.weaponDmg[weaponName] || 0) + amount;
 }
 
 function triggerGamepadRumble(duration = 180, strong = 0.5, weak = 0.5) {
-    if (!navigator.getGamepads) return;
-    const pads = navigator.getGamepads();
-    for (const gp of pads) {
-        if (gp && gp.vibrationActuator && typeof gp.vibrationActuator.playEffect === "function") {
-            gp.vibrationActuator.playEffect("dual-rumble", {
-                startDelay: 0,
-                duration: duration,
-                weakMagnitude: weak,
-                strongMagnitude: strong
-            }).catch(() => { });
-        }
+  if (!navigator.getGamepads) return;
+  const pads = navigator.getGamepads();
+  for (const gp of pads) {
+    if (
+      gp &&
+      gp.vibrationActuator &&
+      typeof gp.vibrationActuator.playEffect === "function"
+    ) {
+      gp.vibrationActuator
+        .playEffect("dual-rumble", {
+          startDelay: 0,
+          duration: duration,
+          weakMagnitude: weak,
+          strongMagnitude: strong,
+        })
+        .catch(() => {});
     }
+  }
 }
 
 // 32 ROGUELITE UPGRADE MODULES (24 ORIGINAL + 8 NEW GADGETS)
 const UPGRADE_POOL = [
-    {
-        id: "plasma_whip", name: "PLAZMOVÝ BIČ", subtitle: "ENERGETICKÝ ŠVIH (360°)",
-        desc: "Šlehá kolem lodi žhnoucím obloukem plazmatu, který drtí vše v dosahu. (Synergie s Bumerangy -> Vortexový Cyklon!)",
-        color: "#00ffaa", apply: () => { player.weapons.whipLvl++; unlockAchievement("whip_master"); }
+  {
+    id: "plasma_whip",
+    name: "PLAZMOVÝ BIČ",
+    subtitle: "ENERGETICKÝ ŠVIH (360°)",
+    desc: "Šlehá kolem lodi žhnoucím obloukem plazmatu, který drtí vše v dosahu. (Synergie s Bumerangy -> Vortexový Cyklon!)",
+    color: "#00ffaa",
+    apply: () => {
+      player.weapons.whipLvl++;
+      unlockAchievement("whip_master");
     },
-    {
-        id: "quantum_mortar", name: "KVANTOVÝ MINOMET", subtitle: "TĚŽKÉ OBLOUKOVÉ GRANÁTY",
-        desc: "Vystřeluje explozivní kvantové granáty na nejbližší shluk nepřátel. (Synergie s Minami -> Kobercové Bombardování!)",
-        color: "#fcee09", apply: () => { player.weapons.mortarLvl++; unlockAchievement("whip_master"); }
+  },
+  {
+    id: "quantum_mortar",
+    name: "KVANTOVÝ MINOMET",
+    subtitle: "TĚŽKÉ OBLOUKOVÉ GRANÁTY",
+    desc: "Vystřeluje explozivní kvantové granáty na nejbližší shluk nepřátel. (Synergie s Minami -> Kobercové Bombardování!)",
+    color: "#fcee09",
+    apply: () => {
+      player.weapons.mortarLvl++;
+      unlockAchievement("whip_master");
     },
-    {
-        id: "nano_shield", name: "NANOBOTOVÝ ŠTÍT", subtitle: "PULZUJÍCÍ BARIÉRA & ODRAZ",
-        desc: "Snižuje přijaté poškození s klesajícím účinkem (max. 55 %) a zrychluje obnovu Aegis štítu. (Synergie s Aegis -> Nesmrtelná Citadela!)",
-        color: "#38bdf8", apply: () => {
-            if (player.weapons.nanoShieldLvl >= 4) return;
-            player.weapons.nanoShieldLvl++;
-            if (player.weapons.aegisLvl > 0) player.aegisReady = true;
-        }
+  },
+  {
+    id: "nano_shield",
+    name: "NANOBOTOVÝ ŠTÍT",
+    subtitle: "PULZUJÍCÍ BARIÉRA & ODRAZ",
+    desc: "Snižuje přijaté poškození s klesajícím účinkem (max. 55 %) a zrychluje obnovu Aegis štítu. (Synergie s Aegis -> Nesmrtelná Citadela!)",
+    color: "#38bdf8",
+    apply: () => {
+      if (player.weapons.nanoShieldLvl >= 4) return;
+      player.weapons.nanoShieldLvl++;
+      if (player.weapons.aegisLvl > 0) player.aegisReady = true;
     },
-    {
-        id: "holo_decoy", name: "HOLOGRAFICKÝ NÁVNADOVÝ DRON", subtitle: "VYBUCHUJÍCÍ KLON",
-        desc: "Vypouští holografické dvojníky, kteří přitahují palbu a po zničení explodují. (Synergie s Nanoboty -> Fantomová Legie!)",
-        color: "#a855f7", apply: () => { player.weapons.decoyLvl++; }
+  },
+  {
+    id: "holo_decoy",
+    name: "HOLOGRAFICKÝ NÁVNADOVÝ DRON",
+    subtitle: "VYBUCHUJÍCÍ KLON",
+    desc: "Vypouští holografické dvojníky, kteří přitahují palbu a po zničení explodují. (Synergie s Nanoboty -> Fantomová Legie!)",
+    color: "#a855f7",
+    apply: () => {
+      player.weapons.decoyLvl++;
     },
-    {
-        id: "lightning_trap", name: "REZONANČNÍ BLESKOVÁ PAST", subtitle: "ELEKTRICKÁ SÍŤ V ARÉNĚ",
-        desc: "Klade do prostoru bleskové uzly, které paralyzují a smaží projíždějící nepřátele. (Synergie s Teslou -> Bouřková Síť!)",
-        color: "#67e8f9", apply: () => { player.weapons.lightningTrapLvl++; }
+  },
+  {
+    id: "lightning_trap",
+    name: "REZONANČNÍ BLESKOVÁ PAST",
+    subtitle: "ELEKTRICKÁ SÍŤ V ARÉNĚ",
+    desc: "Klade do prostoru bleskové uzly, které paralyzují a smaží projíždějící nepřátele. (Synergie s Teslou -> Bouřková Síť!)",
+    color: "#67e8f9",
+    apply: () => {
+      player.weapons.lightningTrapLvl++;
     },
-    {
-        id: "rift_slicer", name: "SUB-PROSTOROVÝ TRHAČ", subtitle: "DIMENZIONÁLNÍ VLNY",
-        desc: "Vysílá široké fázové vlny, které procházejí skrz všechny nepřátele v lajně. (Synergie s Čepelemi -> Dimenzionální Sekáč!)",
-        color: "#f43f5e", apply: () => { player.weapons.riftSlicerLvl++; }
+  },
+  {
+    id: "rift_slicer",
+    name: "SUB-PROSTOROVÝ TRHAČ",
+    subtitle: "DIMENZIONÁLNÍ VLNY",
+    desc: "Vysílá široké fázové vlny, které procházejí skrz všechny nepřátele v lajně. (Synergie s Čepelemi -> Dimenzionální Sekáč!)",
+    color: "#f43f5e",
+    apply: () => {
+      player.weapons.riftSlicerLvl++;
     },
-    {
-        id: "prism_laser", name: "FOTONOVÉ HRANOLY", subtitle: "ROZŠTĚPENÉ PAPRSKY",
-        desc: "Každý třetí výstřel vyšle vějíř 5 laserových paprsků. (Synergie s Railgunem -> Duhová Anihilace!)",
-        color: "#ff0055", apply: () => { player.weapons.prismLaserLvl++; }
+  },
+  {
+    id: "prism_laser",
+    name: "FOTONOVÉ HRANOLY",
+    subtitle: "ROZŠTĚPENÉ PAPRSKY",
+    desc: "Každý třetí výstřel vyšle vějíř 5 laserových paprsků. (Synergie s Railgunem -> Duhová Anihilace!)",
+    color: "#ff0055",
+    apply: () => {
+      player.weapons.prismLaserLvl++;
     },
-    {
-        id: "overcharge_core", name: "OMEGA REAKTOR", subtitle: "+25 % RYCHLOST PŘETLAKU & PALBY",
-        desc: "Zrychluje nabíjení Přetlaku [F] o +35 % a zvyšuje celkové poškození o +15 %. (Synergie s Aurou -> Jádro Supernovy!)",
-        color: "#fb923c", apply: () => { player.weapons.overchargeCoreLvl++; player.dmgMult += 0.15; }
+  },
+  {
+    id: "overcharge_core",
+    name: "OMEGA REAKTOR",
+    subtitle: "+25 % RYCHLOST PŘETLAKU & PALBY",
+    desc: "Zrychluje nabíjení Přetlaku [F] o +35 % a zvyšuje celkové poškození o +15 %. (Synergie s Aurou -> Jádro Supernovy!)",
+    color: "#fb923c",
+    apply: () => {
+      player.weapons.overchargeCoreLvl++;
+      player.dmgMult += 0.15;
     },
-    {
-        id: "solar_halo", name: "SLUNEČNÍ AURA", subtitle: "PERMANENTNÍ ŽHNOUCÍ PRSTENEC",
-        desc: "Kolem lodi pulzuje žhnoucí sluneční koróna, která automaticky spaluje a zpomaluje blízké nepřátele.",
-        color: "#fb923c", apply: () => { player.weapons.solarHaloLvl++; }
+  },
+  {
+    id: "solar_halo",
+    name: "SLUNEČNÍ AURA",
+    subtitle: "PERMANENTNÍ ŽHNOUCÍ PRSTENEC",
+    desc: "Kolem lodi pulzuje žhnoucí sluneční koróna, která automaticky spaluje a zpomaluje blízké nepřátele.",
+    color: "#fb923c",
+    apply: () => {
+      player.weapons.solarHaloLvl++;
     },
-    {
-        id: "swarm_bots", name: "ROJ LOVECKÝCH NANOBOTŮ", subtitle: "SAMONAVÁDĚCÍ KYBER-HMYZ",
-        desc: "Vypouští rychlé zeleno-zlaté nanoboty, kteří vyhledávají oslabené cíle a rozkládají jejich štíty.",
-        color: "#a3e635", apply: () => { player.weapons.swarmBotsLvl++; }
+  },
+  {
+    id: "swarm_bots",
+    name: "ROJ LOVECKÝCH NANOBOTŮ",
+    subtitle: "SAMONAVÁDĚCÍ KYBER-HMYZ",
+    desc: "Vypouští rychlé zeleno-zlaté nanoboty, kteří vyhledávají oslabené cíle a rozkládají jejich štíty.",
+    color: "#a3e635",
+    apply: () => {
+      player.weapons.swarmBotsLvl++;
     },
-    {
-        id: "grav_cannon", name: "GRAVITAČNÍ DĚLO", subtitle: "TĚŽKÉ IMPLODUJÍCÍ KULE",
-        desc: "Střílí pomalé temné sféry, které po nárazu přitáhnou okolní nepřátele do jednoho bodu.",
-        color: "#c084fc", apply: () => { player.weapons.gravCannonLvl++; }
+  },
+  {
+    id: "grav_cannon",
+    name: "GRAVITAČNÍ DĚLO",
+    subtitle: "TĚŽKÉ IMPLODUJÍCÍ KULE",
+    desc: "Střílí pomalé temné sféry, které po nárazu přitáhnou okolní nepřátele do jednoho bodu.",
+    color: "#c084fc",
+    apply: () => {
+      player.weapons.gravCannonLvl++;
     },
-    {
-        id: "phase_melt", name: "FÁZOVÝ ROZKLAD PANCÍŘE", subtitle: "+25 % POŠKOZENÍ DO BOSSŮ & ELIT",
-        desc: "Střely narušují molekulární vazby – Elity a Bossové dostávají o +25 % vyšší poškození ze všech zdrojů.",
-        color: "#f43f5e", apply: () => { player.weapons.phaseMeltLvl++; }
+  },
+  {
+    id: "phase_melt",
+    name: "FÁZOVÝ ROZKLAD PANCÍŘE",
+    subtitle: "+25 % POŠKOZENÍ DO BOSSŮ & ELIT",
+    desc: "Střely narušují molekulární vazby – Elity a Bossové dostávají o +25 % vyšší poškození ze všech zdrojů.",
+    color: "#f43f5e",
+    apply: () => {
+      player.weapons.phaseMeltLvl++;
     },
-    {
-        id: "boomerang", name: "FOTONOVÉ BUMERANGY", subtitle: "VRACEJÍCÍ SE ENERGETICKÉ SRPY",
-        desc: "Vypouští rotující fotonové bumerangy. (Synergie s Plamenometem -> Sluneční Supernova!)",
-        color: "#00ffaa", apply: () => { player.weapons.boomerangLvl++; }
+  },
+  {
+    id: "boomerang",
+    name: "FOTONOVÉ BUMERANGY",
+    subtitle: "VRACEJÍCÍ SE ENERGETICKÉ SRPY",
+    desc: "Vypouští rotující fotonové bumerangy. (Synergie s Plamenometem -> Sluneční Supernova!)",
+    color: "#00ffaa",
+    apply: () => {
+      player.weapons.boomerangLvl++;
     },
-    {
-        id: "mines", name: "ROJ KVANTOVÝCH MIN", subtitle: "MAGNETICKÉ PROSTOROVÉ MINY",
-        desc: "Loď za sebou klade pulzující kvantové miny, které se přitáhnou k blízkým nepřátelům a vybuchnou.",
-        color: "#fcee09", apply: () => { player.weapons.minesLvl++; }
+  },
+  {
+    id: "mines",
+    name: "ROJ KVANTOVÝCH MIN",
+    subtitle: "MAGNETICKÉ PROSTOROVÉ MINY",
+    desc: "Loď za sebou klade pulzující kvantové miny, které se přitáhnou k blízkým nepřátelům a vybuchnou.",
+    color: "#fcee09",
+    apply: () => {
+      player.weapons.minesLvl++;
     },
-    {
-        id: "shockwave", name: "KINETICKÁ TLAKOVÁ VLNA", subtitle: "ODRAZOVÝ PULZ KOLEM LODI",
-        desc: "Periodicky vysílá prstencovou rázovou vlnu, která odhodí nepřátele a smaže blízké střely.",
-        color: "#38bdf8", apply: () => { player.weapons.shockwaveLvl++; }
+  },
+  {
+    id: "shockwave",
+    name: "KINETICKÁ TLAKOVÁ VLNA",
+    subtitle: "ODRAZOVÝ PULZ KOLEM LODI",
+    desc: "Periodicky vysílá prstencovou rázovou vlnu, která odhodí nepřátele a smaže blízké střely.",
+    color: "#38bdf8",
+    apply: () => {
+      player.weapons.shockwaveLvl++;
     },
-    {
-        id: "gravity_amp", name: "DRTIČ GRAVITACE", subtitle: "+35 % DOSAH & SÍLA ČERNÉ DÍRY",
-        desc: "Zvětšuje Černé díry o +35 % a přidá +1 nálož. (Synergie se Satelitem -> Hvězdná Singularita!)",
-        color: "#bc13fe", apply: () => { player.weapons.gravityAmpLvl++; player.bombs = Math.min(player.maxBombs, player.bombs + 1); }
+  },
+  {
+    id: "gravity_amp",
+    name: "DRTIČ GRAVITACE",
+    subtitle: "+35 % DOSAH & SÍLA ČERNÉ DÍRY",
+    desc: "Zvětšuje Černé díry o +35 % a přidá +1 nálož. (Synergie se Satelitem -> Hvězdná Singularita!)",
+    color: "#bc13fe",
+    apply: () => {
+      player.weapons.gravityAmpLvl++;
+      player.bombs = Math.min(player.maxBombs, player.bombs + 1);
     },
-    {
-        id: "regen", name: "NANOBOTNÍ REGENERACE", subtitle: "AUTOMATICKÁ OPRAVA TRUPU V BOJI",
-        desc: "Nanoboty plynule opravují trup lodi (+3.5 HP/s za úroveň, max. 5) a zvýší Max HP o +15.",
-        color: "#10b981", apply: () => {
-            if (player.weapons.regenLvl >= 5) return;
-            player.weapons.regenLvl++;
-            player.maxHp += 15;
-            player.hp = Math.min(player.maxHp, player.hp + 25);
-        }
+  },
+  {
+    id: "regen",
+    name: "NANOBOTNÍ REGENERACE",
+    subtitle: "AUTOMATICKÁ OPRAVA TRUPU V BOJI",
+    desc: "Nanoboty plynule opravují trup lodi (+3.5 HP/s za úroveň, max. 5) a zvýší Max HP o +15.",
+    color: "#10b981",
+    apply: () => {
+      if (player.weapons.regenLvl >= 5) return;
+      player.weapons.regenLvl++;
+      player.maxHp += 15;
+      player.hp = Math.min(player.maxHp, player.hp + 25);
     },
-    {
-        id: "flamethrower", name: "PLAZMOVÝ PLAMENOMET", subtitle: "KUŽEL PLAZMATU & ZAPÁLENÍ",
-        desc: "Chrlí žhnoucí proud plazmatu. (Synergie s Bumerangy -> Sluneční Supernova!)",
-        color: "#ff5500", apply: () => { player.weapons.flamethrowerLvl++; }
+  },
+  {
+    id: "flamethrower",
+    name: "PLAZMOVÝ PLAMENOMET",
+    subtitle: "KUŽEL PLAZMATU & ZAPÁLENÍ",
+    desc: "Chrlí žhnoucí proud plazmatu. (Synergie s Bumerangy -> Sluneční Supernova!)",
+    color: "#ff5500",
+    apply: () => {
+      player.weapons.flamethrowerLvl++;
     },
-    {
-        id: "satellite", name: "ORBITÁLNÍ ION-SATELIT", subtitle: "ORBITÁLNÍ LASEROVÝ ÚDER",
-        desc: "Satelit sesílá iontové sloupy energie. (Synergie s Drtičem Gravitace -> Hvězdná Singularita!)",
-        color: "#ff0055", apply: () => { player.weapons.satelliteLvl++; }
+  },
+  {
+    id: "satellite",
+    name: "ORBITÁLNÍ ION-SATELIT",
+    subtitle: "ORBITÁLNÍ LASEROVÝ ÚDER",
+    desc: "Satelit sesílá iontové sloupy energie. (Synergie s Drtičem Gravitace -> Hvězdná Singularita!)",
+    color: "#ff0055",
+    apply: () => {
+      player.weapons.satelliteLvl++;
     },
-    {
-        id: "barrels", name: "KVANTOVÉ HLAVNĚ", subtitle: "+1 PLAZMOVÝ PROUD",
-        desc: "Přidá další hlaveň k primárnímu pulznímu kanónu a rozšíří zbraňové věže na trupu lodi.",
-        color: "#00f3ff", apply: () => {
-            player.weapons.barrels = Math.min(7, player.weapons.barrels + 1);
-            if (player.weapons.barrels >= 6) unlockAchievement("max_barrels");
-        }
+  },
+  {
+    id: "barrels",
+    name: "KVANTOVÉ HLAVNĚ",
+    subtitle: "+1 PLAZMOVÝ PROUD",
+    desc: "Přidá další hlaveň k primárnímu pulznímu kanónu a rozšíří zbraňové věže na trupu lodi.",
+    color: "#00f3ff",
+    apply: () => {
+      player.weapons.barrels = Math.min(7, player.weapons.barrels + 1);
+      if (player.weapons.barrels >= 6) unlockAchievement("max_barrels");
     },
-    {
-        id: "firerate", name: "HYPER-KONDENZÁTOR", subtitle: "+22 % KADENCE & POHYB",
-        desc: "Zvyšuje rychlost nabíjení zbraní a zrychluje trysky vznášedla.",
-        color: "#fcee09", apply: () => { player.weapons.fireRateLvl++; player.speed += 22; }
+  },
+  {
+    id: "firerate",
+    name: "HYPER-KONDENZÁTOR",
+    subtitle: "+22 % KADENCE & POHYB",
+    desc: "Zvyšuje rychlost nabíjení zbraní a zrychluje trysky vznášedla.",
+    color: "#fcee09",
+    apply: () => {
+      player.weapons.fireRateLvl++;
+      player.speed += 22;
     },
-    {
-        id: "ricochet", name: "ODRAZOVÉ FOTONY", subtitle: "+1 ODRAZ & PRŮRAZNOST",
-        desc: "Střely se odrážejí od stěn arény a pronikají skrz pancíře více nepřátel.",
-        color: "#00ffaa", apply: () => { player.weapons.ricochetLvl++; }
+  },
+  {
+    id: "ricochet",
+    name: "ODRAZOVÉ FOTONY",
+    subtitle: "+1 ODRAZ & PRŮRAZNOST",
+    desc: "Střely se odrážejí od stěn arény a pronikají skrz pancíře více nepřátel.",
+    color: "#00ffaa",
+    apply: () => {
+      player.weapons.ricochetLvl++;
     },
-    {
-        id: "missiles", name: "ROJ MIKRORAKET", subtitle: "NAVÁDĚNÁ SALVA",
-        desc: "Vypouští salvu kybernetických mikroraket, které samy pronásledují cíle.",
-        color: "#ff007f", apply: () => { player.weapons.missilesLvl++; }
+  },
+  {
+    id: "missiles",
+    name: "ROJ MIKRORAKET",
+    subtitle: "NAVÁDĚNÁ SALVA",
+    desc: "Vypouští salvu kybernetických mikroraket, které samy pronásledují cíle.",
+    color: "#ff007f",
+    apply: () => {
+      player.weapons.missilesLvl++;
     },
-    {
-        id: "railgun", name: "KVANTOVÝ RAILGUN", subtitle: "PRŮRAZNÝ HYPER-PAPRSEK",
-        desc: "Namontuje na příď lodi dlouhý Railgun, který vystřeluje okamžitý paprsek přes celou arénu.",
-        color: "#ff0055", apply: () => { player.weapons.railgunLvl++; }
+  },
+  {
+    id: "railgun",
+    name: "KVANTOVÝ RAILGUN",
+    subtitle: "PRŮRAZNÝ HYPER-PAPRSEK",
+    desc: "Namontuje na příď lodi dlouhý Railgun, který vystřeluje okamžitý paprsek přes celou arénu.",
+    color: "#ff0055",
+    apply: () => {
+      player.weapons.railgunLvl++;
     },
-    {
-        id: "drones", name: "AUTONOMNÍ DRONY", subtitle: "+1 ÚTOČNÝ WINGMAN DRON",
-        desc: "Kolem lodi krouží bojové drony. (Synergie s Teslou -> Bouřková Matrice!)",
-        color: "#38bdf8", apply: () => { player.weapons.dronesLvl = Math.min(4, player.weapons.dronesLvl + 1); }
+  },
+  {
+    id: "drones",
+    name: "AUTONOMNÍ DRONY",
+    subtitle: "+1 ÚTOČNÝ WINGMAN DRON",
+    desc: "Kolem lodi krouží bojové drony. (Synergie s Teslou -> Bouřková Matrice!)",
+    color: "#38bdf8",
+    apply: () => {
+      player.weapons.dronesLvl = Math.min(4, player.weapons.dronesLvl + 1);
     },
-    {
-        id: "blades", name: "ORBITÁLNÍ ČEPELE", subtitle: "ROTUJÍCÍ PLAZMOVÉ KOTOUČE",
-        desc: "Energetické disky drtící nepřátele i nepřátelské projektily v těsné blízkosti.",
-        color: "#bc13fe", apply: () => { player.weapons.bladesLvl = Math.min(6, player.weapons.bladesLvl + 1); }
+  },
+  {
+    id: "blades",
+    name: "ORBITÁLNÍ ČEPELE",
+    subtitle: "ROTUJÍCÍ PLAZMOVÉ KOTOUČE",
+    desc: "Energetické disky drtící nepřátele i nepřátelské projektily v těsné blízkosti.",
+    color: "#bc13fe",
+    apply: () => {
+      player.weapons.bladesLvl = Math.min(6, player.weapons.bladesLvl + 1);
     },
-    {
-        id: "tesla", name: "TESLŮV OBLOUK", subtitle: "ŘETĚZOVÝ BLESK",
-        desc: "Vysokonapěťový výboj přeskakující mezi nepřáteli. (Synergie s Drony -> Bouřková Matrice!)",
-        color: "#5ffbff", apply: () => { player.weapons.teslaLvl++; }
+  },
+  {
+    id: "tesla",
+    name: "TESLŮV OBLOUK",
+    subtitle: "ŘETĚZOVÝ BLESK",
+    desc: "Vysokonapěťový výboj přeskakující mezi nepřáteli. (Synergie s Drony -> Bouřková Matrice!)",
+    color: "#5ffbff",
+    apply: () => {
+      player.weapons.teslaLvl++;
     },
-    {
-        id: "trail", name: "PLAZMOVÁ STOPA", subtitle: "HOŘÍCÍ STOPA ZA LODÍ",
-        desc: "Při pohybu a Hyper-Skoku zanechává loď žhnoucí plazmové zóny, které taví pronásledovatele.",
-        color: "#fb923c", apply: () => { player.weapons.plasmaTrailLvl++; }
+  },
+  {
+    id: "trail",
+    name: "PLAZMOVÁ STOPA",
+    subtitle: "HOŘÍCÍ STOPA ZA LODÍ",
+    desc: "Při pohybu a Hyper-Skoku zanechává loď žhnoucí plazmové zóny, které taví pronásledovatele.",
+    color: "#fb923c",
+    apply: () => {
+      player.weapons.plasmaTrailLvl++;
     },
-    {
-        id: "cryo", name: "KRYO-PULZNÍ POLE", subtitle: "MRAZIVÁ TLAKOVÁ VLNA",
-        desc: "Vysílá sub-nulový pulz, který zpomalí okolní nepřátele na 45 % rychlosti.",
-        color: "#67e8f9", apply: () => { player.weapons.cryoNovaLvl++; }
+  },
+  {
+    id: "cryo",
+    name: "KRYO-PULZNÍ POLE",
+    subtitle: "MRAZIVÁ TLAKOVÁ VLNA",
+    desc: "Vysílá sub-nulový pulz, který zpomalí okolní nepřátele na 45 % rychlosti.",
+    color: "#67e8f9",
+    apply: () => {
+      player.weapons.cryoNovaLvl++;
     },
-    {
-        id: "aegis", name: "ENERGETICKÝ ŠTÍT AEGIS", subtitle: "AUTOMATICKÁ BARIÉRA",
-        desc: "Vytvoří dobíjecí silové pole, které plně pohltí zásah a vyvolá odrazovou vlnu (max. 4. úroveň).",
-        color: "#60a5fa", apply: () => {
-            if (player.weapons.aegisLvl >= 4) return;
-            player.weapons.aegisLvl++;
-            player.aegisReady = true;
-            player.aegisCooldown = 0;
-        }
+  },
+  {
+    id: "aegis",
+    name: "ENERGETICKÝ ŠTÍT AEGIS",
+    subtitle: "AUTOMATICKÁ BARIÉRA",
+    desc: "Vytvoří dobíjecí silové pole, které plně pohltí zásah a vyvolá odrazovou vlnu (max. 4. úroveň).",
+    color: "#60a5fa",
+    apply: () => {
+      if (player.weapons.aegisLvl >= 4) return;
+      player.weapons.aegisLvl++;
+      player.aegisReady = true;
+      player.aegisCooldown = 0;
     },
-    {
-        id: "crit", name: "KRITICKÝ PŘETAKTOVAČ", subtitle: "2.4x KRITICKÉ ZÁSAHY & OPRAVY",
-        desc: "Zvyšuje šanci na kritické poškození o +15 % a zničení Elit/Bossů opravuje trup.",
-        color: "#f43f5e", apply: () => { player.weapons.critLvl++; }
+  },
+  {
+    id: "crit",
+    name: "KRITICKÝ PŘETAKTOVAČ",
+    subtitle: "2.4x KRITICKÉ ZÁSAHY & OPRAVY",
+    desc: "Zvyšuje šanci na kritické poškození o +15 % a zničení Elit/Bossů opravuje trup.",
+    color: "#f43f5e",
+    apply: () => {
+      player.weapons.critLvl++;
     },
-    {
-        id: "nova_core", name: "JÁDRO SINGULARITY", subtitle: "+1 ČERNÁ DÍRA & +30 MAX TRUP",
-        desc: "Doplní +1 nálož Černé díry, zvýší maximální integritu trupu o +30 a opraví 60 HP.",
-        color: "#ff9900", apply: () => { player.maxHp += 30; player.hp = Math.min(player.maxHp, player.hp + 60); player.bombs = Math.min(player.maxBombs, player.bombs + 1); }
+  },
+  {
+    id: "nova_core",
+    name: "JÁDRO SINGULARITY",
+    subtitle: "+1 ČERNÁ DÍRA & +30 MAX TRUP",
+    desc: "Doplní +1 nálož Černé díry, zvýší maximální integritu trupu o +30 a opraví 60 HP.",
+    color: "#ff9900",
+    apply: () => {
+      player.maxHp += 30;
+      player.hp = Math.min(player.maxHp, player.hp + 60);
+      player.bombs = Math.min(player.maxBombs, player.bombs + 1);
     },
-    {
-        id: "void_lance", name: "SINGULARITNÍ KOPÍ", subtitle: "FÁZOVÝ PAPRSEK NA PŘÍDI",
-        desc: "Vystřeluje soustředěný fázový oštěp před příď lodi, který maže střely a taví pancíře. (Synergie s Railgunem -> Rozparovač Horizontu!)",
-        color: "#c084fc", apply: () => { player.weapons.voidLanceLvl++; }
+  },
+  {
+    id: "void_lance",
+    name: "SINGULARITNÍ KOPÍ",
+    subtitle: "FÁZOVÝ PAPRSEK NA PŘÍDI",
+    desc: "Vystřeluje soustředěný fázový oštěp před příď lodi, který maže střely a taví pancíře. (Synergie s Railgunem -> Rozparovač Horizontu!)",
+    color: "#c084fc",
+    apply: () => {
+      player.weapons.voidLanceLvl++;
     },
-    {
-        id: "laser_ring", name: "ORBITÁLNÍ LASEROVÝ PRSTENEC", subtitle: "ROTUJÍCÍ PAPRSKOVÉ POLE",
-        desc: "Kolem lodi rotují souvislé laserové paprsky, které pálí vše ve středním dosahu. (Synergie se Sluneční Aurou -> Hvězdná Koróna!)",
-        color: "#ff0055", apply: () => { player.weapons.laserRingLvl = Math.min(5, (player.weapons.laserRingLvl || 0) + 1); }
+  },
+  {
+    id: "laser_ring",
+    name: "ORBITÁLNÍ LASEROVÝ PRSTENEC",
+    subtitle: "ROTUJÍCÍ PAPRSKOVÉ POLE",
+    desc: "Kolem lodi rotují souvislé laserové paprsky, které pálí vše ve středním dosahu. (Synergie se Sluneční Aurou -> Hvězdná Koróna!)",
+    color: "#ff0055",
+    apply: () => {
+      player.weapons.laserRingLvl = Math.min(
+        5,
+        (player.weapons.laserRingLvl || 0) + 1,
+      );
     },
-    {
-        id: "chain_flail", name: "KVANTOVÝ ŘETĚZOVÝ DRTIČ", subtitle: "TĚŽKÁ GRAVITAČNÍ KOULE",
-        desc: "Kolem lodi obíhá na energetickém řetězu masivní gravitační koule, která drtí a odhazuje nepřátele.",
-        color: "#fcee09", apply: () => { player.weapons.chainFlailLvl = Math.min(4, (player.weapons.chainFlailLvl || 0) + 1); }
+  },
+  {
+    id: "chain_flail",
+    name: "KVANTOVÝ ŘETĚZOVÝ DRTIČ",
+    subtitle: "TĚŽKÁ GRAVITAČNÍ KOULE",
+    desc: "Kolem lodi obíhá na energetickém řetězu masivní gravitační koule, která drtí a odhazuje nepřátele.",
+    color: "#fcee09",
+    apply: () => {
+      player.weapons.chainFlailLvl = Math.min(
+        4,
+        (player.weapons.chainFlailLvl || 0) + 1,
+      );
     },
-    {
-        id: "stasis_field", name: "CHRONO-STÁZOVÁ BOMBA", subtitle: "ČASOPROSTOROVÁ ANOMÁLIE",
-        desc: "Vypouští za loď modré stázové pole, které výrazně zpomaluje nepřátele a postupně je poškozuje.",
-        color: "#38bdf8", apply: () => { player.weapons.stasisFieldLvl++; }
-    }
+  },
+  {
+    id: "stasis_field",
+    name: "CHRONO-STÁZOVÁ BOMBA",
+    subtitle: "ČASOPROSTOROVÁ ANOMÁLIE",
+    desc: "Vypouští za loď modré stázové pole, které výrazně zpomaluje nepřátele a postupně je poškozuje.",
+    color: "#38bdf8",
+    apply: () => {
+      player.weapons.stasisFieldLvl++;
+    },
+  },
 ];
 
 function selectUpgradeCard(index) {
-    if (state.mode !== "UPGRADE" || !currentUpgradeChoices[index]) return;
-    const upg = currentUpgradeChoices[index];
-    upg.apply();
-    checkWeaponSynergies();
-    updateHUD();
-    document.getElementById("upgrade-modal").classList.add("hidden");
-    document.getElementById("upgrade-modal").classList.remove("flex");
-    state.mode = "PLAYING";
-    syncHudVisibilityDOM();
-    saveGameProgress(false, currentSaveSlot);
-    spawnShockwave(player.x, player.y, 340, upg.color, 5, 560);
-    spawnLensFlare(player.x, player.y, upg.color, 450);
-    grid.applyForce(player.x, player.y, 300, 40, false, true);
-    addFloatingText(player.x, player.y - 30, `${upg.name} AKTIVNÍ!`, upg.color, 1.3);
+  if (state.mode !== "UPGRADE" || !currentUpgradeChoices[index]) return;
+  const upg = currentUpgradeChoices[index];
+  upg.apply();
+  checkWeaponSynergies();
+  updateHUD();
+  document.getElementById("upgrade-modal").classList.add("hidden");
+  document.getElementById("upgrade-modal").classList.remove("flex");
+  state.mode = "PLAYING";
+  syncHudVisibilityDOM();
+  saveGameProgress(false, currentSaveSlot);
+  spawnShockwave(player.x, player.y, 340, upg.color, 5, 560);
+  spawnLensFlare(player.x, player.y, upg.color, 450);
+  grid.applyForce(player.x, player.y, 300, 40, false, true);
+  addFloatingText(
+    player.x,
+    player.y - 30,
+    `${upg.name} AKTIVNÍ!`,
+    upg.color,
+    1.3,
+  );
 }
 
 function triggerUpgradeSelection(isReroll = false) {
-    state.mode = "UPGRADE";
-    if (!isReroll) {
-        sfx.playLevelUp();
-        state.freeRerollAvailable = true;
-    } else {
-        sfx.playButtonClick(1.2);
-    }
+  state.mode = "UPGRADE";
+  keys.w = keys.a = keys.s = keys.d = keys.space = false;
+  mouse.down = false;
+  if (!isReroll) {
+    sfx.playLevelUp();
+    state.freeRerollAvailable = true;
+  } else {
+    sfx.playButtonClick(1.2);
+  }
 
-    const container = document.getElementById("upgrade-cards-container");
-    container.innerHTML = "";
-    const maxedUpgrade = (upg) => {
-        if (upg.id === "barrels") return player.weapons.barrels >= 7;
-        if (upg.id === "drones") return player.weapons.dronesLvl >= 4;
-        if (upg.id === "blades") return player.weapons.bladesLvl >= 6;
-        if (upg.id === "regen") return player.weapons.regenLvl >= 5;
-        if (upg.id === "nano_shield") return player.weapons.nanoShieldLvl >= 4;
-        if (upg.id === "aegis") return player.weapons.aegisLvl >= 4;
-        if (upg.id === "laser_ring") return player.weapons.laserRingLvl >= 5;
-        if (upg.id === "chain_flail") return player.weapons.chainFlailLvl >= 4;
-        return false;
-    };
-    const availableUpgrades = UPGRADE_POOL.filter(upg => !maxedUpgrade(upg));
-    currentUpgradeChoices = availableUpgrades.sort(() => Math.random() - 0.5).slice(0, 3);
-    const dpadHints = ["⬅️ D-PAD VLEVO", "⬆️ D-PAD NAHORU", "➡️ D-PAD VPRAVO"];
+  const container = document.getElementById("upgrade-cards-container");
+  container.innerHTML = "";
+  const maxedUpgrade = (upg) => {
+    if (upg.id === "barrels") return player.weapons.barrels >= 7;
+    if (upg.id === "drones") return player.weapons.dronesLvl >= 4;
+    if (upg.id === "blades") return player.weapons.bladesLvl >= 6;
+    if (upg.id === "regen") return player.weapons.regenLvl >= 5;
+    if (upg.id === "nano_shield") return player.weapons.nanoShieldLvl >= 4;
+    if (upg.id === "aegis") return player.weapons.aegisLvl >= 4;
+    if (upg.id === "laser_ring") return player.weapons.laserRingLvl >= 5;
+    if (upg.id === "chain_flail") return player.weapons.chainFlailLvl >= 4;
+    return false;
+  };
+  const availableUpgrades = UPGRADE_POOL.filter((upg) => !maxedUpgrade(upg));
+  currentUpgradeChoices = availableUpgrades
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 3);
+  const dpadHints = ["⬅️ D-PAD VLEVO", "⬆️ D-PAD NAHORU", "➡️ D-PAD VPRAVO"];
 
-    currentUpgradeChoices.forEach((upg, idx) => {
-        const card = document.createElement("div");
-        card.className = "cyber-card p-6 flex flex-col justify-between";
-        card.innerHTML = `
+  currentUpgradeChoices.forEach((upg, idx) => {
+    const card = document.createElement("div");
+    card.className = "cyber-card p-6 flex flex-col justify-between";
+    card.innerHTML = `
       <div>
         <div class="flex justify-between items-center mb-1">
           <span class="text-xs font-orbitron tracking-widest uppercase" style="color: ${upg.color}">${upg.subtitle}</span>
@@ -284,1106 +486,1709 @@ function triggerUpgradeSelection(isReroll = false) {
         <span class="font-orbitron text-lg font-black" style="color: ${upg.color}">→</span>
       </div>
     `;
-        card.addEventListener("click", () => selectUpgradeCard(idx));
-        container.appendChild(card);
-    });
+    card.addEventListener("click", () => selectUpgradeCard(idx));
+    container.appendChild(card);
+  });
 
-    // Tlačítko pro přelosování karet (1x zdarma při každém level-upu, další za 2 čipy)
-    let rerollWrap = document.getElementById("upgrade-reroll-wrap");
-    if (!rerollWrap) {
-        rerollWrap = document.createElement("div");
-        rerollWrap.id = "upgrade-reroll-wrap";
-        rerollWrap.className = "mt-5 flex justify-center";
-        container.parentElement.appendChild(rerollWrap);
-    }
-    const rerollCost = state.freeRerollAvailable ? 0 : 2;
-    const canReroll = state.freeRerollAvailable || meta.shards >= rerollCost;
-    rerollWrap.innerHTML = `
+  // Tlačítko pro přelosování karet (1x zdarma při každém level-upu, další za 2 čipy)
+  let rerollWrap = document.getElementById("upgrade-reroll-wrap");
+  if (!rerollWrap) {
+    rerollWrap = document.createElement("div");
+    rerollWrap.id = "upgrade-reroll-wrap";
+    rerollWrap.className = "mt-5 flex justify-center";
+    container.parentElement.appendChild(rerollWrap);
+  }
+  const rerollCost = state.freeRerollAvailable ? 0 : 2;
+  const canReroll = state.freeRerollAvailable || meta.shards >= rerollCost;
+  rerollWrap.innerHTML = `
       <button id="btn-reroll-upgrades" type="button" class="cyber-btn-outline px-6 py-2.5 text-xs ${canReroll ? "border-yellow-400 text-yellow-300" : "opacity-40 cursor-not-allowed"}">
         🎲 PŘELOSOVAT VÝBĚR KARET (${state.freeRerollAvailable ? "1x ZDARMA" : `◈ ${rerollCost} ČIPY`}) [KLÁVESA R]
       </button>
     `;
-    const rerollBtn = document.getElementById("btn-reroll-upgrades");
-    if (rerollBtn && canReroll) {
-        rerollBtn.addEventListener("click", () => {
-            if (!state.freeRerollAvailable) {
-                if (meta.shards < rerollCost) return;
-                meta.shards -= rerollCost;
-                saveMetaProgression();
-            }
-            state.freeRerollAvailable = false;
-            triggerUpgradeSelection(true);
-        });
-    }
+  const rerollBtn = document.getElementById("btn-reroll-upgrades");
+  if (rerollBtn && canReroll) {
+    rerollBtn.addEventListener("click", () => {
+      if (!state.freeRerollAvailable) {
+        if (meta.shards < rerollCost) return;
+        meta.shards -= rerollCost;
+        saveMetaProgression();
+      }
+      state.freeRerollAvailable = false;
+      triggerUpgradeSelection(true);
+    });
+  }
 
-    document.getElementById("upgrade-modal").classList.remove("hidden");
-    document.getElementById("upgrade-modal").classList.add("flex");
-    if (typeof currentLang !== "undefined" && currentLang === "en" && typeof applyDOMTranslations === "function") {
-        setTimeout(applyDOMTranslations, 10);
-    }
+  document.getElementById("upgrade-modal").classList.remove("hidden");
+  document.getElementById("upgrade-modal").classList.add("flex");
+  if (
+    typeof currentLang !== "undefined" &&
+    currentLang === "en" &&
+    typeof applyDOMTranslations === "function"
+  ) {
+    setTimeout(applyDOMTranslations, 10);
+  }
 }
 
 function getAITier() {
-    if (state.wave >= 10) return 4;
-    if (state.wave >= 6) return 3;
-    if (state.wave >= 3) return 2;
-    return 1;
+  if (state.wave >= 10) return 4;
+  if (state.wave >= 6) return 3;
+  if (state.wave >= 3) return 2;
+  return 1;
 }
 
 function spawnRareWormholePair() {
-    const margin = 140;
-    const x1 = margin + Math.random() * (W * 0.35 - margin);
-    const y1 = margin + Math.random() * (H - margin * 2);
-    const x2 = W * 0.65 + Math.random() * (W * 0.35 - margin);
-    const y2 = margin + Math.random() * (H - margin * 2);
+  const margin = 140;
+  const x1 = margin + Math.random() * (W * 0.35 - margin);
+  const y1 = margin + Math.random() * (H - margin * 2);
+  const x2 = W * 0.65 + Math.random() * (W * 0.35 - margin);
+  const y2 = margin + Math.random() * (H - margin * 2);
 
-    wormholes.push({ x1, y1, x2, y2, radius: 30, angle: 0, life: 24.0 });
-    spawnShockwave(x1, y1, 140, "#00f3ff", 3, 400);
-    spawnShockwave(x2, y2, 140, "#ff6600", 3, 400);
-    addFloatingText(W / 2, 110, "🌀 ANOMÁLIE DETEKOVÁNA: PROSTOROVÁ ČERVÍ DÍRA!", "#00f3ff", 1.25);
+  wormholes.push({ x1, y1, x2, y2, radius: 30, angle: 0, life: 24.0 });
+  spawnShockwave(x1, y1, 140, "#00f3ff", 3, 400);
+  spawnShockwave(x2, y2, 140, "#ff6600", 3, 400);
+  addFloatingText(
+    W / 2,
+    110,
+    "🌀 ANOMÁLIE DETEKOVÁNA: PROSTOROVÁ ČERVÍ DÍRA!",
+    "#00f3ff",
+    1.25,
+  );
 }
 
 function spawnSupplyPod() {
-    const margin = 90;
-    const x = margin + Math.random() * (W - margin * 2);
-    const y = margin + Math.random() * (H - margin * 2);
-    const types = [
-        { kind: "HEAL", label: "OPRAVNÝ NANOBOT (+45 HP)", color: "#00ffaa" },
-        { kind: "MAGNET", label: "KVANTOVÝ MAGNET XP!", color: "#fcee09" },
-        { kind: "NOVA", label: "+1 ČERNÁ DÍRA & PŘETLAK", color: "#ff007f" }
-    ];
-    const chosen = types[Math.floor(Math.random() * types.length)];
-    supplyPods.push({ x, y, kind: chosen.kind, label: chosen.label, color: chosen.color, radius: 18, angle: 0, life: 14.0 });
-    spawnShockwave(x, y, 90, chosen.color, 2.5, 340);
-    addFloatingText(x, y - 24, "ZÁSOBOVACÍ POD VYSÁZEN!", chosen.color, 1.0);
+  const margin = 90;
+  const x = margin + Math.random() * (W - margin * 2);
+  const y = margin + Math.random() * (H - margin * 2);
+  const types = [
+    { kind: "HEAL", label: "OPRAVNÝ NANOBOT (+45 HP)", color: "#00ffaa" },
+    { kind: "MAGNET", label: "KVANTOVÝ MAGNET XP!", color: "#fcee09" },
+    { kind: "NOVA", label: "+1 ČERNÁ DÍRA & PŘETLAK", color: "#ff007f" },
+  ];
+  const chosen = types[Math.floor(Math.random() * types.length)];
+  supplyPods.push({
+    x,
+    y,
+    kind: chosen.kind,
+    label: chosen.label,
+    color: chosen.color,
+    radius: 18,
+    angle: 0,
+    life: 14.0,
+  });
+  spawnShockwave(x, y, 90, chosen.color, 2.5, 340);
+  addFloatingText(x, y - 24, "ZÁSOBOVACÍ POD VYSÁZEN!", chosen.color, 1.0);
 }
 
 function spawnEnemy(forcedType = null, xOverride = null, yOverride = null) {
-    let x = xOverride, y = yOverride;
-    if (x === null || y === null) {
-        const margin = 55;
-        for (let tries = 0; tries < 12; tries++) {
-            x = margin + Math.random() * (W - margin * 2);
-            y = margin + Math.random() * (H - margin * 2);
-            if (Math.hypot(x - player.x, y - player.y) > 290) break;
-        }
+  let x = xOverride,
+    y = yOverride;
+  if (x === null || y === null) {
+    const margin = 55;
+    for (let tries = 0; tries < 12; tries++) {
+      x = margin + Math.random() * (W - margin * 2);
+      y = margin + Math.random() * (H - margin * 2);
+      if (Math.hypot(x - player.x, y - player.y) > 290) break;
+    }
+  }
+
+  const tier = getAITier();
+  const diffHpMult =
+    (state.difficulty === "ULTRA"
+      ? 1.45
+      : state.difficulty === "HARDCORE"
+        ? 1.28
+        : 1.0) * (state.mutator === "SWARM_CHAOS" ? 0.72 : 1.0);
+  const diffSpdMult =
+    state.difficulty === "ULTRA"
+      ? 1.25
+      : state.difficulty === "HARDCORE"
+        ? 1.15
+        : 1.0;
+  const playerPowerFactor = 1 + (player.level - 1) * 0.16;
+  const waveScale =
+    (1 + (state.wave - 1) * 0.28) * playerPowerFactor * diffHpMult;
+
+  let type = forcedType;
+  if (!type) {
+    const r = Math.random();
+    if (r < 0.22) type = "CHASER";
+    else if (r < 0.38) type = "WEAVER";
+    else if (r < 0.5) type = "SPLITTER";
+    else if (r < 0.62) type = "KAMIKAZE";
+    else if (r < 0.72 && state.wave >= 2) type = "DISRUPTOR";
+    else if (r < 0.8 && state.wave >= 2) type = "SNIPER";
+    else if (r < 0.87 && state.wave >= 3) type = "WARP_MINER";
+    else if (r < 0.93) type = "JUGGERNAUT";
+    else if (r < 0.97 && state.wave >= 2) type = "PHANTOM";
+    else type = state.wave >= 3 ? "GUARDIAN" : "JUGGERNAUT";
+  }
+
+  // Základní šance 18 % už v 1. vlně, aby Elity a čipy padaly od začátku hry
+  const eliteChance = Math.min(
+    0.8,
+    0.18 +
+      (state.wave - 1) * 0.08 +
+      (state.difficulty === "ULTRA"
+        ? 0.22
+        : state.difficulty === "HARDCORE"
+          ? 0.14
+          : 0),
+  );
+  const isElite =
+    Math.random() < eliteChance &&
+    type !== "MINI_SWARM" &&
+    type !== "ENERGY_ORB";
+  const shieldMult = isElite ? 0.55 : tier >= 3 ? 0.25 : 0;
+
+  if (type === "KAMIKAZE") {
+    const baseHp = 28 * waveScale;
+    enemies.push({
+      type,
+      x,
+      y,
+      vx: 0,
+      vy: 0,
+      radius: 14,
+      hp: baseHp,
+      maxHp: baseHp,
+      shield: 0,
+      maxShield: 0,
+      speed: (325 + Math.min(130, state.wave * 9)) * diffSpdMult,
+      color: "#ff0033",
+      score: 210,
+      angle: 0,
+      spin: 0,
+      slowTimer: 0,
+      burnTimer: 0,
+      isElite,
+    });
+  } else if (type === "DISRUPTOR") {
+    const baseHp = 115 * waveScale;
+    enemies.push({
+      type,
+      x,
+      y,
+      vx: 0,
+      vy: 0,
+      radius: 22,
+      hp: baseHp,
+      maxHp: baseHp,
+      shield: baseHp * 0.45,
+      maxShield: baseHp * 0.45,
+      speed: 95 * diffSpdMult,
+      color: "#00ffaa",
+      score: 390,
+      angle: 0,
+      spin: 2.2,
+      shootTimer: 2.6,
+      slowTimer: 0,
+      burnTimer: 0,
+      isElite: true,
+    });
+  } else if (type === "ENERGY_ORB") {
+    const baseHp = 32 * waveScale;
+    enemies.push({
+      type,
+      x,
+      y,
+      vx: 0,
+      vy: 0,
+      radius: 13,
+      hp: baseHp,
+      maxHp: baseHp,
+      shield: 0,
+      maxShield: 0,
+      speed: 145 * diffSpdMult,
+      color: "#00ffaa",
+      score: 65,
+      angle: 0,
+      spin: 6.0,
+      slowTimer: 0,
+      burnTimer: 0,
+      isElite: false,
+    });
+  } else if (type === "CHASER") {
+    const baseHp = 38 * waveScale;
+    enemies.push({
+      type,
+      x,
+      y,
+      vx: 0,
+      vy: 0,
+      radius: isElite ? 18 : 15,
+      hp: baseHp,
+      maxHp: baseHp,
+      shield: baseHp * shieldMult,
+      maxShield: baseHp * shieldMult,
+      speed: (205 + Math.min(115, state.wave * 7)) * diffSpdMult,
+      color: "#ff007f",
+      score: 140,
+      angle: 0,
+      spin: 5.5,
+      strafeDir: Math.random() < 0.5 ? 1 : -1,
+      strafeTimer: 0.8,
+      slowTimer: 0,
+      burnTimer: 0,
+      isElite,
+    });
+  } else if (type === "WEAVER") {
+    const baseHp = 68 * waveScale;
+    enemies.push({
+      type,
+      x,
+      y,
+      vx: 0,
+      vy: 0,
+      radius: 20,
+      hp: baseHp,
+      maxHp: baseHp,
+      shield: baseHp * shieldMult,
+      maxShield: baseHp * shieldMult,
+      speed: 140 * diffSpdMult,
+      color: "#bc13fe",
+      score: 260,
+      angle: 0,
+      spin: 2.6,
+      shootTimer: 1.4 + Math.random(),
+      slowTimer: 0,
+      burnTimer: 0,
+      isElite,
+    });
+  } else if (type === "SPLITTER") {
+    const baseHp = 92 * waveScale;
+    enemies.push({
+      type,
+      x,
+      y,
+      vx: 0,
+      vy: 0,
+      radius: 23,
+      hp: baseHp,
+      maxHp: baseHp,
+      shield: baseHp * shieldMult,
+      maxShield: baseHp * shieldMult,
+      speed: 145 * diffSpdMult,
+      color: "#fcee09",
+      score: 310,
+      angle: 0,
+      spin: 3.2,
+      slowTimer: 0,
+      burnTimer: 0,
+      isElite,
+    });
+  } else if (type === "MINI_SWARM") {
+    const baseHp = 22 * waveScale;
+    enemies.push({
+      type,
+      x,
+      y,
+      vx: (Math.random() - 0.5) * 260,
+      vy: (Math.random() - 0.5) * 260,
+      radius: 10,
+      hp: baseHp,
+      maxHp: baseHp,
+      shield: 0,
+      maxShield: 0,
+      speed: 285 * diffSpdMult,
+      color: "#00ffaa",
+      score: 85,
+      angle: 0,
+      spin: 9.0,
+      slowTimer: 0,
+      burnTimer: 0,
+      isElite: false,
+    });
+  } else if (type === "JUGGERNAUT") {
+    const baseHp = 175 * waveScale;
+    enemies.push({
+      type,
+      x,
+      y,
+      vx: 0,
+      vy: 0,
+      radius: 27,
+      hp: baseHp,
+      maxHp: baseHp,
+      shield: baseHp * 0.4,
+      maxShield: baseHp * 0.4,
+      speed: 108 * diffSpdMult,
+      color: "#00f3ff",
+      score: 460,
+      angle: Math.atan2(player.y - y, player.x - x),
+      spin: 0,
+      shootTimer: 2.2,
+      slowTimer: 0,
+      burnTimer: 0,
+      isElite: true,
+    });
+  } else if (type === "PHANTOM") {
+    const baseHp = 82 * waveScale;
+    enemies.push({
+      type,
+      x,
+      y,
+      vx: 0,
+      vy: 0,
+      radius: 18,
+      hp: baseHp,
+      maxHp: baseHp,
+      shield: baseHp * 0.5,
+      maxShield: baseHp * 0.5,
+      speed: 110 * diffSpdMult,
+      color: "#ff2a85",
+      score: 380,
+      angle: 0,
+      spin: 4.0,
+      shootTimer: 2.2,
+      teleportTimer: 3.5,
+      aiming: false,
+      slowTimer: 0,
+      burnTimer: 0,
+      isElite: true,
+    });
+  } else if (type === "GUARDIAN") {
+    const baseHp = 135 * waveScale;
+    enemies.push({
+      type,
+      x,
+      y,
+      vx: 0,
+      vy: 0,
+      radius: 22,
+      hp: baseHp,
+      maxHp: baseHp,
+      shield: baseHp * 0.6,
+      maxShield: baseHp * 0.6,
+      speed: 85 * diffSpdMult,
+      color: "#38bdf8",
+      score: 420,
+      angle: 0,
+      spin: 1.8,
+      pulseTimer: 1.6,
+      slowTimer: 0,
+      burnTimer: 0,
+      isElite: true,
+    });
+  } else if (type === "SNIPER") {
+    const baseHp = 64 * waveScale;
+    enemies.push({
+      type,
+      x,
+      y,
+      vx: 0,
+      vy: 0,
+      radius: 17,
+      hp: baseHp,
+      maxHp: baseHp,
+      shield: baseHp * 0.35,
+      maxShield: baseHp * 0.35,
+      speed: 95 * diffSpdMult,
+      color: "#ff0055",
+      score: 340,
+      angle: 0,
+      spin: 0,
+      shootTimer: 2.4,
+      aiming: false,
+      slowTimer: 0,
+      burnTimer: 0,
+      isElite: true,
+    });
+  } else if (type === "WARP_MINER") {
+    const baseHp = 105 * waveScale;
+    enemies.push({
+      type,
+      x,
+      y,
+      vx: 0,
+      vy: 0,
+      radius: 21,
+      hp: baseHp,
+      maxHp: baseHp,
+      shield: baseHp * 0.4,
+      maxShield: baseHp * 0.4,
+      speed: 135 * diffSpdMult,
+      color: "#fcee09",
+      score: 360,
+      angle: Math.random() * Math.PI * 2,
+      spin: 2.5,
+      mineTimer: 2.2,
+      slowTimer: 0,
+      burnTimer: 0,
+      isElite: true,
+    });
+  } else if (type === "BOSS") {
+    state.bossActive = true;
+    const bossIndex = Math.floor((state.wave / 3 - 1) % 10);
+    const bossProfiles = [
+      {
+        subtype: "ARCHON",
+        name: "OMEGA ARCHON // SINGULARITA",
+        color: "#ff0055",
+        hpMult: 1.0,
+        radius: 56,
+      },
+      {
+        subtype: "SERAPH",
+        name: "CHRONO SERAPH // VALKÝRA",
+        color: "#fcee09",
+        hpMult: 0.95,
+        radius: 52,
+      },
+      {
+        subtype: "HYDRA",
+        name: "NEXUS HYDRA // TRI-CORE MATRIX",
+        color: "#00ffaa",
+        hpMult: 1.15,
+        radius: 58,
+      },
+      {
+        subtype: "LEVIATHAN",
+        name: "VOID LEVIATHAN // KYBER-HAD",
+        color: "#bc13fe",
+        hpMult: 1.25,
+        radius: 54,
+      },
+      {
+        subtype: "NEMESIS",
+        name: "AETHER NEMESIS // FÁZOVÝ PŘÍZRAK",
+        color: "#38bdf8",
+        hpMult: 1.2,
+        radius: 52,
+      },
+      {
+        subtype: "COLOSSUS",
+        name: "SOLARIS COLOSSUS // HVĚZDNÁ KOVÁRNA",
+        color: "#fb923c",
+        hpMult: 1.38,
+        radius: 62,
+      },
+      {
+        subtype: "PRISM",
+        name: "QUANTUM PRISM // KRYSTALICKÝ HRANOL",
+        color: "#00f3ff",
+        hpMult: 1.22,
+        radius: 54,
+      },
+      {
+        subtype: "TITAN",
+        name: "GRAVITY TITAN // DVOJITÁ SINGULARITA",
+        color: "#a855f7",
+        hpMult: 1.32,
+        radius: 58,
+      },
+      {
+        subtype: "ARACHNID",
+        name: "CYBER ARACHNID // MECHANICKÁ TARANTULE",
+        color: "#a3e635",
+        hpMult: 1.18,
+        radius: 54,
+      },
+      {
+        subtype: "VALKYRIE",
+        name: "OMEGA VALKYRIE // ZRCADLOVÝ LOVEC",
+        color: "#f43f5e",
+        hpMult: 1.28,
+        radius: 56,
+      },
+    ];
+    const profile = bossProfiles[bossIndex];
+    const bossHp = 2100 * waveScale * profile.hpMult;
+
+    const bossObj = {
+      type: "BOSS",
+      subtype: profile.subtype,
+      name: profile.name,
+      x: W / 2,
+      y: 130,
+      vx: 0,
+      vy: 0,
+      radius: profile.radius,
+      hp: bossHp,
+      maxHp: bossHp,
+      shield: bossHp * 0.25,
+      maxShield: bossHp * 0.25,
+      speed: 115 * diffSpdMult,
+      color: profile.color,
+      score: 6500,
+      angle: 0,
+      spin: 1.3,
+      shootTimer: 1.1,
+      phaseTimer: 0,
+      slowTimer: 0,
+      burnTimer: 0,
+      spawnTime: performance.now(),
+      isElite: true,
+      segments: [],
+    };
+
+    if (profile.subtype === "LEVIATHAN") {
+      for (let s = 0; s < 8; s++)
+        bossObj.segments.push({
+          x: W / 2,
+          y: 130 - s * 28,
+          angle: Math.PI / 2,
+        });
     }
 
-    const tier = getAITier();
-    const diffHpMult = (state.difficulty === "ULTRA" ? 1.45 : (state.difficulty === "HARDCORE" ? 1.28 : 1.0)) * (state.mutator === "SWARM_CHAOS" ? 0.72 : 1.0);
-    const diffSpdMult = state.difficulty === "ULTRA" ? 1.25 : (state.difficulty === "HARDCORE" ? 1.15 : 1.0);
-    const playerPowerFactor = 1 + (player.level - 1) * 0.16;
-    const waveScale = (1 + (state.wave - 1) * 0.28) * playerPowerFactor * diffHpMult;
+    enemies.push(bossObj);
+    document.getElementById("boss-name").textContent = profile.name;
+    const ghostBossName = document.getElementById("ghost-boss-name");
+    if (ghostBossName) ghostBossName.textContent = profile.name;
+    document.getElementById("boss-hud").classList.remove("hidden");
+    document.getElementById("boss-hud").classList.add("flex");
+    document.getElementById("ghost-boss-bar-wrap").classList.remove("hidden");
+    document.getElementById("ghost-boss-bar-wrap").classList.add("flex");
+    addFloatingText(
+      W / 2,
+      H / 2 - 80,
+      `VAROVÁNÍ: ${profile.name}!`,
+      profile.color,
+      1.45,
+    );
+    spawnShockwave(W / 2, 130, 460, profile.color, 6, 520);
+    spawnLensFlare(W / 2, 130, profile.color, 700);
+    grid.applyForce(W / 2, 130, 440, 70, false, true);
+    state.chromatic = 1.0;
+  }
 
-    let type = forcedType;
-    if (!type) {
-        const r = Math.random();
-        if (r < 0.22) type = "CHASER";
-        else if (r < 0.38) type = "WEAVER";
-        else if (r < 0.50) type = "SPLITTER";
-        else if (r < 0.62) type = "KAMIKAZE";
-        else if (r < 0.72 && state.wave >= 2) type = "DISRUPTOR";
-        else if (r < 0.80 && state.wave >= 2) type = "SNIPER";
-        else if (r < 0.87 && state.wave >= 3) type = "WARP_MINER";
-        else if (r < 0.93) type = "JUGGERNAUT";
-        else if (r < 0.97 && state.wave >= 2) type = "PHANTOM";
-        else type = state.wave >= 3 ? "GUARDIAN" : "JUGGERNAUT";
-    }
-
-    // Základní šance 18 % už v 1. vlně, aby Elity a čipy padaly od začátku hry
-    const eliteChance = Math.min(0.80, 0.18 + (state.wave - 1) * 0.08 + (state.difficulty === "ULTRA" ? 0.22 : (state.difficulty === "HARDCORE" ? 0.14 : 0)));
-    const isElite = Math.random() < eliteChance && type !== "MINI_SWARM" && type !== "ENERGY_ORB";
-    const shieldMult = isElite ? 0.55 : tier >= 3 ? 0.25 : 0;
-
-    if (type === "KAMIKAZE") {
-        const baseHp = 28 * waveScale;
-        enemies.push({
-            type, x, y, vx: 0, vy: 0, radius: 14,
-            hp: baseHp, maxHp: baseHp, shield: 0, maxShield: 0,
-            speed: (325 + Math.min(130, state.wave * 9)) * diffSpdMult, color: "#ff0033", score: 210,
-            angle: 0, spin: 0, slowTimer: 0, burnTimer: 0, isElite
-        });
-    } else if (type === "DISRUPTOR") {
-        const baseHp = 115 * waveScale;
-        enemies.push({
-            type, x, y, vx: 0, vy: 0, radius: 22,
-            hp: baseHp, maxHp: baseHp, shield: baseHp * 0.45, maxShield: baseHp * 0.45,
-            speed: 95 * diffSpdMult, color: "#00ffaa", score: 390,
-            angle: 0, spin: 2.2, shootTimer: 2.6, slowTimer: 0, burnTimer: 0, isElite: true
-        });
-    } else if (type === "ENERGY_ORB") {
-        const baseHp = 32 * waveScale;
-        enemies.push({
-            type, x, y, vx: 0, vy: 0, radius: 13,
-            hp: baseHp, maxHp: baseHp, shield: 0, maxShield: 0,
-            speed: 145 * diffSpdMult, color: "#00ffaa", score: 65,
-            angle: 0, spin: 6.0, slowTimer: 0, burnTimer: 0, isElite: false
-        });
-    } else if (type === "CHASER") {
-        const baseHp = 38 * waveScale;
-        enemies.push({
-            type, x, y, vx: 0, vy: 0, radius: isElite ? 18 : 15,
-            hp: baseHp, maxHp: baseHp, shield: baseHp * shieldMult, maxShield: baseHp * shieldMult,
-            speed: (205 + Math.min(115, state.wave * 7)) * diffSpdMult, color: "#ff007f", score: 140,
-            angle: 0, spin: 5.5, strafeDir: Math.random() < 0.5 ? 1 : -1, strafeTimer: 0.8,
-            slowTimer: 0, burnTimer: 0, isElite
-        });
-    } else if (type === "WEAVER") {
-        const baseHp = 68 * waveScale;
-        enemies.push({
-            type, x, y, vx: 0, vy: 0, radius: 20,
-            hp: baseHp, maxHp: baseHp, shield: baseHp * shieldMult, maxShield: baseHp * shieldMult,
-            speed: 140 * diffSpdMult, color: "#bc13fe", score: 260, angle: 0, spin: 2.6,
-            shootTimer: 1.4 + Math.random(), slowTimer: 0, burnTimer: 0, isElite
-        });
-    } else if (type === "SPLITTER") {
-        const baseHp = 92 * waveScale;
-        enemies.push({
-            type, x, y, vx: 0, vy: 0, radius: 23,
-            hp: baseHp, maxHp: baseHp, shield: baseHp * shieldMult, maxShield: baseHp * shieldMult,
-            speed: 145 * diffSpdMult, color: "#fcee09", score: 310, angle: 0, spin: 3.2,
-            slowTimer: 0, burnTimer: 0, isElite
-        });
-    } else if (type === "MINI_SWARM") {
-        const baseHp = 22 * waveScale;
-        enemies.push({
-            type, x, y, vx: (Math.random() - 0.5) * 260, vy: (Math.random() - 0.5) * 260,
-            radius: 10, hp: baseHp, maxHp: baseHp, shield: 0, maxShield: 0,
-            speed: 285 * diffSpdMult, color: "#00ffaa", score: 85, angle: 0, spin: 9.0,
-            slowTimer: 0, burnTimer: 0, isElite: false
-        });
-    } else if (type === "JUGGERNAUT") {
-        const baseHp = 175 * waveScale;
-        enemies.push({
-            type, x, y, vx: 0, vy: 0, radius: 27,
-            hp: baseHp, maxHp: baseHp, shield: baseHp * 0.4, maxShield: baseHp * 0.4,
-            speed: 108 * diffSpdMult, color: "#00f3ff", score: 460,
-            angle: Math.atan2(player.y - y, player.x - x), spin: 0, shootTimer: 2.2,
-            slowTimer: 0, burnTimer: 0, isElite: true
-        });
-    } else if (type === "PHANTOM") {
-        const baseHp = 82 * waveScale;
-        enemies.push({
-            type, x, y, vx: 0, vy: 0, radius: 18,
-            hp: baseHp, maxHp: baseHp, shield: baseHp * 0.5, maxShield: baseHp * 0.5,
-            speed: 110 * diffSpdMult, color: "#ff2a85", score: 380, angle: 0, spin: 4.0,
-            shootTimer: 2.2, teleportTimer: 3.5, aiming: false,
-            slowTimer: 0, burnTimer: 0, isElite: true
-        });
-    } else if (type === "GUARDIAN") {
-        const baseHp = 135 * waveScale;
-        enemies.push({
-            type, x, y, vx: 0, vy: 0, radius: 22,
-            hp: baseHp, maxHp: baseHp, shield: baseHp * 0.6, maxShield: baseHp * 0.6,
-            speed: 85 * diffSpdMult, color: "#38bdf8", score: 420, angle: 0, spin: 1.8,
-            pulseTimer: 1.6, slowTimer: 0, burnTimer: 0, isElite: true
-        });
-    } else if (type === "SNIPER") {
-        const baseHp = 64 * waveScale;
-        enemies.push({
-            type, x, y, vx: 0, vy: 0, radius: 17,
-            hp: baseHp, maxHp: baseHp, shield: baseHp * 0.35, maxShield: baseHp * 0.35,
-            speed: 95 * diffSpdMult, color: "#ff0055", score: 340,
-            angle: 0, spin: 0, shootTimer: 2.4, aiming: false, slowTimer: 0, burnTimer: 0, isElite: true
-        });
-    } else if (type === "WARP_MINER") {
-        const baseHp = 105 * waveScale;
-        enemies.push({
-            type, x, y, vx: 0, vy: 0, radius: 21,
-            hp: baseHp, maxHp: baseHp, shield: baseHp * 0.4, maxShield: baseHp * 0.4,
-            speed: 135 * diffSpdMult, color: "#fcee09", score: 360,
-            angle: Math.random() * Math.PI * 2, spin: 2.5, mineTimer: 2.2, slowTimer: 0, burnTimer: 0, isElite: true
-        })
-    } else if (type === "BOSS") {
-        state.bossActive = true;
-        const bossIndex = Math.floor(((state.wave / 3) - 1) % 10);
-        const bossProfiles = [
-            { subtype: "ARCHON", name: "OMEGA ARCHON // SINGULARITA", color: "#ff0055", hpMult: 1.0, radius: 56 },
-            { subtype: "SERAPH", name: "CHRONO SERAPH // VALKÝRA", color: "#fcee09", hpMult: 0.95, radius: 52 },
-            { subtype: "HYDRA", name: "NEXUS HYDRA // TRI-CORE MATRIX", color: "#00ffaa", hpMult: 1.15, radius: 58 },
-            { subtype: "LEVIATHAN", name: "VOID LEVIATHAN // KYBER-HAD", color: "#bc13fe", hpMult: 1.25, radius: 54 },
-            { subtype: "NEMESIS", name: "AETHER NEMESIS // FÁZOVÝ PŘÍZRAK", color: "#38bdf8", hpMult: 1.20, radius: 52 },
-            { subtype: "COLOSSUS", name: "SOLARIS COLOSSUS // HVĚZDNÁ KOVÁRNA", color: "#fb923c", hpMult: 1.38, radius: 62 },
-            { subtype: "PRISM", name: "QUANTUM PRISM // KRYSTALICKÝ HRANOL", color: "#00f3ff", hpMult: 1.22, radius: 54 },
-            { subtype: "TITAN", name: "GRAVITY TITAN // DVOJITÁ SINGULARITA", color: "#a855f7", hpMult: 1.32, radius: 58 },
-            { subtype: "ARACHNID", name: "CYBER ARACHNID // MECHANICKÁ TARANTULE", color: "#a3e635", hpMult: 1.18, radius: 54 },
-            { subtype: "VALKYRIE", name: "OMEGA VALKYRIE // ZRCADLOVÝ LOVEC", color: "#f43f5e", hpMult: 1.28, radius: 56 }
-        ];
-        const profile = bossProfiles[bossIndex];
-        const bossHp = 2100 * waveScale * profile.hpMult;
-
-        const bossObj = {
-            type: "BOSS", subtype: profile.subtype, name: profile.name,
-            x: W / 2, y: 130, vx: 0, vy: 0, radius: profile.radius,
-            hp: bossHp, maxHp: bossHp, shield: bossHp * 0.25, maxShield: bossHp * 0.25,
-            speed: 115 * diffSpdMult, color: profile.color, score: 6500, angle: 0, spin: 1.3,
-            shootTimer: 1.1, phaseTimer: 0, slowTimer: 0, burnTimer: 0,
-            spawnTime: performance.now(),
-            isElite: true, segments: []
-        };
-
-        if (profile.subtype === "LEVIATHAN") {
-            for (let s = 0; s < 8; s++) bossObj.segments.push({ x: W / 2, y: 130 - s * 28, angle: Math.PI / 2 });
-        }
-
-        enemies.push(bossObj);
-        document.getElementById("boss-name").textContent = profile.name;
-        const ghostBossName = document.getElementById("ghost-boss-name");
-        if (ghostBossName) ghostBossName.textContent = profile.name;
-        document.getElementById("boss-hud").classList.remove("hidden");
-        document.getElementById("boss-hud").classList.add("flex");
-        document.getElementById("ghost-boss-bar-wrap").classList.remove("hidden");
-        document.getElementById("ghost-boss-bar-wrap").classList.add("flex");
-        addFloatingText(W / 2, H / 2 - 80, `VAROVÁNÍ: ${profile.name}!`, profile.color, 1.45);
-        spawnShockwave(W / 2, 130, 460, profile.color, 6, 520);
-        spawnLensFlare(W / 2, 130, profile.color, 700);
-        grid.applyForce(W / 2, 130, 440, 70, false, true);
-        state.chromatic = 1.0;
-    }
-
-    spawnShockwave(x, y, 48, "#ffffff", 2, 260);
-    grid.applyForce(x, y, 110, 14, false);
+  spawnShockwave(x, y, 48, "#ffffff", 2, 260);
+  grid.applyForce(x, y, 110, 14, false);
 }
 
 function unleashQuantumExplosion(isInitialCharge = false) {
-    spawnShockwave(player.x, player.y, 750, "#fcee09", 8, 920);
-    spawnShockwave(player.x, player.y, 520, "#00f3ff", 5, 680);
-    spawnLensFlare(player.x, player.y, "#fcee09", 900);
-    grid.applyForce(player.x, player.y, 640, 115, false, true);
-    state.chromatic = 1.0;
-    state.shake = Math.max(state.shake, 22);
-    enemyBullets.length = 0;
+  spawnShockwave(player.x, player.y, 750, "#fcee09", 8, 920);
+  spawnShockwave(player.x, player.y, 520, "#00f3ff", 5, 680);
+  spawnLensFlare(player.x, player.y, "#fcee09", 900);
+  grid.applyForce(player.x, player.y, 640, 115, false, true);
+  state.chromatic = 1.0;
+  state.shake = Math.max(state.shake, 22);
+  enemyBullets.length = 0;
 
-    const blastDmg = (isInitialCharge ? 140 : 280) * player.dmgMult;
-    for (let i = enemies.length - 1; i >= 0; i--) {
-        const e = enemies[i];
-        lightningArcs.push({ x1: player.x, y1: player.y, x2: e.x, y2: e.y, life: 0.32, color: "#fcee09" });
-        e.slowTimer = Math.max(e.slowTimer || 0, 3.5);
-        damageEnemy(e, blastDmg, "#fcee09", true, false, "KVANTOVÝ PŘETLAK");
-    }
+  const blastDmg = (isInitialCharge ? 140 : 280) * player.dmgMult;
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    const e = enemies[i];
+    lightningArcs.push({
+      x1: player.x,
+      y1: player.y,
+      x2: e.x,
+      y2: e.y,
+      life: 0.32,
+      color: "#fcee09",
+    });
+    e.slowTimer = Math.max(e.slowTimer || 0, 3.5);
+    damageEnemy(e, blastDmg, "#fcee09", true, false, "KVANTOVÝ PŘETLAK");
+  }
 }
 
 function triggerQuantumOverdrive() {
-    if (state.mode !== "PLAYING" || state.overdrive < 100 || state.overdriveTimer > 0) return;
-    state.overdrive = 0;
-    state.overdriveTimer = 5.5 + (meta.upgrades.overdriveLvl || 0) * 0.8;
-    unlockAchievement("overdrive_use");
-    state.overdriveUses = (state.overdriveUses || 0) + 1;
-    if (state.overdriveUses >= 5) unlockAchievement("overdrive_master");
-    sfx.playLevelUp();
+  if (
+    state.mode !== "PLAYING" ||
+    state.overdrive < 100 ||
+    state.overdriveTimer > 0
+  )
+    return;
+  state.overdrive = 0;
+  state.overdriveTimer = 5.5 + (meta.upgrades.overdriveLvl || 0) * 0.8;
+  unlockAchievement("overdrive_use");
+  state.overdriveUses = (state.overdriveUses || 0) + 1;
+  if (state.overdriveUses >= 5) unlockAchievement("overdrive_master");
+  sfx.playLevelUp();
 
-    unleashQuantumExplosion(false);
-    addFloatingText(player.x, player.y - 42, "⚡ KVANTOVÁ EXPLOZE & PŘETLAK AKTIVNÍ!", "#fcee09", 1.45);
-    updateHUD();
+  unleashQuantumExplosion(false);
+  addFloatingText(
+    player.x,
+    player.y - 42,
+    "⚡ KVANTOVÁ EXPLOZE & PŘETLAK AKTIVNÍ!",
+    "#fcee09",
+    1.45,
+  );
+  updateHUD();
 }
 
 function firePlasmaWhip() {
-    const radius = 155 + player.weapons.whipLvl * 28 + (player.weapons.boomerangLvl > 0 ? 45 : 0);
-    const dmg = (75 + player.weapons.whipLvl * 32) * player.dmgMult;
-    spawnShockwave(player.x, player.y, radius, "#00ffaa", 5, 680);
-    grid.applyForce(player.x, player.y, radius, 38, false, true);
-    for (let i = enemies.length - 1; i >= 0; i--) {
-        const e = enemies[i];
-        if (Math.hypot(e.x - player.x, e.y - player.y) <= radius + e.radius) {
-            damageEnemy(e, dmg, "#00ffaa", true, false, "PLAZMOVÝ BIČ");
-        }
+  const radius =
+    155 +
+    player.weapons.whipLvl * 28 +
+    (player.weapons.boomerangLvl > 0 ? 45 : 0);
+  const dmg = (75 + player.weapons.whipLvl * 32) * player.dmgMult;
+  spawnShockwave(player.x, player.y, radius, "#00ffaa", 5, 680);
+  grid.applyForce(player.x, player.y, radius, 38, false, true);
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    const e = enemies[i];
+    if (Math.hypot(e.x - player.x, e.y - player.y) <= radius + e.radius) {
+      damageEnemy(e, dmg, "#00ffaa", true, false, "PLAZMOVÝ BIČ");
     }
+  }
 }
 
 function fireQuantumMortar() {
-    if (enemies.length === 0) return;
-    const count = 1 + Math.floor(player.weapons.mortarLvl / 2) + (player.weapons.minesLvl > 0 ? 1 : 0);
-    for (let c = 0; c < count; c++) {
-        const target = enemies[Math.floor(Math.random() * enemies.length)];
-        const blastR = 135 + player.weapons.mortarLvl * 22;
-        const dmg = (130 + player.weapons.mortarLvl * 45) * player.dmgMult;
-        spawnShockwave(target.x, target.y, blastR, "#fcee09", 5, 520);
-        spawnParticles(target.x, target.y, "#fcee09", 28, 80, 380, 3.0);
-        grid.applyForce(target.x, target.y, blastR * 1.2, 45, false, true);
-        sfx.playExplosion(1.3);
-        for (let i = enemies.length - 1; i >= 0; i--) {
-            const e = enemies[i];
-            if (Math.hypot(e.x - target.x, e.y - target.y) <= blastR + e.radius) {
-                damageEnemy(e, dmg, "#fcee09", true, false, "KVANTOVÝ MINOMET");
-            }
-        }
+  if (enemies.length === 0) return;
+  const count =
+    1 +
+    Math.floor(player.weapons.mortarLvl / 2) +
+    (player.weapons.minesLvl > 0 ? 1 : 0);
+  for (let c = 0; c < count; c++) {
+    const target = enemies[Math.floor(Math.random() * enemies.length)];
+    const blastR = 135 + player.weapons.mortarLvl * 22;
+    const dmg = (130 + player.weapons.mortarLvl * 45) * player.dmgMult;
+    spawnShockwave(target.x, target.y, blastR, "#fcee09", 5, 520);
+    spawnParticles(target.x, target.y, "#fcee09", 28, 80, 380, 3.0);
+    grid.applyForce(target.x, target.y, blastR * 1.2, 45, false, true);
+    sfx.playExplosion(1.3);
+    for (let i = enemies.length - 1; i >= 0; i--) {
+      const e = enemies[i];
+      if (Math.hypot(e.x - target.x, e.y - target.y) <= blastR + e.radius) {
+        damageEnemy(e, dmg, "#fcee09", true, false, "KVANTOVÝ MINOMET");
+      }
     }
+  }
 }
 
 function spawnHoloDecoy() {
-    if (decoys.length >= 3) decoys.shift();
-    decoys.push({
-        x: player.x + (Math.random() - 0.5) * 40,
-        y: player.y + (Math.random() - 0.5) * 40,
-        angle: player.angle,
-        life: 4.5,
-        blastDmg: (160 + player.weapons.decoyLvl * 55) * player.dmgMult
-    });
+  if (decoys.length >= 3) decoys.shift();
+  decoys.push({
+    x: player.x + (Math.random() - 0.5) * 40,
+    y: player.y + (Math.random() - 0.5) * 40,
+    angle: player.angle,
+    life: 4.5,
+    blastDmg: (160 + player.weapons.decoyLvl * 55) * player.dmgMult,
+  });
 }
 
 function dropLightningTrap() {
-    plasmaPools.push({
-        x: player.x,
-        y: player.y,
-        radius: 48 + player.weapons.lightningTrapLvl * 10,
-        dmg: (95 + player.weapons.lightningTrapLvl * 35) * player.dmgMult,
-        color: "#67e8f9",
-        isTrap: true,
-        life: 5.5,
-        maxLife: 5.5
-    });
+  plasmaPools.push({
+    x: player.x,
+    y: player.y,
+    radius: 48 + player.weapons.lightningTrapLvl * 10,
+    dmg: (95 + player.weapons.lightningTrapLvl * 35) * player.dmgMult,
+    color: "#67e8f9",
+    isTrap: true,
+    life: 5.5,
+    maxLife: 5.5,
+  });
 }
 
 function fireRiftSlicer() {
-    const count = 1 + (player.weapons.bladesLvl > 0 ? 1 : 0);
-    for (let i = 0; i < count; i++) {
-        const a = player.angle + (i - (count - 1) / 2) * 0.22;
-        bullets.push({
-            x: player.x + Math.cos(a) * 20,
-            y: player.y + Math.sin(a) * 20,
-            px: player.x,
-            py: player.y,
-            vx: Math.cos(a) * 760,
-            vy: Math.sin(a) * 760,
-            dmg: (68 + player.weapons.riftSlicerLvl * 28) * player.dmgMult,
-            bounces: 0,
-            pierce: 99,
-            radius: 14,
-            weaponName: "SUB-PROSTOROVÝ TRHAČ",
-            color: "#f43f5e",
-            life: 1.4
-        });
-    }
-    sfx.playLaser(0.65);
+  const count = 1 + (player.weapons.bladesLvl > 0 ? 1 : 0);
+  for (let i = 0; i < count; i++) {
+    const a = player.angle + (i - (count - 1) / 2) * 0.22;
+    bullets.push({
+      x: player.x + Math.cos(a) * 20,
+      y: player.y + Math.sin(a) * 20,
+      px: player.x,
+      py: player.y,
+      vx: Math.cos(a) * 760,
+      vy: Math.sin(a) * 760,
+      dmg: (68 + player.weapons.riftSlicerLvl * 28) * player.dmgMult,
+      bounces: 0,
+      pierce: 99,
+      radius: 14,
+      weaponName: "SUB-PROSTOROVÝ TRHAČ",
+      color: "#f43f5e",
+      life: 1.4,
+    });
+  }
+  sfx.playLaser(0.65);
 }
 
 function fireVoidLance() {
-    const hasSynergy = player.weapons.railgunLvl > 0;
-    const len = 250 + player.weapons.voidLanceLvl * 45 + (hasSynergy ? 140 : 0);
-    const a = player.angle;
-    const x2 = player.x + Math.cos(a) * len;
-    const y2 = player.y + Math.sin(a) * len;
+  const hasSynergy = player.weapons.railgunLvl > 0;
+  const len = 250 + player.weapons.voidLanceLvl * 45 + (hasSynergy ? 140 : 0);
+  const a = player.angle;
+  const x2 = player.x + Math.cos(a) * len;
+  const y2 = player.y + Math.sin(a) * len;
 
-    railBeams.push({ x1: player.x, y1: player.y, x2, y2, color: hasSynergy ? "#fcee09" : "#c084fc", life: 0.22, maxLife: 0.22 });
-    sfx.playLaser(0.55);
+  railBeams.push({
+    x1: player.x,
+    y1: player.y,
+    x2,
+    y2,
+    color: hasSynergy ? "#fcee09" : "#c084fc",
+    life: 0.22,
+    maxLife: 0.22,
+  });
+  sfx.playLaser(0.55);
 
-    const dx = Math.cos(a);
-    const dy = Math.sin(a);
-    const dmg = (90 + player.weapons.voidLanceLvl * 38) * player.dmgMult * (hasSynergy ? 1.35 : 1.0);
+  const dx = Math.cos(a);
+  const dy = Math.sin(a);
+  const dmg =
+    (90 + player.weapons.voidLanceLvl * 38) *
+    player.dmgMult *
+    (hasSynergy ? 1.35 : 1.0);
 
-    for (let i = enemies.length - 1; i >= 0; i--) {
-        const e = enemies[i];
-        const ex = e.x - player.x;
-        const ey = e.y - player.y;
-        const proj = ex * dx + ey * dy;
-        if (proj > 0 && proj <= len) {
-            const perpDist = Math.abs(ex * dy - ey * dx);
-            if (perpDist < e.radius + 22) {
-                damageEnemy(e, dmg, "#c084fc", true, false, "SINGULARITNÍ KOPÍ");
-            }
-        }
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    const e = enemies[i];
+    const ex = e.x - player.x;
+    const ey = e.y - player.y;
+    const proj = ex * dx + ey * dy;
+    if (proj > 0 && proj <= len) {
+      const perpDist = Math.abs(ex * dy - ey * dx);
+      if (perpDist < e.radius + 22) {
+        damageEnemy(e, dmg, "#c084fc", true, false, "SINGULARITNÍ KOPÍ");
+      }
     }
-    // Smaže nepřátelské střely v dráze kopí
-    for (let i = enemyBullets.length - 1; i >= 0; i--) {
-        const eb = enemyBullets[i];
-        const ex = eb.x - player.x;
-        const ey = eb.y - player.y;
-        const proj = ex * dx + ey * dy;
-        if (proj > 0 && proj <= len && Math.abs(ex * dy - ey * dx) < 26) {
-            fastRemove(enemyBullets, i);
-        }
+  }
+  // Smaže nepřátelské střely v dráze kopí
+  for (let i = enemyBullets.length - 1; i >= 0; i--) {
+    const eb = enemyBullets[i];
+    const ex = eb.x - player.x;
+    const ey = eb.y - player.y;
+    const proj = ex * dx + ey * dy;
+    if (proj > 0 && proj <= len && Math.abs(ex * dy - ey * dx) < 26) {
+      fastRemove(enemyBullets, i);
     }
+  }
 }
 
 function dropStasisField() {
-    const trailOffset = player.radius + 34;
-    plasmaPools.push({
-        x: player.x - Math.cos(player.angle) * trailOffset,
-        y: player.y - Math.sin(player.angle) * trailOffset,
-        radius: 68 + player.weapons.stasisFieldLvl * 14,
-        dmg: (78 + player.weapons.stasisFieldLvl * 28) * player.dmgMult,
-        color: "#38bdf8",
-        isTrap: true,
-        weaponName: "CHRONO-STÁZOVÁ BOMBA",
-        life: 5.0,
-        maxLife: 5.0
-    });
+  const trailOffset = player.radius + 34;
+  plasmaPools.push({
+    x: player.x - Math.cos(player.angle) * trailOffset,
+    y: player.y - Math.sin(player.angle) * trailOffset,
+    radius: 68 + player.weapons.stasisFieldLvl * 14,
+    dmg: (78 + player.weapons.stasisFieldLvl * 28) * player.dmgMult,
+    color: "#38bdf8",
+    isTrap: true,
+    weaponName: "CHRONO-STÁZOVÁ BOMBA",
+    life: 5.0,
+    maxLife: 5.0,
+  });
 }
 
 function firePrismFan() {
-    const rays = 5 + (player.weapons.railgunLvl > 0 ? 2 : 0);
-    const spread = 0.16;
-    for (let i = 0; i < rays; i++) {
-        const a = player.angle + (i - (rays - 1) / 2) * spread;
-        bullets.push({
-            x: player.x + Math.cos(a) * 18,
-            y: player.y + Math.sin(a) * 18,
-            px: player.x,
-            py: player.y,
-            vx: Math.cos(a) * 980,
-            vy: Math.sin(a) * 980,
-            dmg: (32 + player.weapons.prismLaserLvl * 15) * player.dmgMult,
-            bounces: 1,
-            pierce: 2,
-            weaponName: "FOTONOVÉ HRANOLY",
-            color: "#ff0055",
-            life: 1.2
-        });
-    }
+  const rays = 5 + (player.weapons.railgunLvl > 0 ? 2 : 0);
+  const spread = 0.16;
+  for (let i = 0; i < rays; i++) {
+    const a = player.angle + (i - (rays - 1) / 2) * spread;
+    bullets.push({
+      x: player.x + Math.cos(a) * 18,
+      y: player.y + Math.sin(a) * 18,
+      px: player.x,
+      py: player.y,
+      vx: Math.cos(a) * 980,
+      vy: Math.sin(a) * 980,
+      dmg: (32 + player.weapons.prismLaserLvl * 15) * player.dmgMult,
+      bounces: 1,
+      pierce: 2,
+      weaponName: "FOTONOVÉ HRANOLY",
+      color: "#ff0055",
+      life: 1.2,
+    });
+  }
 }
 
 function firePhotonBoomerangs() {
-    const count = player.weapons.boomerangLvl;
-    const isSupernova = player.weapons.flamethrowerLvl > 0;
-    for (let i = 0; i < count; i++) {
-        const a = player.angle + (i - (count - 1) / 2) * 0.4;
-        boomerangs.push({
-            x: player.x, y: player.y,
-            vx: Math.cos(a) * 680, vy: Math.sin(a) * 680,
-            returning: false,
-            spinAngle: 0,
-            life: 2.2,
-            isSupernova,
-            dmg: (52 + player.weapons.boomerangLvl * 20) * player.dmgMult * (isSupernova ? 1.35 : 1.0),
-            color: isSupernova ? "#ff6600" : "#00ffaa"
-        });
-    }
-    sfx.playLaser(0.75);
+  const count = player.weapons.boomerangLvl;
+  const isSupernova = player.weapons.flamethrowerLvl > 0;
+  for (let i = 0; i < count; i++) {
+    const a = player.angle + (i - (count - 1) / 2) * 0.4;
+    boomerangs.push({
+      x: player.x,
+      y: player.y,
+      vx: Math.cos(a) * 680,
+      vy: Math.sin(a) * 680,
+      returning: false,
+      spinAngle: 0,
+      life: 2.2,
+      isSupernova,
+      dmg:
+        (52 + player.weapons.boomerangLvl * 20) *
+        player.dmgMult *
+        (isSupernova ? 1.35 : 1.0),
+      color: isSupernova ? "#ff6600" : "#00ffaa",
+    });
+  }
+  sfx.playLaser(0.75);
 }
 
 function dropQuantumMine() {
-    mines.push({
-        x: player.x, y: player.y,
-        radius: 14,
-        triggerRadius: 95 + player.weapons.minesLvl * 15,
-        blastRadius: 145 + player.weapons.minesLvl * 20,
-        dmg: (110 + player.weapons.minesLvl * 40) * player.dmgMult,
-        pulse: 0,
-        life: 14.0
-    });
-    meta.stats.minesDropped = (meta.stats.minesDropped || 0) + 1;
-    if (meta.stats.minesDropped >= 20) unlockAchievement("mine_master");
+  mines.push({
+    x: player.x,
+    y: player.y,
+    radius: 14,
+    triggerRadius: 95 + player.weapons.minesLvl * 15,
+    blastRadius: 145 + player.weapons.minesLvl * 20,
+    dmg: (110 + player.weapons.minesLvl * 40) * player.dmgMult,
+    pulse: 0,
+    life: 14.0,
+  });
+  meta.stats.minesDropped = (meta.stats.minesDropped || 0) + 1;
+  if (meta.stats.minesDropped >= 20) unlockAchievement("mine_master");
 }
 
-function triggerKineticShockwave(customRadius = null, customDmg = null, customCol = "#38bdf8") {
-    const radius = customRadius || (210 + player.weapons.shockwaveLvl * 45);
-    spawnShockwave(player.x, player.y, radius, customCol, 4.5, 580);
-    // Grid force voláme jen u menších vln, u gigantických to vynecháme, ať to nezatíží CPU
-    if (radius < 400) grid.applyForce(player.x, player.y, radius, 30, false, false);
+function triggerKineticShockwave(
+  customRadius = null,
+  customDmg = null,
+  customCol = "#38bdf8",
+) {
+  const radius = customRadius || 210 + player.weapons.shockwaveLvl * 45;
+  spawnShockwave(player.x, player.y, radius, customCol, 4.5, 580);
+  // Grid force voláme jen u menších vln, u gigantických to vynecháme, ať to nezatíží CPU
+  if (radius < 400)
+    grid.applyForce(player.x, player.y, radius, 30, false, false);
 
-    for (const e of enemies) {
-        const dx = e.x - player.x;
-        const dy = e.y - player.y;
-        const d = Math.hypot(dx, dy) || 1;
-        if (d <= radius) {
-            const push = (1 - d / radius) * (e.type === "BOSS" ? 35 : 165);
-            e.x += (dx / d) * push;
-            e.y += (dy / d) * push;
-            const dmg = customDmg || ((35 + player.weapons.shockwaveLvl * 18) * player.dmgMult);
-            damageEnemy(e, dmg, customCol, true, false, "TLAKOVÁ VLNA");
-        }
+  for (const e of enemies) {
+    const dx = e.x - player.x;
+    const dy = e.y - player.y;
+    const d = Math.hypot(dx, dy) || 1;
+    if (d <= radius) {
+      const push = (1 - d / radius) * (e.type === "BOSS" ? 35 : 165);
+      e.x += (dx / d) * push;
+      e.y += (dy / d) * push;
+      const dmg =
+        customDmg || (35 + player.weapons.shockwaveLvl * 18) * player.dmgMult;
+      damageEnemy(e, dmg, customCol, true, false, "TLAKOVÁ VLNA");
     }
-    for (let i = enemyBullets.length - 1; i >= 0; i--) {
-        if (Math.hypot(enemyBullets[i].x - player.x, enemyBullets[i].y - player.y) <= radius * 0.85) {
-            enemyBullets[i] = enemyBullets[enemyBullets.length - 1];
-            enemyBullets.pop();
-        }
+  }
+  for (let i = enemyBullets.length - 1; i >= 0; i--) {
+    if (
+      Math.hypot(enemyBullets[i].x - player.x, enemyBullets[i].y - player.y) <=
+      radius * 0.85
+    ) {
+      enemyBullets[i] = enemyBullets[enemyBullets.length - 1];
+      enemyBullets.pop();
     }
+  }
 }
 
 function updateFlamethrower(dt) {
-    if (player.weapons.flamethrowerLvl <= 0 || enemies.length === 0) return;
-    const range = 195 + player.weapons.flamethrowerLvl * 28;
-    const coneHalfAngle = 0.42;
+  if (player.weapons.flamethrowerLvl <= 0 || enemies.length === 0) return;
+  const range = 195 + player.weapons.flamethrowerLvl * 28;
+  const coneHalfAngle = 0.42;
 
-    for (let i = 0; i < 3; i++) {
-        const a = player.angle + (Math.random() - 0.5) * coneHalfAngle * 1.8;
-        const spd = 280 + Math.random() * 240;
-        const cols = ["#ff3300", "#ff8800", "#fcee09"];
-        if (particles.length < MAX_PARTICLES) {
-            particles.push({
-                x: player.x + Math.cos(player.angle) * 18,
-                y: player.y + Math.sin(player.angle) * 18,
-                vx: Math.cos(a) * spd, vy: Math.sin(a) * spd,
-                color: cols[Math.floor(Math.random() * cols.length)],
-                size: 3.5 + Math.random() * 2.5, life: 0.28 + Math.random() * 0.16,
-                maxLife: 0.42, drag: 0.92
-            });
-        }
+  for (let i = 0; i < 3; i++) {
+    const a = player.angle + (Math.random() - 0.5) * coneHalfAngle * 1.8;
+    const spd = 280 + Math.random() * 240;
+    const cols = ["#ff3300", "#ff8800", "#fcee09"];
+    if (particles.length < MAX_PARTICLES) {
+      particles.push({
+        x: player.x + Math.cos(player.angle) * 18,
+        y: player.y + Math.sin(player.angle) * 18,
+        vx: Math.cos(a) * spd,
+        vy: Math.sin(a) * spd,
+        color: cols[Math.floor(Math.random() * cols.length)],
+        size: 3.5 + Math.random() * 2.5,
+        life: 0.28 + Math.random() * 0.16,
+        maxLife: 0.42,
+        drag: 0.92,
+      });
     }
+  }
 
-    player.flameTickTimer -= dt;
-    if (player.flameTickTimer <= 0) {
-        player.flameTickTimer = 0.09;
-        const dmg = (11 + player.weapons.flamethrowerLvl * 5.5) * player.dmgMult;
+  player.flameTickTimer -= dt;
+  if (player.flameTickTimer <= 0) {
+    player.flameTickTimer = 0.09;
+    const dmg = (11 + player.weapons.flamethrowerLvl * 5.5) * player.dmgMult;
 
-        for (const e of enemies) {
-            const dx = e.x - player.x;
-            const dy = e.y - player.y;
-            const dist = Math.hypot(dx, dy);
-            if (dist <= range + e.radius) {
-                const angleToEnemy = Math.atan2(dy, dx);
-                const diff = Math.abs(Math.atan2(Math.sin(angleToEnemy - player.angle), Math.cos(angleToEnemy - player.angle)));
-                if (diff <= coneHalfAngle) {
-                    if (!e.burnTimer || e.burnTimer <= 0) {
-                        meta.stats.burnedCount = (meta.stats.burnedCount || 0) + 1;
-                        if (meta.stats.burnedCount >= 15) unlockAchievement("pyromancer");
-                    }
-                    e.burnTimer = 2.6;
-                    damageEnemy(e, dmg, "#ff6600", true, false, "PLAMENOMET");
-                }
-            }
+    for (const e of enemies) {
+      const dx = e.x - player.x;
+      const dy = e.y - player.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist <= range + e.radius) {
+        const angleToEnemy = Math.atan2(dy, dx);
+        const diff = Math.abs(
+          Math.atan2(
+            Math.sin(angleToEnemy - player.angle),
+            Math.cos(angleToEnemy - player.angle),
+          ),
+        );
+        if (diff <= coneHalfAngle) {
+          if (!e.burnTimer || e.burnTimer <= 0) {
+            meta.stats.burnedCount = (meta.stats.burnedCount || 0) + 1;
+            if (meta.stats.burnedCount >= 15) unlockAchievement("pyromancer");
+          }
+          e.burnTimer = 2.6;
+          damageEnemy(e, dmg, "#ff6600", true, false, "PLAMENOMET");
         }
+      }
     }
+  }
 }
 
 function triggerOrbitalSatelliteLock(overrideTarget = null) {
-    if (enemies.length === 0 && !overrideTarget) return;
-    let target = overrideTarget || enemies[0];
-    if (!overrideTarget) {
-        for (const e of enemies) {
-            if (e.hp > target.hp) target = e;
-        }
+  if (enemies.length === 0 && !overrideTarget) return;
+  let target = overrideTarget || enemies[0];
+  if (!overrideTarget) {
+    for (const e of enemies) {
+      if (e.hp > target.hp) target = e;
     }
-    const radius = 125 + player.weapons.satelliteLvl * 20;
-    orbitalStrikes.push({
-        x: target.x, y: target.y, targetRef: target, radius,
-        phase: "LOCK", timer: 0.75, maxTimer: 0.75, beamLife: 0.45,
-        dmg: (165 + player.weapons.satelliteLvl * 75 + player.level * 10) * player.dmgMult
-    });
+  }
+  const radius = 125 + player.weapons.satelliteLvl * 20;
+  orbitalStrikes.push({
+    x: target.x,
+    y: target.y,
+    targetRef: target,
+    radius,
+    phase: "LOCK",
+    timer: 0.75,
+    maxTimer: 0.75,
+    beamLife: 0.45,
+    dmg:
+      (165 + player.weapons.satelliteLvl * 75 + player.level * 10) *
+      player.dmgMult,
+  });
 }
 
 let primaryShotCounter = 0;
 function firePrimaryWeapons() {
-    state.firedAnyShot = true;
-    primaryShotCounter++;
-    if (player.weapons.prismLaserLvl > 0 && primaryShotCounter % 3 === 0) {
-        firePrismFan();
-    }
+  state.firedAnyShot = true;
+  primaryShotCounter++;
+  if (player.weapons.prismLaserLvl > 0 && primaryShotCounter % 3 === 0) {
+    firePrismFan();
+  }
 
-    const barrels = player.weapons.barrels;
-    const spread = 0.105;
-    const baseAngle = player.angle;
-    const isBassShot = (sfx.beatPulse || 0) > 0.45 || (sfx.bassEnergy || 0) > 0.65;
-    const bassDmgMult = isBassShot ? 1.25 : 1.0;
+  const barrels = player.weapons.barrels;
+  const spread = 0.105;
+  const baseAngle = player.angle;
+  const isBassShot =
+    (sfx.beatPulse || 0) > 0.45 || (sfx.bassEnergy || 0) > 0.65;
+  const bassDmgMult = isBassShot ? 1.25 : 1.0;
 
-    for (let i = 0; i < barrels; i++) {
-        const offsetIndex = i - (barrels - 1) / 2;
-        const a = baseAngle + offsetIndex * spread;
-        const muzzleX = player.x + Math.cos(a) * 18;
-        const muzzleY = player.y + Math.sin(a) * 18;
+  for (let i = 0; i < barrels; i++) {
+    const offsetIndex = i - (barrels - 1) / 2;
+    const a = baseAngle + offsetIndex * spread;
+    const muzzleX = player.x + Math.cos(a) * 18;
+    const muzzleY = player.y + Math.sin(a) * 18;
 
-        bullets.push({
-            x: muzzleX, y: muzzleY, px: muzzleX, py: muzzleY,
-            vx: Math.cos(a) * 940, vy: Math.sin(a) * 940,
-            dmg: (24 + player.level * 3.2) * player.dmgMult * bassDmgMult,
-            bounces: player.weapons.ricochetLvl,
-            pierce: Math.floor(player.weapons.ricochetLvl / 2),
-            bassBoosted: isBassShot,
-            weaponName: "PULZNÍ KANÓN",
-            color: state.overdriveTimer > 0
-                ? "#fcee09"
-                : (isBassShot ? "#ff007f" : (player.weapons.ricochetLvl > 0 ? "#00ffaa" : player.color)),
-            life: 1.35
-        });
-    }
+    bullets.push({
+      x: muzzleX,
+      y: muzzleY,
+      px: muzzleX,
+      py: muzzleY,
+      vx: Math.cos(a) * 940,
+      vy: Math.sin(a) * 940,
+      dmg: (24 + player.level * 3.2) * player.dmgMult * bassDmgMult,
+      bounces: player.weapons.ricochetLvl,
+      pierce: Math.floor(player.weapons.ricochetLvl / 2),
+      bassBoosted: isBassShot,
+      weaponName: "PULZNÍ KANÓN",
+      color:
+        state.overdriveTimer > 0
+          ? "#fcee09"
+          : isBassShot
+            ? "#ff007f"
+            : player.weapons.ricochetLvl > 0
+              ? "#00ffaa"
+              : player.color,
+      life: 1.35,
+    });
+  }
 
-    grid.applyForce(player.x + Math.cos(baseAngle) * 24, player.y + Math.sin(baseAngle) * 24, 75, 5.5, false);
-    sfx.playLaser(state.overdriveTimer > 0 ? 1.25 : (isBassShot ? 1.12 : (0.95 + Math.random() * 0.15)));
+  grid.applyForce(
+    player.x + Math.cos(baseAngle) * 24,
+    player.y + Math.sin(baseAngle) * 24,
+    75,
+    5.5,
+    false,
+  );
+  sfx.playLaser(
+    state.overdriveTimer > 0
+      ? 1.25
+      : isBassShot
+        ? 1.12
+        : 0.95 + Math.random() * 0.15,
+  );
 }
 
 function fireQuantumRailgun() {
-    const a = player.angle;
-    const len = Math.hypot(W, H);
-    const x2 = player.x + Math.cos(a) * len;
-    const y2 = player.y + Math.sin(a) * len;
+  const a = player.angle;
+  const len = Math.hypot(W, H);
+  const x2 = player.x + Math.cos(a) * len;
+  const y2 = player.y + Math.sin(a) * len;
 
-    railBeams.push({ x1: player.x, y1: player.y, x2, y2, color: "#ff0055", life: 0.28, maxLife: 0.28 });
-    sfx.playRailgun();
-    state.shake = Math.max(state.shake, 9);
-    state.chromatic = Math.max(state.chromatic, 0.45);
-    spawnLensFlare(player.x, player.y, "#ff0055", 420);
+  railBeams.push({
+    x1: player.x,
+    y1: player.y,
+    x2,
+    y2,
+    color: "#ff0055",
+    life: 0.28,
+    maxLife: 0.28,
+  });
+  sfx.playRailgun();
+  state.shake = Math.max(state.shake, 9);
+  state.chromatic = Math.max(state.chromatic, 0.45);
+  spawnLensFlare(player.x, player.y, "#ff0055", 420);
 
-    for (let d = 60; d < 900; d += 90) {
-        const gx = player.x + Math.cos(a) * d;
-        const gy = player.y + Math.sin(a) * d;
-        if (gx > 0 && gx < W && gy > 0 && gy < H) grid.applyForce(gx, gy, 130, 24, false, true);
+  for (let d = 60; d < 900; d += 90) {
+    const gx = player.x + Math.cos(a) * d;
+    const gy = player.y + Math.sin(a) * d;
+    if (gx > 0 && gx < W && gy > 0 && gy < H)
+      grid.applyForce(gx, gy, 130, 24, false, true);
+  }
+
+  const dx = Math.cos(a);
+  const dy = Math.sin(a);
+  const dmg =
+    (95 + player.weapons.railgunLvl * 45 + player.level * 6) * player.dmgMult;
+
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    const e = enemies[i];
+    const ex = e.x - player.x;
+    const ey = e.y - player.y;
+    const proj = ex * dx + ey * dy;
+    if (proj > 0) {
+      const perpDist = Math.abs(ex * dy - ey * dx);
+      if (perpDist < e.radius + 16) {
+        damageEnemy(e, dmg, "#ff0055", true, false, "KVANTOVÝ RAILGUN");
+        spawnShockwave(e.x, e.y, 75, "#ff0055", 3, 420);
+      }
     }
-
-    const dx = Math.cos(a);
-    const dy = Math.sin(a);
-    const dmg = (95 + player.weapons.railgunLvl * 45 + player.level * 6) * player.dmgMult;
-
-    for (let i = enemies.length - 1; i >= 0; i--) {
-        const e = enemies[i];
-        const ex = e.x - player.x;
-        const ey = e.y - player.y;
-        const proj = ex * dx + ey * dy;
-        if (proj > 0) {
-            const perpDist = Math.abs(ex * dy - ey * dx);
-            if (perpDist < e.radius + 16) {
-                damageEnemy(e, dmg, "#ff0055", true, false, "KVANTOVÝ RAILGUN");
-                spawnShockwave(e.x, e.y, 75, "#ff0055", 3, 420);
-            }
-        }
-    }
+  }
 }
 
 function fireDroneProjectiles() {
-    const count = player.weapons.dronesLvl;
-    const orbitR = 44;
-    const hasStormSynergy = player.weapons.teslaLvl > 0;
-    for (let i = 0; i < count; i++) {
-        const da = player.droneAngle + (i * Math.PI * 2) / count;
-        const dx = player.x + Math.cos(da) * orbitR;
-        const dy = player.y + Math.sin(da) * orbitR;
+  const count = player.weapons.dronesLvl;
+  const orbitR = 44;
+  const hasStormSynergy = player.weapons.teslaLvl > 0;
+  for (let i = 0; i < count; i++) {
+    const da = player.droneAngle + (i * Math.PI * 2) / count;
+    const dx = player.x + Math.cos(da) * orbitR;
+    const dy = player.y + Math.sin(da) * orbitR;
 
-        let nearest = null;
-        let bestD = Infinity;
-        for (const e of enemies) {
-            const dist = Math.hypot(e.x - dx, e.y - dy);
-            if (dist < bestD) { bestD = dist; nearest = e; }
-        }
-        const aimA = nearest ? Math.atan2(nearest.y - dy, nearest.x - dx) : player.angle;
-        bullets.push({
-            x: dx, y: dy, px: dx, py: dy,
-            vx: Math.cos(aimA) * 860, vy: Math.sin(aimA) * 860,
-            dmg: (18 + player.level * 2) * player.dmgMult,
-            bounces: 0, pierce: 0,
-            stormArc: hasStormSynergy,
-            weaponName: "AUTONOMNÍ DRONY",
-            color: hasStormSynergy ? "#5ffbff" : "#38bdf8",
-            life: 1.1
-        });
+    let nearest = null;
+    let bestD = Infinity;
+    for (const e of enemies) {
+      const dist = Math.hypot(e.x - dx, e.y - dy);
+      if (dist < bestD) {
+        bestD = dist;
+        nearest = e;
+      }
     }
+    const aimA = nearest
+      ? Math.atan2(nearest.y - dy, nearest.x - dx)
+      : player.angle;
+    bullets.push({
+      x: dx,
+      y: dy,
+      px: dx,
+      py: dy,
+      vx: Math.cos(aimA) * 860,
+      vy: Math.sin(aimA) * 860,
+      dmg: (18 + player.level * 2) * player.dmgMult,
+      bounces: 0,
+      pierce: 0,
+      stormArc: hasStormSynergy,
+      weaponName: "AUTONOMNÍ DRONY",
+      color: hasStormSynergy ? "#5ffbff" : "#38bdf8",
+      life: 1.1,
+    });
+  }
 }
 
 function triggerCryoNova() {
-    const radius = 260 + player.weapons.cryoNovaLvl * 45;
-    spawnShockwave(player.x, player.y, radius, "#67e8f9", 5, 520);
-    grid.applyForce(player.x, player.y, radius, 26, false);
+  const radius = 260 + player.weapons.cryoNovaLvl * 45;
+  spawnShockwave(player.x, player.y, radius, "#67e8f9", 5, 520);
+  grid.applyForce(player.x, player.y, radius, 26, false);
 
-    for (const e of enemies) {
-        if (Math.hypot(e.x - player.x, e.y - player.y) <= radius) {
-            e.slowTimer = 3.2;
-            damageEnemy(e, (28 + player.weapons.cryoNovaLvl * 14) * player.dmgMult, "#67e8f9", false, false, "KRYO-POLE");
-        }
+  for (const e of enemies) {
+    if (Math.hypot(e.x - player.x, e.y - player.y) <= radius) {
+      e.slowTimer = 3.2;
+      damageEnemy(
+        e,
+        (28 + player.weapons.cryoNovaLvl * 14) * player.dmgMult,
+        "#67e8f9",
+        false,
+        false,
+        "KRYO-POLE",
+      );
     }
+  }
 }
 
 function fireHomingMissiles() {
-    const count = 1 + player.weapons.missilesLvl;
-    for (let i = 0; i < count; i++) {
-        const a = player.angle + (i - (count - 1) / 2) * 0.45;
-        missiles.push({
-            x: player.x, y: player.y,
-            vx: Math.cos(a) * 320, vy: Math.sin(a) * 320,
-            speed: 550, dmg: (46 + player.weapons.missilesLvl * 16) * player.dmgMult,
-            weaponName: "MIKRORAKETY",
-            life: 3.0, color: "#ff007f"
-        });
-    }
+  const count = 1 + player.weapons.missilesLvl;
+  for (let i = 0; i < count; i++) {
+    const a = player.angle + (i - (count - 1) / 2) * 0.45;
+    missiles.push({
+      x: player.x,
+      y: player.y,
+      vx: Math.cos(a) * 320,
+      vy: Math.sin(a) * 320,
+      speed: 550,
+      dmg: (46 + player.weapons.missilesLvl * 16) * player.dmgMult,
+      weaponName: "MIKRORAKETY",
+      life: 3.0,
+      color: "#ff007f",
+    });
+  }
 }
 
 function fireSwarmNanobots() {
-    const count = 2 + player.weapons.swarmBotsLvl + (player.weapons.decoyLvl > 0 ? 2 : 0);
-    for (let i = 0; i < count; i++) {
-        const a = Math.random() * Math.PI * 2;
-        missiles.push({
-            x: player.x, y: player.y,
-            vx: Math.cos(a) * 420, vy: Math.sin(a) * 420,
-            speed: 680, dmg: (28 + player.weapons.swarmBotsLvl * 12) * player.dmgMult,
-            weaponName: "ROJ NANOBOTŮ",
-            life: 2.5, color: "#a3e635"
-        });
-    }
+  const count =
+    2 + player.weapons.swarmBotsLvl + (player.weapons.decoyLvl > 0 ? 2 : 0);
+  for (let i = 0; i < count; i++) {
+    const a = Math.random() * Math.PI * 2;
+    missiles.push({
+      x: player.x,
+      y: player.y,
+      vx: Math.cos(a) * 420,
+      vy: Math.sin(a) * 420,
+      speed: 680,
+      dmg: (28 + player.weapons.swarmBotsLvl * 12) * player.dmgMult,
+      weaponName: "ROJ NANOBOTŮ",
+      life: 2.5,
+      color: "#a3e635",
+    });
+  }
 }
 
 function fireGravityCannon() {
-    const a = player.angle;
-    bullets.push({
-        x: player.x + Math.cos(a) * 20,
-        y: player.y + Math.sin(a) * 20,
-        px: player.x, py: player.y,
-        vx: Math.cos(a) * 460, vy: Math.sin(a) * 460,
-        dmg: (75 + player.weapons.gravCannonLvl * 35) * player.dmgMult,
-        bounces: 0, pierce: 2,
-        radius: 7,
-        gravImplode: true,
-        weaponName: "GRAVITAČNÍ DĚLO",
-        color: "#c084fc",
-        life: 1.8
-    });
+  const a = player.angle;
+  bullets.push({
+    x: player.x + Math.cos(a) * 20,
+    y: player.y + Math.sin(a) * 20,
+    px: player.x,
+    py: player.y,
+    vx: Math.cos(a) * 460,
+    vy: Math.sin(a) * 460,
+    dmg: (75 + player.weapons.gravCannonLvl * 35) * player.dmgMult,
+    bounces: 0,
+    pierce: 2,
+    radius: 7,
+    gravImplode: true,
+    weaponName: "GRAVITAČNÍ DĚLO",
+    color: "#c084fc",
+    life: 1.8,
+  });
 }
 
-function fireTeslaLightning(originX = player.x, originY = player.y, maxTargetsOverride = null) {
-    if (enemies.length === 0) return;
-    const maxTargets = maxTargetsOverride || (2 + player.weapons.teslaLvl * 2);
-    const range = 290;
-    let currX = originX;
-    let currY = originY;
-    const hitSet = new Set();
+function fireTeslaLightning(
+  originX = player.x,
+  originY = player.y,
+  maxTargetsOverride = null,
+) {
+  if (enemies.length === 0) return;
+  const maxTargets = maxTargetsOverride || 2 + player.weapons.teslaLvl * 2;
+  const range = 290;
+  let currX = originX;
+  let currY = originY;
+  const hitSet = new Set();
 
-    for (let step = 0; step < maxTargets; step++) {
-        let nearest = null;
-        let minDist = range;
-        for (const e of enemies) {
-            if (hitSet.has(e)) continue;
-            const d = Math.hypot(e.x - currX, e.y - currY);
-            if (d < minDist) { minDist = d; nearest = e; }
-        }
-        if (!nearest) break;
-
-        hitSet.add(nearest);
-        grid.applyForce(nearest.x, nearest.y, 90, 12, false, true);
-        damageEnemy(nearest, (38 + player.weapons.teslaLvl * 14) * player.dmgMult, "#5ffbff", true, false, "TESLŮV OBLOUK");
-        lightningArcs.push({ x1: currX, y1: currY, x2: nearest.x, y2: nearest.y, life: 0.18, color: "#5ffbff" });
-        currX = nearest.x;
-        currY = nearest.y;
+  for (let step = 0; step < maxTargets; step++) {
+    let nearest = null;
+    let minDist = range;
+    for (const e of enemies) {
+      if (hitSet.has(e)) continue;
+      const d = Math.hypot(e.x - currX, e.y - currY);
+      if (d < minDist) {
+        minDist = d;
+        nearest = e;
+      }
     }
+    if (!nearest) break;
+
+    hitSet.add(nearest);
+    grid.applyForce(nearest.x, nearest.y, 90, 12, false, true);
+    damageEnemy(
+      nearest,
+      (38 + player.weapons.teslaLvl * 14) * player.dmgMult,
+      "#5ffbff",
+      true,
+      false,
+      "TESLŮV OBLOUK",
+    );
+    lightningArcs.push({
+      x1: currX,
+      y1: currY,
+      x2: nearest.x,
+      y2: nearest.y,
+      life: 0.18,
+      color: "#5ffbff",
+    });
+    currX = nearest.x;
+    currY = nearest.y;
+  }
 }
 
 function triggerHyperDash() {
-    if (state.mode !== "PLAYING" || player.dashCooldown > 0) return;
-    player.dashCooldown = state.mutator === "INFINITE_DASH" ? 0.18 : player.dashMaxCooldown;
-    player.invulnTimer = 0.45;
+  if (state.mode !== "PLAYING" || player.dashCooldown > 0) return;
+  player.dashCooldown =
+    state.mutator === "INFINITE_DASH" ? 0.18 : player.dashMaxCooldown;
+  player.invulnTimer = 0.45;
 
-    if (player.shipClass === "STALKER" || player.weapons.decoyLvl > 0) {
-        spawnHoloDecoy();
+  if (player.shipClass === "STALKER" || player.weapons.decoyLvl > 0) {
+    spawnHoloDecoy();
+  }
+
+  if (player.shipClass === "CHRONO_SHIP") {
+    spawnShockwave(player.x, player.y, 220, "#67e8f9", 4, 520);
+    for (const e of enemies) {
+      if (Math.hypot(e.x - player.x, e.y - player.y) <= 220 + e.radius) {
+        e.slowTimer = Math.max(e.slowTimer || 0, 3.0);
+        damageEnemy(
+          e,
+          45 * player.dmgMult,
+          "#67e8f9",
+          false,
+          false,
+          "KRYO-POLE",
+        );
+      }
     }
-
-    if (player.shipClass === "CHRONO_SHIP") {
-        spawnShockwave(player.x, player.y, 220, "#67e8f9", 4, 520);
-        for (const e of enemies) {
-            if (Math.hypot(e.x - player.x, e.y - player.y) <= 220 + e.radius) {
-                e.slowTimer = Math.max(e.slowTimer || 0, 3.0);
-                damageEnemy(e, 45 * player.dmgMult, "#67e8f9", false, false, "KRYO-POLE");
-            }
-        }
-        if (state.overdriveTimer <= 0) {
-            state.overdrive = Math.min(100, state.overdrive + 12);
-        }
+    if (state.overdriveTimer <= 0) {
+      state.overdrive = Math.min(100, state.overdrive + 12);
     }
+  }
 
-    if (player.hp <= player.maxHp * 0.2) {
-        unlockAchievement("clutch_dash");
+  if (player.hp <= player.maxHp * 0.2) {
+    unlockAchievement("clutch_dash");
+  }
+
+  let dx = (keys.d ? 1 : 0) - (keys.a ? 1 : 0);
+  let dy = (keys.s ? 1 : 0) - (keys.w ? 1 : 0);
+  let dashAngle = player.angle;
+  if (dx !== 0 || dy !== 0) dashAngle = Math.atan2(dy, dx);
+
+  const dashDist = 185;
+  const steps = 7;
+  for (let i = 1; i <= steps; i++) {
+    const ix = player.x + Math.cos(dashAngle) * (dashDist * (i / steps));
+    const iy = player.y + Math.sin(dashAngle) * (dashDist * (i / steps));
+    player.afterimages.push({ x: ix, y: iy, angle: player.angle, alpha: 0.85 });
+    if (player.weapons.plasmaTrailLvl > 0 && i % 2 === 0) {
+      plasmaPools.push({
+        x: ix,
+        y: iy,
+        radius: 34,
+        dmg: (65 + player.weapons.plasmaTrailLvl * 25) * player.dmgMult,
+        life: 2.2,
+        maxLife: 2.2,
+      });
     }
+  }
 
-    let dx = (keys.d ? 1 : 0) - (keys.a ? 1 : 0);
-    let dy = (keys.s ? 1 : 0) - (keys.w ? 1 : 0);
-    let dashAngle = player.angle;
-    if (dx !== 0 || dy !== 0) dashAngle = Math.atan2(dy, dx);
+  player.x = Math.max(
+    25,
+    Math.min(W - 25, player.x + Math.cos(dashAngle) * dashDist),
+  );
+  player.y = Math.max(
+    25,
+    Math.min(H - 25, player.y + Math.sin(dashAngle) * dashDist),
+  );
 
-    const dashDist = 185;
-    const steps = 7;
-    for (let i = 1; i <= steps; i++) {
-        const ix = player.x + Math.cos(dashAngle) * (dashDist * (i / steps));
-        const iy = player.y + Math.sin(dashAngle) * (dashDist * (i / steps));
-        player.afterimages.push({ x: ix, y: iy, angle: player.angle, alpha: 0.85 });
-        if (player.weapons.plasmaTrailLvl > 0 && i % 2 === 0) {
-            plasmaPools.push({
-                x: ix, y: iy, radius: 34,
-                dmg: (65 + player.weapons.plasmaTrailLvl * 25) * player.dmgMult,
-                life: 2.2, maxLife: 2.2
-            });
-        }
-    }
-
-    player.x = Math.max(25, Math.min(W - 25, player.x + Math.cos(dashAngle) * dashDist));
-    player.y = Math.max(25, Math.min(H - 25, player.y + Math.sin(dashAngle) * dashDist));
-
-    sfx.playDash();
-    spawnShockwave(player.x, player.y, 185, player.color, 4, 520);
-    spawnParticles(player.x, player.y, player.color, 28, 120, 420, 2.8);
-    grid.applyForce(player.x, player.y, 240, 42, false, true);
-    state.shake = Math.max(state.shake, 7);
+  sfx.playDash();
+  spawnShockwave(player.x, player.y, 185, player.color, 4, 520);
+  spawnParticles(player.x, player.y, player.color, 28, 120, 420, 2.8);
+  grid.applyForce(player.x, player.y, 240, 42, false, true);
+  state.shake = Math.max(state.shake, 7);
 }
 
 function deploySingularityBomb() {
-    if (state.mode !== "PLAYING" || player.bombs <= 0) return;
-    triggerGamepadRumble(350, 0.9, 0.7);
-    player.bombs--;
-    meta.stats.blackHolesUsed = (meta.stats.blackHolesUsed || 0) + 1;
-    if (state.runStats) state.runStats.blackHolesUsed++;
-    if (meta.stats.blackHolesUsed >= 5) unlockAchievement("black_hole_5");
-    updateHUD();
+  if (state.mode !== "PLAYING" || player.bombs <= 0) return;
+  triggerGamepadRumble(350, 0.9, 0.7);
+  player.bombs--;
+  meta.stats.blackHolesUsed = (meta.stats.blackHolesUsed || 0) + 1;
+  if (state.runStats) state.runStats.blackHolesUsed++;
+  if (meta.stats.blackHolesUsed >= 5) unlockAchievement("black_hole_5");
+  updateHUD();
 
-    // Zohlednění Cyber-Shop modulu Rozšíření horizontu (bombRadiusLvl)
-    const shopRadiusMult = 1 + (meta.upgrades.bombRadiusLvl || 0) * 0.15;
-    const amp = (1 + (player.weapons.gravityAmpLvl || 0) * 0.35) * shopRadiusMult;
-    const isStarSingularity = player.weapons.satelliteLvl > 0 && player.weapons.gravityAmpLvl > 0;
-    const dist = Math.min(280, Math.hypot(mouse.x - player.x, mouse.y - player.y));
-    const a = Math.atan2(mouse.y - player.y, mouse.x - player.x);
-    const sx = Math.max(80, Math.min(W - 80, player.x + Math.cos(a) * dist));
-    const sy = Math.max(80, Math.min(H - 80, player.y + Math.sin(a) * dist));
+  // Zohlednění Cyber-Shop modulu Rozšíření horizontu (bombRadiusLvl)
+  const shopRadiusMult = 1 + (meta.upgrades.bombRadiusLvl || 0) * 0.15;
+  const amp = (1 + (player.weapons.gravityAmpLvl || 0) * 0.35) * shopRadiusMult;
+  const isStarSingularity =
+    player.weapons.satelliteLvl > 0 && player.weapons.gravityAmpLvl > 0;
+  const dist = Math.min(
+    280,
+    Math.hypot(mouse.x - player.x, mouse.y - player.y),
+  );
+  const a = Math.atan2(mouse.y - player.y, mouse.x - player.x);
+  const sx = Math.max(80, Math.min(W - 80, player.x + Math.cos(a) * dist));
+  const sy = Math.max(80, Math.min(H - 80, player.y + Math.sin(a) * dist));
 
-    singularities.push({
-        x: sx, y: sy,
-        radius: 36 * amp,
-        pullRadius: 430 * amp,
-        amp,
-        isStarSingularity,
-        strikeTimer: 0.45,
-        life: 2.5, maxLife: 2.5, angle: 0
-    });
-    sfx.playSingularity();
-    spawnLensFlare(sx, sy, isStarSingularity ? "#fcee09" : "#ff007f", 520);
-    addFloatingText(sx, sy - 40, isStarSingularity ? "🌟 HVĚZDNÁ SINGULARITA!" : "KVANTOVÁ ČERNÁ DÍRA!", isStarSingularity ? "#fcee09" : "#ff007f", 1.35);
-    state.shake = 12;
-    state.chromatic = 0.9;
+  singularities.push({
+    x: sx,
+    y: sy,
+    radius: 36 * amp,
+    pullRadius: 430 * amp,
+    amp,
+    isStarSingularity,
+    strikeTimer: 0.45,
+    life: 2.5,
+    maxLife: 2.5,
+    angle: 0,
+  });
+  sfx.playSingularity();
+  spawnLensFlare(sx, sy, isStarSingularity ? "#fcee09" : "#ff007f", 520);
+  addFloatingText(
+    sx,
+    sy - 40,
+    isStarSingularity ? "🌟 HVĚZDNÁ SINGULARITA!" : "KVANTOVÁ ČERNÁ DÍRA!",
+    isStarSingularity ? "#fcee09" : "#ff007f",
+    1.35,
+  );
+  state.shake = 12;
+  state.chromatic = 0.9;
 }
 
-function damageEnemy(e, dmg, hitColor = "#00f3ff", shieldBonus = false, fromBoomerang = false, weaponSource = "PULZNÍ KANÓN") {
-    let finalDmg = dmg * (state.mutator === "GLASS_CANNON" ? 2.0 : 1.0);
-    if (player.weapons.phaseMeltLvl > 0 && (e.isElite || e.type === "BOSS")) {
-        finalDmg *= (1 + player.weapons.phaseMeltLvl * 0.25);
-    }
+function damageEnemy(
+  e,
+  dmg,
+  hitColor = "#00f3ff",
+  shieldBonus = false,
+  fromBoomerang = false,
+  weaponSource = "PULZNÍ KANÓN",
+) {
+  let finalDmg = dmg * (state.mutator === "GLASS_CANNON" ? 2.0 : 1.0);
+  if (player.weapons.phaseMeltLvl > 0 && (e.isElite || e.type === "BOSS")) {
+    finalDmg *= 1 + player.weapons.phaseMeltLvl * 0.25;
+  }
 
-    let isCrit = false;
-    const totalCritChance = (player.weapons.critLvl || 0) * 0.14 + (meta.upgrades.critShopLvl || 0) * 0.06;
-    if (totalCritChance > 0 && Math.random() < totalCritChance) {
-        finalDmg *= 2.4;
-        isCrit = true;
-        hitColor = "#fcee09";
-    }
+  let isCrit = false;
+  const totalCritChance =
+    (player.weapons.critLvl || 0) * 0.14 +
+    (meta.upgrades.critShopLvl || 0) * 0.06;
+  if (totalCritChance > 0 && Math.random() < totalCritChance) {
+    finalDmg *= 2.4;
+    isCrit = true;
+    hitColor = "#fcee09";
+  }
 
-    recordWeaponDmg(fromBoomerang ? "FOTONOVÉ BUMERANGY" : weaponSource, finalDmg);
+  recordWeaponDmg(
+    fromBoomerang ? "FOTONOVÉ BUMERANGY" : weaponSource,
+    finalDmg,
+  );
 
-    if (e.shield && e.shield > 0) {
-        const shieldDmg = shieldBonus ? finalDmg * 1.6 : finalDmg;
-        if (e.shield >= shieldDmg) {
-            e.shield -= shieldDmg;
-            spawnParticles(e.x, e.y, "#38bdf8", 4, 60, 200, 2.0, 0.12, 0.25);
-            return;
-        } else {
-            const leftover = shieldDmg - e.shield;
-            e.shield = 0;
-            e.hp -= leftover;
-            spawnShockwave(e.x, e.y, e.radius * 2.2, "#38bdf8", 2.5, 360);
-        }
+  if (e.shield && e.shield > 0) {
+    const shieldDmg = shieldBonus ? finalDmg * 1.6 : finalDmg;
+    if (e.shield >= shieldDmg) {
+      e.shield -= shieldDmg;
+      spawnParticles(e.x, e.y, "#38bdf8", 4, 60, 200, 2.0, 0.12, 0.25);
+      return;
     } else {
-        e.hp -= finalDmg;
+      const leftover = shieldDmg - e.shield;
+      e.shield = 0;
+      e.hp -= leftover;
+      spawnShockwave(e.x, e.y, e.radius * 2.2, "#38bdf8", 2.5, 360);
+    }
+  } else {
+    e.hp -= finalDmg;
+  }
+
+  if (isCrit && Math.random() < 0.35) {
+    addFloatingText(
+      e.x,
+      e.y - 18,
+      `KRIT ${Math.floor(finalDmg)}!`,
+      "#fcee09",
+      0.95,
+    );
+  }
+  spawnParticles(e.x, e.y, hitColor, 4, 60, 240, 2.0, 0.15, 0.32);
+
+  if (e.hp <= 0 && !e.dead) {
+    e.dead = true;
+    unlockAchievement("first_blood");
+
+    // Záznam pro celoživotní Síň slávy
+    meta.stats.totalKillsLifetime = (meta.stats.totalKillsLifetime || 0) + 1;
+    if (e.type === "BOSS") {
+      meta.stats.totalBossKillsLifetime =
+        (meta.stats.totalBossKillsLifetime || 0) + 1;
     }
 
-    if (isCrit && Math.random() < 0.35) {
-        addFloatingText(e.x, e.y - 18, `KRIT ${Math.floor(finalDmg)}!`, "#fcee09", 0.95);
+    if (state.runStats) {
+      state.runStats.totalKills++;
+      if (e.isElite && e.type !== "BOSS") state.runStats.eliteKills++;
+      if (e.type === "BOSS") state.runStats.bossKills++;
     }
-    spawnParticles(e.x, e.y, hitColor, 4, 60, 240, 2.0, 0.15, 0.32);
 
-    if (e.hp <= 0 && !e.dead) {
-        e.dead = true;
-        unlockAchievement("first_blood");
-
-        // Záznam pro celoživotní Síň slávy
-        meta.stats.totalKillsLifetime = (meta.stats.totalKillsLifetime || 0) + 1;
-        if (e.type === "BOSS") {
-            meta.stats.totalBossKillsLifetime = (meta.stats.totalBossKillsLifetime || 0) + 1;
-        }
-
-        if (state.runStats) {
-            state.runStats.totalKills++;
-            if (e.isElite && e.type !== "BOSS") state.runStats.eliteKills++;
-            if (e.type === "BOSS") state.runStats.bossKills++;
-        }
-
-        if (e.type === "KAMIKAZE" && weaponSource !== "KOLIZE TRUPU") {
-            meta.stats.kamikazeKills = (meta.stats.kamikazeKills || 0) + 1;
-            if (meta.stats.kamikazeKills >= 15) unlockAchievement("kamikaze_hunter");
-        }
-        if (fromBoomerang) {
-            meta.stats.boomerangKills = (meta.stats.boomerangKills || 0) + 1;
-            if (meta.stats.boomerangKills >= 25) unlockAchievement("boomerang_pro");
-        }
-
-        state.combo = Math.min(20.0, +(state.combo + 0.25).toFixed(2));
-        if (state.combo > state.maxCombo) state.maxCombo = state.combo;
-        if (state.combo >= 5.0) unlockAchievement("combo_5");
-        if (state.combo >= 10.0) unlockAchievement("combo_10");
-        if (state.combo >= 20.0) unlockAchievement("combo_20");
-        state.comboTimer = 3.8;
-
-        if (state.overdriveTimer <= 0) {
-            const prevOd = state.overdrive;
-            const odGainMult = 1 + (player.weapons.overchargeCoreLvl || 0) * 0.35;
-            state.overdrive = Math.min(100, state.overdrive + (e.type === "BOSS" ? 40 : (e.isElite ? 8 : 4.5)) * odGainMult);
-            if (prevOd < 100 && state.overdrive >= 100) {
-                unleashQuantumExplosion(true);
-                addFloatingText(player.x, player.y - 45, "⚡ PŘETLAK 100 %: KVANTOVÝ VÝBOJ! [STISKNI F]", "#fcee09", 1.35);
-            }
-        }
-
-        const scoreMult = state.difficulty === "ULTRA" ? 1.75 : (state.difficulty === "HARDCORE" ? 1.35 : 1.0);
-        const gainedScore = Math.floor(e.score * state.combo * scoreMult);
-        state.score += gainedScore;
-        if (state.score >= 100000) unlockAchievement("score_100k");
-        if (state.score >= 500000) unlockAchievement("score_500k");
-        if (state.score >= 1000000) unlockAchievement("score_1m");
-
-        const isBoss = e.type === "BOSS";
-        const pCount = isBoss ? 140 : 28;
-        spawnParticles(e.x, e.y, e.color, pCount, 90, isBoss ? 680 : 450, isBoss ? 4.0 : 2.8);
-        spawnParticles(e.x, e.y, "#ffffff", Math.floor(pCount * 0.35), 120, 520, 2.2);
-        spawnShockwave(e.x, e.y, isBoss ? 540 : 125, e.color, isBoss ? 7 : 3.5, isBoss ? 620 : 420);
-        if (isBoss || e.isElite) spawnLensFlare(e.x, e.y, e.color, isBoss ? 800 : 340);
-        grid.applyForce(e.x, e.y, isBoss ? 480 : 195, isBoss ? 85 : 28, false, isBoss);
-
-        state.shake = Math.max(state.shake, isBoss ? 25 : 6.5);
-        if (isBoss) state.chromatic = 1.0;
-        sfx.playExplosion(isBoss ? 2.4 : 1.0);
-
-        const shardHunterBonus = meta.upgrades.shardHunterLvl || 0;
-        const diffChipMult = state.difficulty === "ULTRA" ? 3 : (state.difficulty === "HARDCORE" ? 2 : 1);
-
-        if (isBoss) {
-            unlockAchievement("boss_slayer");
-            if (e.subtype === "NEMESIS") unlockAchievement("boss_nemesis");
-            if (e.subtype === "COLOSSUS") unlockAchievement("boss_colossus");
-            if (e.subtype === "SERAPH") unlockAchievement("boss_seraph");
-            if (e.subtype === "HYDRA") unlockAchievement("boss_hydra");
-            if (e.subtype === "LEVIATHAN") unlockAchievement("boss_leviathan");
-            if (e.subtype === "PRISM") unlockAchievement("boss_prism");
-            if (e.subtype === "TITAN") unlockAchievement("boss_titan");
-            if (e.subtype === "ARACHNID") unlockAchievement("boss_arachnid");
-            if (e.subtype === "VALKYRIE") unlockAchievement("boss_valkyrie");
-            if (e.enrageTriggered) unlockAchievement("enrage_tamer");
-
-            if (e.spawnTime && (performance.now() - e.spawnTime) <= 10000) {
-                unlockAchievement("speed_boss");
-            }
-            const rewardShards = (8 + shardHunterBonus * 2) * diffChipMult;
-            meta.shards += rewardShards;
-            saveMetaProgression();
-            addFloatingText(e.x, e.y - 55, `+${rewardShards} ◈ KVANTOVÝCH ČIPŮ!`, "#fcee09", 1.4);
-        } else if (e.isElite && Math.random() < (0.55 + shardHunterBonus * 0.12)) {
-            const eliteShards = 1 * diffChipMult;
-            meta.shards += eliteShards;
-            saveMetaProgression();
-            updateHUD();
-            addFloatingText(e.x, e.y - 22, `+${eliteShards} ◈ ČIP`, "#fcee09", 1.05);
-        } else if (!e.isElite && e.type !== "ENERGY_ORB" && Math.random() < (0.08 + shardHunterBonus * 0.03)) {
-            const normShards = 1 * diffChipMult;
-            meta.shards += normShards;
-            saveMetaProgression();
-            updateHUD();
-            addFloatingText(e.x, e.y - 22, `+${normShards} ◈ ČIP`, "#fcee09", 0.95);
-        }
-
-        if (player.weapons.critLvl > 0 && (e.isElite || isBoss)) {
-            const heal = isBoss ? 25 : 4;
-            player.hp = Math.min(player.maxHp, player.hp + heal);
-        }
-
-        if (e.type === "SPLITTER") {
-            for (let k = 0; k < 3; k++) {
-                spawnEnemy("MINI_SWARM", e.x + (Math.random() - 0.5) * 24, e.y + (Math.random() - 0.5) * 24);
-            }
-        }
-
-        if (isBoss) {
-            state.bossActive = false;
-            document.getElementById("boss-hud").classList.add("hidden");
-            document.getElementById("boss-hud").classList.remove("flex");
-            document.getElementById("ghost-boss-bar-wrap").classList.add("hidden");
-            document.getElementById("ghost-boss-bar-wrap").classList.remove("flex");
-            player.bombs = Math.min(player.maxBombs, player.bombs + 1);
-            addFloatingText(e.x, e.y - 30, `${e.name} ZNIČEN! +1 ČERNÁ DÍRA`, "#fcee09", 1.45);
-            saveGameProgress(false, currentSaveSlot);
-
-            if (state.difficulty !== "ENDLESS" && state.wave >= 12) {
-                if (state.difficulty === "HARDCORE" || state.difficulty === "ULTRA") unlockAchievement("hardcore_victor");
-                triggerGameOver(true);
-                return;
-            }
-        }
-
-        if (e.type === "ENERGY_ORB") return;
-
-        const gemCount = isBoss ? 20 : (e.isElite ? 4 : 2);
-        const xpBonus = 1 + (meta.upgrades.magnetLvl || 0) * 0.12;
-        for (let g = 0; g < gemCount; g++) {
-            const ga = Math.random() * Math.PI * 2;
-            const gs = 60 + Math.random() * 140;
-            gems.push({
-                x: e.x, y: e.y,
-                vx: Math.cos(ga) * gs, vy: Math.sin(ga) * gs,
-                val: Math.round((isBoss ? 16 : 13) * xpBonus),
-                angle: Math.random() * 6, magnetized: false
-            });
-        }
+    if (e.type === "KAMIKAZE" && weaponSource !== "KOLIZE TRUPU") {
+      meta.stats.kamikazeKills = (meta.stats.kamikazeKills || 0) + 1;
+      if (meta.stats.kamikazeKills >= 15) unlockAchievement("kamikaze_hunter");
     }
+    if (fromBoomerang) {
+      meta.stats.boomerangKills = (meta.stats.boomerangKills || 0) + 1;
+      if (meta.stats.boomerangKills >= 25) unlockAchievement("boomerang_pro");
+    }
+
+    state.combo = Math.min(20.0, +(state.combo + 0.25).toFixed(2));
+    if (state.combo > state.maxCombo) state.maxCombo = state.combo;
+    if (state.combo >= 5.0) unlockAchievement("combo_5");
+    if (state.combo >= 10.0) unlockAchievement("combo_10");
+    if (state.combo >= 20.0) unlockAchievement("combo_20");
+    state.comboTimer = 3.8;
+
+    if (state.overdriveTimer <= 0) {
+      const prevOd = state.overdrive;
+      const odGainMult = 1 + (player.weapons.overchargeCoreLvl || 0) * 0.35;
+      state.overdrive = Math.min(
+        100,
+        state.overdrive +
+          (e.type === "BOSS" ? 40 : e.isElite ? 8 : 4.5) * odGainMult,
+      );
+      if (prevOd < 100 && state.overdrive >= 100) {
+        unleashQuantumExplosion(true);
+        addFloatingText(
+          player.x,
+          player.y - 45,
+          "⚡ PŘETLAK 100 %: KVANTOVÝ VÝBOJ! [STISKNI F]",
+          "#fcee09",
+          1.35,
+        );
+      }
+    }
+
+    const scoreMult =
+      state.difficulty === "ULTRA"
+        ? 1.75
+        : state.difficulty === "HARDCORE"
+          ? 1.35
+          : 1.0;
+    const gainedScore = Math.floor(e.score * state.combo * scoreMult);
+    state.score += gainedScore;
+    if (state.score >= 100000) unlockAchievement("score_100k");
+    if (state.score >= 500000) unlockAchievement("score_500k");
+    if (state.score >= 1000000) unlockAchievement("score_1m");
+
+    const isBoss = e.type === "BOSS";
+    const pCount = isBoss ? 140 : 28;
+    spawnParticles(
+      e.x,
+      e.y,
+      e.color,
+      pCount,
+      90,
+      isBoss ? 680 : 450,
+      isBoss ? 4.0 : 2.8,
+    );
+    spawnParticles(
+      e.x,
+      e.y,
+      "#ffffff",
+      Math.floor(pCount * 0.35),
+      120,
+      520,
+      2.2,
+    );
+    spawnShockwave(
+      e.x,
+      e.y,
+      isBoss ? 540 : 125,
+      e.color,
+      isBoss ? 7 : 3.5,
+      isBoss ? 620 : 420,
+    );
+    if (isBoss || e.isElite)
+      spawnLensFlare(e.x, e.y, e.color, isBoss ? 800 : 340);
+    grid.applyForce(
+      e.x,
+      e.y,
+      isBoss ? 480 : 195,
+      isBoss ? 85 : 28,
+      false,
+      isBoss,
+    );
+
+    state.shake = Math.max(state.shake, isBoss ? 25 : 6.5);
+    if (isBoss) state.chromatic = 1.0;
+    sfx.playExplosion(isBoss ? 2.4 : 1.0);
+
+    const shardHunterBonus = meta.upgrades.shardHunterLvl || 0;
+    const diffChipMult =
+      state.difficulty === "ULTRA"
+        ? 3
+        : state.difficulty === "HARDCORE"
+          ? 2
+          : 1;
+
+    if (isBoss) {
+      unlockAchievement("boss_slayer");
+      if (e.subtype === "NEMESIS") unlockAchievement("boss_nemesis");
+      if (e.subtype === "COLOSSUS") unlockAchievement("boss_colossus");
+      if (e.subtype === "SERAPH") unlockAchievement("boss_seraph");
+      if (e.subtype === "HYDRA") unlockAchievement("boss_hydra");
+      if (e.subtype === "LEVIATHAN") unlockAchievement("boss_leviathan");
+      if (e.subtype === "PRISM") unlockAchievement("boss_prism");
+      if (e.subtype === "TITAN") unlockAchievement("boss_titan");
+      if (e.subtype === "ARACHNID") unlockAchievement("boss_arachnid");
+      if (e.subtype === "VALKYRIE") unlockAchievement("boss_valkyrie");
+      if (e.enrageTriggered) unlockAchievement("enrage_tamer");
+
+      if (e.spawnTime && performance.now() - e.spawnTime <= 10000) {
+        unlockAchievement("speed_boss");
+      }
+      const rewardShards = (8 + shardHunterBonus * 2) * diffChipMult;
+      meta.shards += rewardShards;
+      saveMetaProgression();
+      addFloatingText(
+        e.x,
+        e.y - 55,
+        `+${rewardShards} ◈ KVANTOVÝCH ČIPŮ!`,
+        "#fcee09",
+        1.4,
+      );
+    } else if (e.isElite && Math.random() < 0.55 + shardHunterBonus * 0.12) {
+      const eliteShards = 1 * diffChipMult;
+      meta.shards += eliteShards;
+      saveMetaProgression();
+      updateHUD();
+      addFloatingText(e.x, e.y - 22, `+${eliteShards} ◈ ČIP`, "#fcee09", 1.05);
+    } else if (
+      !e.isElite &&
+      e.type !== "ENERGY_ORB" &&
+      Math.random() < 0.08 + shardHunterBonus * 0.03
+    ) {
+      const normShards = 1 * diffChipMult;
+      meta.shards += normShards;
+      saveMetaProgression();
+      updateHUD();
+      addFloatingText(e.x, e.y - 22, `+${normShards} ◈ ČIP`, "#fcee09", 0.95);
+    }
+
+    if (player.weapons.critLvl > 0 && (e.isElite || isBoss)) {
+      const heal = isBoss ? 25 : 4;
+      player.hp = Math.min(player.maxHp, player.hp + heal);
+    }
+
+    if (e.type === "SPLITTER") {
+      for (let k = 0; k < 3; k++) {
+        spawnEnemy(
+          "MINI_SWARM",
+          e.x + (Math.random() - 0.5) * 24,
+          e.y + (Math.random() - 0.5) * 24,
+        );
+      }
+    }
+
+    if (isBoss) {
+      state.bossActive = false;
+      document.getElementById("boss-hud").classList.add("hidden");
+      document.getElementById("boss-hud").classList.remove("flex");
+      document.getElementById("ghost-boss-bar-wrap").classList.add("hidden");
+      document.getElementById("ghost-boss-bar-wrap").classList.remove("flex");
+      player.bombs = Math.min(player.maxBombs, player.bombs + 1);
+      addFloatingText(
+        e.x,
+        e.y - 30,
+        `${e.name} ZNIČEN! +1 ČERNÁ DÍRA`,
+        "#fcee09",
+        1.45,
+      );
+      saveGameProgress(false, currentSaveSlot);
+
+      if (state.difficulty !== "ENDLESS" && state.wave >= 12) {
+        if (state.difficulty === "HARDCORE" || state.difficulty === "ULTRA")
+          unlockAchievement("hardcore_victor");
+        triggerGameOver(true);
+        return;
+      }
+    }
+
+    if (e.type === "ENERGY_ORB") return;
+
+    const gemCount = isBoss ? 20 : e.isElite ? 4 : 2;
+    const xpBonus = 1 + (meta.upgrades.magnetLvl || 0) * 0.12;
+    for (let g = 0; g < gemCount; g++) {
+      const ga = Math.random() * Math.PI * 2;
+      const gs = 60 + Math.random() * 140;
+      gems.push({
+        x: e.x,
+        y: e.y,
+        vx: Math.cos(ga) * gs,
+        vy: Math.sin(ga) * gs,
+        val: Math.round((isBoss ? 16 : 13) * xpBonus),
+        angle: Math.random() * 6,
+        magnetized: false,
+      });
+    }
+  }
 }
 
 function damagePlayer(amount) {
+  if (player.invulnTimer > 0 || state.mode !== "PLAYING") return;
 
-    if (player.invulnTimer > 0 || state.mode !== "PLAYING") return;
+  const aegisMaxCd =
+    player.weapons.nanoShieldLvl > 0 && player.weapons.aegisLvl > 0
+      ? 4.0
+      : Math.max(4.5, 11.0 - player.weapons.aegisLvl * 1.8);
 
-    const aegisMaxCd = (player.weapons.nanoShieldLvl > 0 && player.weapons.aegisLvl > 0)
-        ? 4.0
-        : Math.max(4.5, 11.0 - player.weapons.aegisLvl * 1.8);
-
-    if (player.weapons.aegisLvl > 0 && player.aegisReady) {
-        player.aegisReady = false;
-        player.aegisCooldown = aegisMaxCd;
-        player.invulnTimer = 0.9;
-        state.chromatic = 0.65;
-        triggerGamepadRumble(150, 0.4, 0.6);
-        spawnShockwave(player.x, player.y, 290, "#60a5fa", 6, 580);
-        spawnLensFlare(player.x, player.y, "#60a5fa", 480);
-        grid.applyForce(player.x, player.y, 320, 55, false, true);
-        addFloatingText(player.x, player.y - 28, "AEGIS ŠTÍT POHLTIL ZÁSAH!", "#60a5fa", 1.25);
-        for (let i = enemyBullets.length - 1; i >= 0; i--) {
-            if (Math.hypot(enemyBullets[i].x - player.x, enemyBullets[i].y - player.y) < 260) {
-                enemyBullets[i] = enemyBullets[enemyBullets.length - 1];
-                enemyBullets.pop();
-            }
-        }
-        updateHUD();
-        return;
+  if (player.weapons.aegisLvl > 0 && player.aegisReady) {
+    player.aegisReady = false;
+    player.aegisCooldown = aegisMaxCd;
+    player.invulnTimer = 0.9;
+    state.chromatic = 0.65;
+    triggerGamepadRumble(150, 0.4, 0.6);
+    spawnShockwave(player.x, player.y, 290, "#60a5fa", 6, 580);
+    spawnLensFlare(player.x, player.y, "#60a5fa", 480);
+    grid.applyForce(player.x, player.y, 320, 55, false, true);
+    addFloatingText(
+      player.x,
+      player.y - 28,
+      "AEGIS ŠTÍT POHLTIL ZÁSAH!",
+      "#60a5fa",
+      1.25,
+    );
+    for (let i = enemyBullets.length - 1; i >= 0; i--) {
+      if (
+        Math.hypot(enemyBullets[i].x - player.x, enemyBullets[i].y - player.y) <
+        260
+      ) {
+        enemyBullets[i] = enemyBullets[enemyBullets.length - 1];
+        enemyBullets.pop();
+      }
     }
-
-    // Skutečný zásah trupu – silná haptická odezva
-    triggerGamepadRumble(220, 0.8, 0.4);
-
-    let mult = (state.difficulty === "ULTRA" ? 1.5 : (state.difficulty === "HARDCORE" ? 1.25 : 1.0)) * (state.mutator === "GLASS_CANNON" ? 2.0 : 1.0);
-    if (player.weapons.nanoShieldLvl > 0) {
-        // Diminishing returns prevent shield stacking from making the player effectively invulnerable.
-        mult *= Math.max(0.45, Math.pow(0.82, player.weapons.nanoShieldLvl));
-    }
-
-    const finalAmount = Math.max(1, Math.ceil(amount * mult));
-    player.hp -= finalAmount;
-    player.invulnTimer = 0.85;
-    state.combo = Math.max(1.0, +(state.combo * 0.55).toFixed(1));
-    state.shake = 18;
-    state.chromatic = 1.0;
-
-    // Cyber-Shop Modul: Reaktivní pancíř (thornsArmorLvl) vyšle odvetný výboj při zásahu
-    const thornsLvl = meta.upgrades.thornsArmorLvl || 0;
-    if (thornsLvl > 0) {
-        const thornsRadius = 210 + thornsLvl * 35;
-        const thornsDmg = (70 + thornsLvl * 45) * player.dmgMult;
-        spawnShockwave(player.x, player.y, thornsRadius, "#f43f5e", 5, 620);
-        for (let i = enemies.length - 1; i >= 0; i--) {
-            const e = enemies[i];
-            if (Math.hypot(e.x - player.x, e.y - player.y) <= thornsRadius + e.radius) {
-                damageEnemy(e, thornsDmg, "#f43f5e", true, false, "REAKTIVNÍ PANCÍŘ");
-            }
-        }
-    }
-
-    sfx.playExplosion(1.7);
-    spawnShockwave(player.x, player.y, 260, "#ff0055", 5, 550);
-    spawnParticles(player.x, player.y, "#ff0055", 45, 120, 480, 3.2);
-    grid.applyForce(player.x, player.y, 320, 52, false, true);
-    addFloatingText(player.x, player.y - 25, `-${Math.floor(finalAmount)} TRUP!`, "#ff0055", 1.25);
-
-    // Pokud HP klesne pod 1 (nebo zbyde jen nepatrný zlomek), loď je okamžitě zničena
-    if (player.hp < 1) {
-        player.hp = 0;
-        updateHUD();
-        triggerGameOver(false);
-        return;
-    }
-
     updateHUD();
+    return;
+  }
+
+  // Skutečný zásah trupu – silná haptická odezva
+  triggerGamepadRumble(220, 0.8, 0.4);
+
+  let mult =
+    (state.difficulty === "ULTRA"
+      ? 1.5
+      : state.difficulty === "HARDCORE"
+        ? 1.25
+        : 1.0) * (state.mutator === "GLASS_CANNON" ? 2.0 : 1.0);
+  if (player.weapons.nanoShieldLvl > 0) {
+    // Diminishing returns prevent shield stacking from making the player effectively invulnerable.
+    mult *= Math.max(0.45, Math.pow(0.82, player.weapons.nanoShieldLvl));
+  }
+
+  const finalAmount = Math.max(1, Math.ceil(amount * mult));
+  player.hp -= finalAmount;
+  player.invulnTimer = 0.85;
+  state.combo = Math.max(1.0, +(state.combo * 0.55).toFixed(1));
+  state.shake = 18;
+  state.chromatic = 1.0;
+
+  // Cyber-Shop Modul: Reaktivní pancíř (thornsArmorLvl) vyšle odvetný výboj při zásahu
+  const thornsLvl = meta.upgrades.thornsArmorLvl || 0;
+  if (thornsLvl > 0) {
+    const thornsRadius = 210 + thornsLvl * 35;
+    const thornsDmg = (70 + thornsLvl * 45) * player.dmgMult;
+    spawnShockwave(player.x, player.y, thornsRadius, "#f43f5e", 5, 620);
+    for (let i = enemies.length - 1; i >= 0; i--) {
+      const e = enemies[i];
+      if (
+        Math.hypot(e.x - player.x, e.y - player.y) <=
+        thornsRadius + e.radius
+      ) {
+        damageEnemy(e, thornsDmg, "#f43f5e", true, false, "REAKTIVNÍ PANCÍŘ");
+      }
+    }
+  }
+
+  sfx.playExplosion(1.7);
+  spawnShockwave(player.x, player.y, 260, "#ff0055", 5, 550);
+  spawnParticles(player.x, player.y, "#ff0055", 45, 120, 480, 3.2);
+  grid.applyForce(player.x, player.y, 320, 52, false, true);
+  addFloatingText(
+    player.x,
+    player.y - 25,
+    `-${Math.floor(finalAmount)} TRUP!`,
+    "#ff0055",
+    1.25,
+  );
+
+  // Pokud HP klesne pod 1 (nebo zbyde jen nepatrný zlomek), loď je okamžitě zničena
+  if (player.hp < 1) {
+    player.hp = 0;
+    updateHUD();
+    triggerGameOver(false);
+    return;
+  }
+
+  updateHUD();
 }
